@@ -257,6 +257,13 @@ class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
     );
   }
 
+void onFechaEntrevistaChanged(DateTime fecha) {
+  final fechaFormato = DateFormat('yyyy-MM-dd').format(fecha);
+  state = state.copyWith(
+    createHcGeneral: state.createHcGeneral.copyWith(fechaEntrevista: fechaFormato),
+  );
+}
+
   Future<void> getPacienteByDni(String dni) async {
     try {
       state = state.copyWith(loading: true);
@@ -365,11 +372,6 @@ class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
     );
   }
 
-  void onFechaEntrevistaChanged(String value) {
-    state = state.copyWith(
-      createHcGeneral: state.createHcGeneral.copyWith(fechaEntrevista: value),
-    );
-  }
 
   void onNombreCompletoChanged(String value) {
     state = state.copyWith(

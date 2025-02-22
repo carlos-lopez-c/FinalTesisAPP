@@ -52,13 +52,7 @@ class HomeScreen extends ConsumerWidget {
         PsicologiaTab(),
         ListaCitas(),
       ];
-    } else {
-      return const Scaffold(
-        body: Center(
-          child: Text('Acceso denegado. No tienes un rol asignado.'),
-        ),
-      );
-    }
+    } 
 
     return DefaultTabController(
       length: tabs.length,

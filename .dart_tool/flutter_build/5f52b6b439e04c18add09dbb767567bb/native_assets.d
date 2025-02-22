@@ -1,1 +1,0 @@
- C:\\Users\\Patri\\OneDrive\\Documentos\\GitHub\\TesisAPPfinal\\.dart_tool\\flutter_build\\5f52b6b439e04c18add09dbb767567bb\\native_assets.yaml: 

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:h_c_1/hc_tr/presentation/providers/hc_form_general_provider.dart';
 import '/hc_tr/presentation/widgets/headerBusqueda.dart';
 
-class SearchHcTrGeneral extends StatelessWidget {
+class SearchHcTrGeneral extends ConsumerWidget { 
+  
   const SearchHcTrGeneral({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {  
+    final hcGeneralProviderNotifier = ref.watch(hcGeneralProvider.notifier);
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -45,7 +49,7 @@ class SearchHcTrGeneral extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           _buildSection('1.- DATOS INFORMATIVOS'),
-          _buildFormField('Fecha de la entrevista'),
+    _buildDatePickerField('Fecha de la entrevista', context, hcGeneralProviderNotifier),
           _buildFormField('Evaluador'),
           _buildFormField('Nombre completo'),
           Row(
@@ -600,5 +604,38 @@ Widget InlineCheckboxGroup(
         }).toList(),
       ),
     ],
+  );
+}
+
+TextEditingController _dateController = TextEditingController();
+
+Widget _buildDatePickerField(String label, BuildContext context, HcGeneralFormNotifier provider) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8.0),
+    child: TextFormField(
+      readOnly: true,
+      controller: TextEditingController(text: provider.state.createHcGeneral.fechaEntrevista),
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: Colors.grey[200],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        suffixIcon: Icon(Icons.calendar_today),
+      ),
+      onTap: () async {
+        DateTime? pickedDate = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2100),
+        );
+
+        if (pickedDate != null) {
+          provider.onFechaEntrevistaChanged(pickedDate);
+        }
+      },
+    ),
   );
 }

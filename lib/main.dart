@@ -3,8 +3,11 @@ import 'package:h_c_1/config/constants/enviroments.dart';
 import 'package:h_c_1/config/routes/app_routes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:firebase_core/firebase_core.dart';  // Import Firebase
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();  // Ensure proper initialization
+  await Firebase.initializeApp();  // Initialize Firebase
   await Environment.initEnvironment();
   await initializeDateFormatting('es_EC', null);
   runApp(const ProviderScope(child: MyApp()));
@@ -17,7 +20,7 @@ class MyApp extends ConsumerWidget {
     final appRouter = ref.watch(goRouterProvider);
     return MaterialApp.router(
       locale: const Locale('es', 'EC'),
-      debugShowCheckedModeBanner: false,
+     
       routerConfig: appRouter,
     );
   }

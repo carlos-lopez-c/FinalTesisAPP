@@ -5,18 +5,14 @@ import 'package:h_c_1/shared/infrastructure/inputs/email_input.dart';
 import 'package:h_c_1/shared/infrastructure/inputs/inputs.dart';
 
 final formularioProvider =
-    StateNotifierProvider.autoDispose<FormularioNotifier, FormularioState>(
-        (ref) {
+    StateNotifierProvider.autoDispose<FormularioNotifier, FormularioState>((ref) {
   final loginUserCallback = ref.watch(authProvider.notifier).loginUser;
-
   return FormularioNotifier(loginUserCallback: loginUserCallback);
 });
 
 class FormularioNotifier extends StateNotifier<FormularioState> {
   final Function(String, String) loginUserCallback;
-  FormularioNotifier({
-    required this.loginUserCallback,
-  }) : super(const FormularioState());
+  FormularioNotifier({required this.loginUserCallback}) : super(const FormularioState());
 
   void onEmailChanged(String value) {
     final newEmail = Email.dirty(value);
@@ -39,13 +35,17 @@ class FormularioNotifier extends StateNotifier<FormularioState> {
 
     if (!state.isValid) return;
 
-    state = state.copyWith(isPosting: true);
+    state = state.copyWith(isPosting: true, errorMessage: null);
 
     try {
-      // Simula un proceso de envío
+      // Intento de autenticación
       await loginUserCallback(state.email.value, state.password.value);
     } catch (e) {
-      print('Error al enviar el formulario: $e');
+      // Manejo del error de autenticación
+      state = state.copyWith(
+        isPosting: false,
+        errorMessage: 'Revise la contraseña e intente nuevamente.',
+      );
     } finally {
       state = state.copyWith(isPosting: false);
     }
@@ -67,10 +67,10 @@ class FormularioNotifier extends StateNotifier<FormularioState> {
 class FormularioState {
   final Email email;
   final Password password;
-
   final bool isPosting;
   final bool isFormPosted;
   final bool isValid;
+  final String? errorMessage;
 
   const FormularioState({
     this.email = const Email.pure(),
@@ -78,6 +78,7 @@ class FormularioState {
     this.isPosting = false,
     this.isFormPosted = false,
     this.isValid = false,
+    this.errorMessage,
   });
 
   FormularioState copyWith({
@@ -86,6 +87,7 @@ class FormularioState {
     bool? isPosting,
     bool? isFormPosted,
     bool? isValid,
+    String? errorMessage,
   }) {
     return FormularioState(
       email: email ?? this.email,
@@ -93,6 +95,7 @@ class FormularioState {
       isPosting: isPosting ?? this.isPosting,
       isFormPosted: isFormPosted ?? this.isFormPosted,
       isValid: isValid ?? this.isValid,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 }

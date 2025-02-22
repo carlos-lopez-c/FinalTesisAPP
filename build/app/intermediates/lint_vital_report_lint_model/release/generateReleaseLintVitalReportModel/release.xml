@@ -1,0 +1,37 @@
+<variant
+    name="release"
+    package="com.example.h_c_1"
+    minSdkVersion="23"
+    targetSdkVersion="33"
+    shrinking="true"
+    mergedManifest="F:\Moviles Tesis\Con Firebase FINAL\TesisAPPfinal\build\app\intermediates\merged_manifest\release\processReleaseMainManifest\AndroidManifest.xml"
+    manifestMergeReport="F:\Moviles Tesis\Con Firebase FINAL\TesisAPPfinal\build\app\outputs\logs\manifest-merger-release-report.txt"
+    proguardFiles="F:\Moviles Tesis\Con Firebase FINAL\TesisAPPfinal\build\app\intermediates\default_proguard_files\global\proguard-android-optimize.txt-8.3.2;C:\dev\flutter\packages\flutter_tools\gradle\flutter_proguard_rules.pro;proguard-rules.pro"
+    partialResultsDir="F:\Moviles Tesis\Con Firebase FINAL\TesisAPPfinal\build\app\intermediates\lint_vital_partial_results\release\lintVitalAnalyzeRelease\out">
+  <buildFeatures
+      namespacing="REQUIRED"/>
+  <sourceProviders>
+    <sourceProvider
+        manifests="src\main\AndroidManifest.xml"
+        javaDirectories="src\main\java;src\release\java;src\main\kotlin;src\release\kotlin"
+        resDirectories="src\main\res;src\release\res"
+        assetsDirectories="src\main\assets;src\release\assets"/>
+  </sourceProviders>
+  <testSourceProviders>
+  </testSourceProviders>
+  <testFixturesSourceProviders>
+  </testFixturesSourceProviders>
+  <manifestPlaceholders>
+    <placeholder
+        name="applicationName"
+        value="android.app.Application" />
+  </manifestPlaceholders>
+  <artifact
+      classOutputs="F:\Moviles Tesis\Con Firebase FINAL\TesisAPPfinal\build\app\intermediates\javac\release\compileReleaseJavaWithJavac\classes;F:\Moviles Tesis\Con Firebase FINAL\TesisAPPfinal\build\app\tmp\kotlin-classes\release;F:\Moviles Tesis\Con Firebase FINAL\TesisAPPfinal\build\app\kotlinToolingMetadata;F:\Moviles Tesis\Con Firebase FINAL\TesisAPPfinal\build\app\intermediates\compile_and_runtime_not_namespaced_r_class_jar\release\processReleaseResources\R.jar"
+      type="MAIN"
+      applicationId="com.example.h_c_1"
+      generatedSourceFolders="F:\Moviles Tesis\Con Firebase FINAL\TesisAPPfinal\build\app\generated\ap_generated_sources\release\out"
+      generatedResourceFolders="F:\Moviles Tesis\Con Firebase FINAL\TesisAPPfinal\build\app\generated\res\google-services\release;F:\Moviles Tesis\Con Firebase FINAL\TesisAPPfinal\build\app\generated\res\resValues\release"
+      desugaredMethodsFiles="C:\Users\carlo\.gradle\caches\8.10.2\transforms\2371a299080b629ceb14c5a6423e672f\transformed\D8BackportedDesugaredMethods.txt">
+  </artifact>
+</variant>

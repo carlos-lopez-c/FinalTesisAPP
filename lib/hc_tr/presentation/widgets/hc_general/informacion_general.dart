@@ -109,7 +109,7 @@ class _DatosInformativosWidgetState
         _buildFormField(
           label: 'Fecha de la entrevista (dd/mm/aaaa)',
           controller: fechaEntrevistaController,
-          onChanged: hcNotifier.onFechaEntrevistaChanged,
+         
         ),
         _buildFormField(
           label: 'Nombre completo',

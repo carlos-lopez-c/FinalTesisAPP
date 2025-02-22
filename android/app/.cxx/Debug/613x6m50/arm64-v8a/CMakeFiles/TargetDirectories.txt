@@ -1,0 +1,2 @@
+F:/Moviles Tesis/Con Firebase FINAL/TesisAPPfinal/android/app/.cxx/Debug/613x6m50/arm64-v8a/CMakeFiles/edit_cache.dir
+F:/Moviles Tesis/Con Firebase FINAL/TesisAPPfinal/android/app/.cxx/Debug/613x6m50/arm64-v8a/CMakeFiles/rebuild_cache.dir

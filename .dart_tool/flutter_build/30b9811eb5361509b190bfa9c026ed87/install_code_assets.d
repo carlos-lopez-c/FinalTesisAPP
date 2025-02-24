@@ -1,1 +1,0 @@
- F:\\Moviles\ Tesis\\Con\ Firebase\ FINAL\\TesisAPPfinal\\.dart_tool\\flutter_build\\30b9811eb5361509b190bfa9c026ed87\\native_assets.json: 

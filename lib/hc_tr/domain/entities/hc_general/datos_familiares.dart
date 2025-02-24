@@ -1,18 +1,18 @@
 class DatosFamiliares {
-  bool nuclear;
-  bool monoParental;
-  bool funcional;
-  bool reconstituida;
-  bool disfuncional;
-  bool extensa;
+  bool? nuclear;
+  bool? monoParental;
+  bool? funcional;
+  bool? reconstituida;
+  bool? disfuncional;
+  bool? extensa;
 
   DatosFamiliares({
-    required this.nuclear,
-    required this.monoParental,
-    required this.funcional,
-    required this.reconstituida,
-    required this.disfuncional,
-    required this.extensa,
+    this.nuclear,
+    this.monoParental,
+    this.funcional,
+    this.reconstituida,
+    this.disfuncional,
+    this.extensa,
   });
 
   DatosFamiliares copyWith({

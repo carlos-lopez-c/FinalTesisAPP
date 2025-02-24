@@ -2,13 +2,60 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_c_1/hc_tr/presentation/providers/hc_form_general_provider.dart';
 
-class HabitosPersonalesWidget extends ConsumerWidget {
+class HabitosPersonalesWidget extends ConsumerStatefulWidget {
   const HabitosPersonalesWidget({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  _HabitosPersonalesWidgetState createState() =>
+      _HabitosPersonalesWidgetState();
+}
+
+class _HabitosPersonalesWidgetState
+    extends ConsumerState<HabitosPersonalesWidget> {
+  late TextEditingController aptitudesInteresesEscolaresController;
+  late TextEditingController rendimientoGeneralEscolaridadController;
+  late TextEditingController quienViveEnCasaController;
+
+  @override
+  void initState() {
+    super.initState();
+    aptitudesInteresesEscolaresController = TextEditingController();
+    rendimientoGeneralEscolaridadController = TextEditingController();
+    quienViveEnCasaController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    aptitudesInteresesEscolaresController.dispose();
+    rendimientoGeneralEscolaridadController.dispose();
+    quienViveEnCasaController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final hcState = ref.watch(hcGeneralProvider);
     final hcNotifier = ref.read(hcGeneralProvider.notifier);
+
+    // Actualizar los controladores cuando el estado cambia
+    aptitudesInteresesEscolaresController.text = hcState
+        .createHcGeneral
+        .antecedentesPerinatales
+        .antecedentesPostnatales
+        .habitosPersonales
+        .aptitudesEInteresesEscolares;
+    rendimientoGeneralEscolaridadController.text = hcState
+        .createHcGeneral
+        .antecedentesPerinatales
+        .antecedentesPostnatales
+        .habitosPersonales
+        .rendimientoGeneralEscolaridad;
+    quienViveEnCasaController.text = hcState
+        .createHcGeneral
+        .antecedentesPerinatales
+        .antecedentesPostnatales
+        .habitosPersonales
+        .quienViveEnCasa;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -30,21 +77,29 @@ class HabitosPersonalesWidget extends ConsumerWidget {
           ],
           selectedValues: [
             hcState.createHcGeneral.antecedentesPerinatales
-                .antecedentesPostnatales.habitosPersonales.berrinches,
+                    .antecedentesPostnatales.habitosPersonales.berrinches ??
+                false,
             hcState.createHcGeneral.antecedentesPerinatales
-                .antecedentesPostnatales.habitosPersonales.insulta,
+                    .antecedentesPostnatales.habitosPersonales.insulta ??
+                false,
             hcState.createHcGeneral.antecedentesPerinatales
-                .antecedentesPostnatales.habitosPersonales.llora,
+                    .antecedentesPostnatales.habitosPersonales.llora ??
+                false,
             hcState.createHcGeneral.antecedentesPerinatales
-                .antecedentesPostnatales.habitosPersonales.grita,
+                    .antecedentesPostnatales.habitosPersonales.grita ??
+                false,
             hcState.createHcGeneral.antecedentesPerinatales
-                .antecedentesPostnatales.habitosPersonales.agrede,
+                    .antecedentesPostnatales.habitosPersonales.agrede ??
+                false,
             hcState.createHcGeneral.antecedentesPerinatales
-                .antecedentesPostnatales.habitosPersonales.seEncierra,
+                    .antecedentesPostnatales.habitosPersonales.seEncierra ??
+                false,
             hcState.createHcGeneral.antecedentesPerinatales
-                .antecedentesPostnatales.habitosPersonales.pideAyuda,
+                    .antecedentesPostnatales.habitosPersonales.pideAyuda ??
+                false,
             hcState.createHcGeneral.antecedentesPerinatales
-                .antecedentesPostnatales.habitosPersonales.pegaALosPadres,
+                    .antecedentesPostnatales.habitosPersonales.pegaALosPadres ??
+                false,
           ],
           onChangedList: [
             hcNotifier.onHabitosPersonalesBerrinchesChanged,
@@ -62,27 +117,18 @@ class HabitosPersonalesWidget extends ConsumerWidget {
         // 🔹 Aptitudes e intereses escolares
         _buildSection('Aptitudes e intereses escolares'),
         _buildMultilineFormField(
-            label: 'Describa...',
-            initialValue: hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .aptitudesEInteresesEscolares,
-            onChanged: hcNotifier
-                .onHabitosPersonalesAptitudesInteresesEscolaresChanged),
+          label: 'Describa...',
+          controller: aptitudesInteresesEscolaresController,
+          onChanged:
+              hcNotifier.onHabitosPersonalesAptitudesInteresesEscolaresChanged,
+        ),
         const Divider(),
 
         // 🔹 Rendimiento general en escolaridad
         _buildSection('Rendimiento general en escolaridad'),
         _buildMultilineFormField(
           label: 'Describa...',
-          initialValue: hcState
-              .createHcGeneral
-              .antecedentesPerinatales
-              .antecedentesPostnatales
-              .habitosPersonales
-              .rendimientoGeneralEscolaridad,
+          controller: rendimientoGeneralEscolaridadController,
           onChanged: hcNotifier
               .onHabitosPersonalesRendimientoGeneralEscolaridadChanged,
         ),
@@ -103,61 +149,69 @@ class HabitosPersonalesWidget extends ConsumerWidget {
           ],
           selectedValues: [
             hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .comportamientoGeneral
-                .agresivo,
+                    .createHcGeneral
+                    .antecedentesPerinatales
+                    .antecedentesPostnatales
+                    .habitosPersonales
+                    .comportamientoGeneral
+                    .agresivo ??
+                false,
             hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .comportamientoGeneral
-                .pasivo,
+                    .createHcGeneral
+                    .antecedentesPerinatales
+                    .antecedentesPostnatales
+                    .habitosPersonales
+                    .comportamientoGeneral
+                    .pasivo ??
+                false,
             hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .comportamientoGeneral
-                .destructor,
+                    .createHcGeneral
+                    .antecedentesPerinatales
+                    .antecedentesPostnatales
+                    .habitosPersonales
+                    .comportamientoGeneral
+                    .destructor ??
+                false,
             hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .comportamientoGeneral
-                .sociable,
+                    .createHcGeneral
+                    .antecedentesPerinatales
+                    .antecedentesPostnatales
+                    .habitosPersonales
+                    .comportamientoGeneral
+                    .sociable ??
+                false,
             hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .comportamientoGeneral
-                .hipercinetico,
+                    .createHcGeneral
+                    .antecedentesPerinatales
+                    .antecedentesPostnatales
+                    .habitosPersonales
+                    .comportamientoGeneral
+                    .hipercinetico ??
+                false,
             hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .comportamientoGeneral
-                .empatia,
+                    .createHcGeneral
+                    .antecedentesPerinatales
+                    .antecedentesPostnatales
+                    .habitosPersonales
+                    .comportamientoGeneral
+                    .empatia ??
+                false,
             hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .comportamientoGeneral
-                .interesesPeculiares,
+                    .createHcGeneral
+                    .antecedentesPerinatales
+                    .antecedentesPostnatales
+                    .habitosPersonales
+                    .comportamientoGeneral
+                    .interesesPeculiares ??
+                false,
             hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .comportamientoGeneral
-                .interesPorInteraccion,
+                    .createHcGeneral
+                    .antecedentesPerinatales
+                    .antecedentesPostnatales
+                    .habitosPersonales
+                    .comportamientoGeneral
+                    .interesPorInteraccion ??
+                false,
           ],
           onChangedList: [
             hcNotifier.onHabitosPersonalesComportamientoGeneralAgresivoChanged,
@@ -175,206 +229,14 @@ class HabitosPersonalesWidget extends ConsumerWidget {
           ],
         ),
         const Divider(),
-        _buildSection('ASPECTOS DE SOCIALIZACIÓN'),
-        _buildInlineCheckboxGroup(
-          title: "Socialización",
-          options: [
-            "Mayores",
-            "Menores",
-            "Socialización con familia",
-            "Reacción con personas extrañas",
-            "Todos"
-          ],
-          selectedValues: [
-            hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .aspectosSocializacion
-                .mayores,
-            hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .aspectosSocializacion
-                .menores,
-            hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .aspectosSocializacion
-                .socializacionConFamilia,
-            hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .aspectosSocializacion
-                .reaccionConPersonasExtranas,
-            hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .aspectosSocializacion
-                .todos,
-          ],
-          onChangedList: [
-            hcNotifier.onHabitosPersonalesAspectosSocializacionMayoresChanged,
-            hcNotifier.onHabitosPersonalesAspectosSocializacionMenoresChanged,
-            hcNotifier
-                .onHabitosPersonalesAspectosSocializacionSocializacionConFamiliaChanged,
-            hcNotifier
-                .onHabitosPersonalesAspectosSocializacionReaccionConPersonasExtranasChanged,
-            hcNotifier.onHabitosPersonalesAspectosSocializacionTodosChanged,
-          ],
-        ),
-
-        const Divider(),
-
-        // 🔹 ASPECTOS COGNITIVOS
-        _buildInlineCheckboxGroup(
-          title: "Aspectos Cognitivos",
-          options: [
-            "Logra concentrarse 5 min",
-            "Reconoce partes del cuerpo",
-            "Asocia objetos",
-            "Reconoce a sus familiares",
-            "Reconoce colores básicos"
-          ],
-          selectedValues: [
-            hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .aspectosSocializacion
-                .lograConcentrarse5Min,
-            hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .aspectosSocializacion
-                .reconocePartesDelCuerpo,
-            hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .aspectosSocializacion
-                .asociaObjetos,
-            hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .aspectosSocializacion
-                .reconoceASusFamiliares,
-            hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .aspectosSocializacion
-                .reconoceColoresBasicos,
-          ],
-          onChangedList: [
-            hcNotifier
-                .onHabitosPersonalesAspectosSocializacionLograConcentrarse5MinChanged,
-            hcNotifier
-                .onHabitosPersonalesAspectosSocializacionReconocePartesDelCuerpoChanged,
-            hcNotifier
-                .onHabitosPersonalesAspectosSocializacionAsociaObjetosChanged,
-            hcNotifier
-                .onHabitosPersonalesAspectosSocializacionReconoceASusFamiliaresChanged,
-            hcNotifier
-                .onHabitosPersonalesAspectosSocializacionReconoceColoresBasicosChanged,
-          ],
-        ),
-
-        const Divider(),
-
-        // 🔹 DATOS FAMILIARES
-        _buildSection('DATOS FAMILIARES'),
-        _buildInlineCheckboxGroup(
-          title: "Tipo de hogar",
-          options: [
-            "Nuclear",
-            "Monoparental",
-            "Funcional",
-            "Reconstituida",
-            "Disfuncional",
-            "Extensa"
-          ],
-          selectedValues: [
-            hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .datosFamiliares
-                .nuclear,
-            hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .datosFamiliares
-                .monoParental,
-            hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .datosFamiliares
-                .funcional,
-            hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .datosFamiliares
-                .reconstituida,
-            hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .datosFamiliares
-                .disfuncional,
-            hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .datosFamiliares
-                .extensa,
-          ],
-          onChangedList: [
-            hcNotifier.onHabitosPersonalesDatosFamiliaresNuclearChanged,
-            hcNotifier.onHabitosPersonalesDatosFamiliaresMonoParentalChanged,
-            hcNotifier.onHabitosPersonalesDatosFamiliaresFuncionalChanged,
-            hcNotifier.onHabitosPersonalesDatosFamiliaresReconstituidaChanged,
-            hcNotifier.onHabitosPersonalesDatosFamiliaresDisfuncionalChanged,
-            hcNotifier.onHabitosPersonalesDatosFamiliaresExtensaChanged,
-          ],
-        ),
-
-        const Divider(),
 
         // 🔹 ¿Quién vive en la casa?
         _buildSection('¿Quién vive en la casa?'),
         _buildMultilineFormField(
           label: 'Describa quien vive en la casa',
-          initialValue: hcState.createHcGeneral.antecedentesPerinatales
-              .antecedentesPostnatales.habitosPersonales.quienViveEnCasa,
+          controller: quienViveEnCasaController,
           onChanged: hcNotifier.onHabitosPersonalesQuienViveEnCasaChanged,
         ),
-
         const Divider(),
 
         // 🔹 INTEGRACIÓN SENSORIAL
@@ -383,33 +245,37 @@ class HabitosPersonalesWidget extends ConsumerWidget {
           options: ["Vista", "Oído", "Tacto", "Gusto y Olfato"],
           selectedValues: [
             hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .integracionSensorial
-                .vista,
+                    .createHcGeneral
+                    .antecedentesPerinatales
+                    .antecedentesPostnatales
+                    .habitosPersonales
+                    .integracionSensorial
+                    .vista ??
+                false,
             hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .integracionSensorial
-                .oido,
+                    .createHcGeneral
+                    .antecedentesPerinatales
+                    .antecedentesPostnatales
+                    .habitosPersonales
+                    .integracionSensorial
+                    .oido ??
+                false,
             hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .integracionSensorial
-                .tacto,
+                    .createHcGeneral
+                    .antecedentesPerinatales
+                    .antecedentesPostnatales
+                    .habitosPersonales
+                    .integracionSensorial
+                    .tacto ??
+                false,
             hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .habitosPersonales
-                .integracionSensorial
-                .gustoYolfato,
+                    .createHcGeneral
+                    .antecedentesPerinatales
+                    .antecedentesPostnatales
+                    .habitosPersonales
+                    .integracionSensorial
+                    .gustoYolfato ??
+                false,
           ],
           onChangedList: [
             hcNotifier.onHabitosPersonalesIntegracionSensorialVistaChanged,
@@ -437,13 +303,13 @@ class HabitosPersonalesWidget extends ConsumerWidget {
   // 🔹 Campo de texto multilínea conectado al estado
   Widget _buildMultilineFormField({
     required String label,
-    required String initialValue,
+    required TextEditingController controller,
     required Function(String) onChanged,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
-        initialValue: initialValue,
+        controller: controller,
         onChanged: onChanged,
         maxLines: 5, // Permite múltiples líneas para respuestas detalladas
         decoration: InputDecoration(

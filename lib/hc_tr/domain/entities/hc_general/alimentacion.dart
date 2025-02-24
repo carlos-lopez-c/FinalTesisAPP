@@ -1,12 +1,12 @@
 class Alimentacion {
-  bool materna;
-  bool artificial;
-  bool maticacion;
+  bool? materna;
+  bool? artificial;
+  bool? maticacion;
 
   Alimentacion({
-    required this.materna,
-    required this.artificial,
-    required this.maticacion,
+    this.materna,
+    this.artificial,
+    this.maticacion,
   });
 
   Alimentacion copyWith({

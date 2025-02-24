@@ -1,26 +1,31 @@
+import 'package:h_c_1/hc_tr/domain/entities/hc_general/antecedentes_perinatales.dart';
+import 'package:h_c_1/hc_tr/domain/entities/hc_general/antecedentes_personales.dart';
+
 class CreateHcPsAdult {
-  final String patientId;
-  final String antecedenteFamiliares;
-  final String areasIntervecion;
-  final String cobertura;
-  final String curso;
-  final String desencadenantesMotivoConsulta;
-  final String direccion;
-  final String estructuraFamiliar;
-  final DateTime fechaCreacion;
-  final DateTime fechaEvalucion;
-  final DateTime fechaNacimiento;
-  final String impresionDiagnostica;
-  final String institucion;
-  final String motivoConsulta;
-  final String nombreCompleto;
-  final String observaciones;
-  final String pruebasAplicadas;
-  final String remision;
-  final String responsable;
-  final String telefono;
+  String? id;
+  String patientId;
+  String antecedenteFamiliares;
+  String areasIntervecion;
+  String cobertura;
+  String curso;
+  String desencadenantesMotivoConsulta;
+  String direccion;
+  String estructuraFamiliar;
+  String fechaCreacion;
+  String fechaEvalucion;
+  String fechaNacimiento;
+  String impresionDiagnostica;
+  String institucion;
+  String motivoConsulta;
+  String nombreCompleto;
+  String observaciones;
+  String pruebasAplicadas;
+  String remision;
+  String responsable;
+  String telefono;
 
   CreateHcPsAdult({
+    this.id,
     required this.patientId,
     required this.antecedenteFamiliares,
     required this.areasIntervecion,
@@ -44,6 +49,7 @@ class CreateHcPsAdult {
   });
 
   CreateHcPsAdult copyWith({
+    String? id,
     String? patientId,
     String? antecedenteFamiliares,
     String? areasIntervecion,
@@ -52,9 +58,9 @@ class CreateHcPsAdult {
     String? desencadenantesMotivoConsulta,
     String? direccion,
     String? estructuraFamiliar,
-    DateTime? fechaCreacion,
-    DateTime? fechaEvalucion,
-    DateTime? fechaNacimiento,
+    String? fechaCreacion,
+    String? fechaEvalucion,
+    String? fechaNacimiento,
     String? impresionDiagnostica,
     String? institucion,
     String? motivoConsulta,
@@ -66,6 +72,7 @@ class CreateHcPsAdult {
     String? telefono,
   }) {
     return CreateHcPsAdult(
+      id: id ?? this.id,
       patientId: patientId ?? this.patientId,
       antecedenteFamiliares:
           antecedenteFamiliares ?? this.antecedenteFamiliares,
@@ -93,51 +100,82 @@ class CreateHcPsAdult {
 
   Map<String, dynamic> toJson() {
     return {
-      "patientId": patientId,
-      "antecedenteFamiliares": antecedenteFamiliares,
-      "areasIntervecion": areasIntervecion,
-      "cobertura": cobertura,
-      "curso": curso,
-      "desencadenantesMotivoConsulta": desencadenantesMotivoConsulta,
-      "direccion": direccion,
-      "estructuraFamiliar": estructuraFamiliar,
-      "fechaCreacion": fechaCreacion.toIso8601String(),
-      "fechaEvalucion": fechaEvalucion.toIso8601String(),
-      "fechaNacimiento": fechaNacimiento.toIso8601String(),
-      "impresionDiagnostica": impresionDiagnostica,
-      "institucion": institucion,
-      "motivoConsulta": motivoConsulta,
-      "nombreCompleto": nombreCompleto,
-      "observaciones": observaciones,
-      "pruebasAplicadas": pruebasAplicadas,
-      "remision": remision,
-      "responsable": responsable,
-      "telefono": telefono,
+      'id': id,
+      'patientId': patientId,
+      'antecedenteFamiliares': antecedenteFamiliares,
+      'areasIntervecion': areasIntervecion,
+      'cobertura': cobertura,
+      'curso': curso,
+      'desencadenantesMotivoConsulta': desencadenantesMotivoConsulta,
+      'direccion': direccion,
+      'estructuraFamiliar': estructuraFamiliar,
+      'fechaCreacion': fechaCreacion,
+      'fechaEvalucion': fechaEvalucion,
+      'fechaNacimiento': fechaNacimiento,
+      'impresionDiagnostica': impresionDiagnostica,
+      'institucion': institucion,
+      'motivoConsulta': motivoConsulta,
+      'nombreCompleto': nombreCompleto,
+      'observaciones': observaciones,
+      'pruebasAplicadas': pruebasAplicadas,
+      'remision': remision,
+      'responsable': responsable,
+      'telefono': telefono,
     };
   }
 
   factory CreateHcPsAdult.fromJson(Map<String, dynamic> json) {
-    return CreateHcPsAdult(
-      patientId: json["patientId"],
-      antecedenteFamiliares: json["antecedenteFamiliares"],
-      areasIntervecion: json["areasIntervecion"],
-      cobertura: json["cobertura"],
-      curso: json["curso"],
-      desencadenantesMotivoConsulta: json["desencadenantesMotivoConsulta"],
-      direccion: json["direccion"],
-      estructuraFamiliar: json["estructuraFamiliar"],
-      fechaCreacion: DateTime.parse(json["fechaCreacion"]),
-      fechaEvalucion: DateTime.parse(json["fechaEvalucion"]),
-      fechaNacimiento: DateTime.parse(json["fechaNacimiento"]),
-      impresionDiagnostica: json["impresionDiagnostica"],
-      institucion: json["institucion"],
-      motivoConsulta: json["motivoConsulta"],
-      nombreCompleto: json["nombreCompleto"],
-      observaciones: json["observaciones"],
-      pruebasAplicadas: json["pruebasAplicadas"],
-      remision: json["remision"],
-      responsable: json["responsable"],
-      telefono: json["telefono"],
-    );
+    try {
+      // Verificar que los campos obligatorios no sean nulos
+      if (json['patientId'] == null ||
+          json['antecedenteFamiliares'] == null ||
+          json['areasIntervecion'] == null ||
+          json['cobertura'] == null ||
+          json['curso'] == null ||
+          json['desencadenantesMotivoConsulta'] == null ||
+          json['direccion'] == null ||
+          json['estructuraFamiliar'] == null ||
+          json['fechaCreacion'] == null ||
+          json['fechaEvalucion'] == null ||
+          json['fechaNacimiento'] == null ||
+          json['impresionDiagnostica'] == null ||
+          json['institucion'] == null ||
+          json['motivoConsulta'] == null ||
+          json['nombreCompleto'] == null ||
+          json['observaciones'] == null ||
+          json['pruebasAplicadas'] == null ||
+          json['remision'] == null ||
+          json['responsable'] == null ||
+          json['telefono'] == null) {
+        throw Exception('Uno o más campos obligatorios son nulos');
+      }
+
+      return CreateHcPsAdult(
+        id: json['id'],
+        patientId: json['patientId'],
+        antecedenteFamiliares: json['antecedenteFamiliares'],
+        areasIntervecion: json['areasIntervecion'],
+        cobertura: json['cobertura'],
+        curso: json['curso'],
+        desencadenantesMotivoConsulta: json['desencadenantesMotivoConsulta'],
+        direccion: json['direccion'],
+        estructuraFamiliar: json['estructuraFamiliar'],
+        fechaCreacion: json['fechaCreacion'],
+        fechaEvalucion: json['fechaEvalucion'],
+        fechaNacimiento: json['fechaNacimiento'],
+        impresionDiagnostica: json['impresionDiagnostica'],
+        institucion: json['institucion'],
+        motivoConsulta: json['motivoConsulta'],
+        nombreCompleto: json['nombreCompleto'],
+        observaciones: json['observaciones'],
+        pruebasAplicadas: json['pruebasAplicadas'],
+        remision: json['remision'],
+        responsable: json['responsable'],
+        telefono: json['telefono'],
+      );
+    } catch (e) {
+      print('Error al convertir JSON a CreateHcPsicologica: $e');
+      throw Exception('Error al convertir JSON a CreateHcPsicologica');
+    }
   }
 }

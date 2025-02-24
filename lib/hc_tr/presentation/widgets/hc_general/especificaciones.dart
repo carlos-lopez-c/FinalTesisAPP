@@ -2,13 +2,111 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_c_1/hc_tr/presentation/providers/hc_form_general_provider.dart';
 
-class EspecificacionesWidget extends ConsumerWidget {
+class EspecificacionesWidget extends ConsumerStatefulWidget {
   const EspecificacionesWidget({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  _EspecificacionesWidgetState createState() => _EspecificacionesWidgetState();
+}
+
+class _EspecificacionesWidgetState
+    extends ConsumerState<EspecificacionesWidget> {
+  late TextEditingController intensionComunicativaController;
+  late TextEditingController traumatismoController;
+  late TextEditingController infeccionesController;
+  late TextEditingController reaccionesVacunasController;
+  late TextEditingController desnutricionObesidadController;
+  late TextEditingController cirugiasController;
+  late TextEditingController convulsionesController;
+  late TextEditingController medicacionController;
+  late TextEditingController sindromesController;
+  late TextEditingController observacionesController;
+  late TextEditingController diagnosticStudiesController;
+
+  @override
+  void initState() {
+    super.initState();
+    intensionComunicativaController = TextEditingController();
+    traumatismoController = TextEditingController();
+    infeccionesController = TextEditingController();
+    reaccionesVacunasController = TextEditingController();
+    desnutricionObesidadController = TextEditingController();
+    cirugiasController = TextEditingController();
+    convulsionesController = TextEditingController();
+    medicacionController = TextEditingController();
+    sindromesController = TextEditingController();
+    observacionesController = TextEditingController();
+    diagnosticStudiesController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    intensionComunicativaController.dispose();
+    traumatismoController.dispose();
+    infeccionesController.dispose();
+    reaccionesVacunasController.dispose();
+    desnutricionObesidadController.dispose();
+    cirugiasController.dispose();
+    convulsionesController.dispose();
+    medicacionController.dispose();
+    sindromesController.dispose();
+    observacionesController.dispose();
+    diagnosticStudiesController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final hcState = ref.watch(hcGeneralProvider);
     final hcNotifier = ref.read(hcGeneralProvider.notifier);
+
+    // Actualizar los controladores cuando el estado cambia
+    intensionComunicativaController.text = hcState
+        .createHcGeneral
+        .antecedentesPerinatales
+        .antecedentesPostnatales
+        .especificaciones
+        .intensionComunicativaHospitalizaciones;
+    traumatismoController.text = hcState.createHcGeneral.antecedentesPerinatales
+        .antecedentesPostnatales.especificaciones.traumatismo;
+    infeccionesController.text = hcState.createHcGeneral.antecedentesPerinatales
+        .antecedentesPostnatales.especificaciones.infecciones;
+    reaccionesVacunasController.text = hcState
+        .createHcGeneral
+        .antecedentesPerinatales
+        .antecedentesPostnatales
+        .especificaciones
+        .reaccionesPeculiaresVacunas;
+    desnutricionObesidadController.text = hcState
+        .createHcGeneral
+        .antecedentesPerinatales
+        .antecedentesPostnatales
+        .especificaciones
+        .desnutricionOObesidad;
+    cirugiasController.text = hcState.createHcGeneral.antecedentesPerinatales
+        .antecedentesPostnatales.especificaciones.cirugias;
+    convulsionesController.text = hcState
+        .createHcGeneral
+        .antecedentesPerinatales
+        .antecedentesPostnatales
+        .especificaciones
+        .convulsiones;
+    medicacionController.text = hcState.createHcGeneral.antecedentesPerinatales
+        .antecedentesPostnatales.especificaciones.medicacion;
+    sindromesController.text = hcState.createHcGeneral.antecedentesPerinatales
+        .antecedentesPostnatales.especificaciones.sindromes;
+    observacionesController.text = hcState
+        .createHcGeneral
+        .antecedentesPerinatales
+        .antecedentesPostnatales
+        .especificaciones
+        .observaciones;
+    diagnosticStudiesController.text = hcState
+        .createHcGeneral
+        .antecedentesPerinatales
+        .antecedentesPostnatales
+        .especificaciones
+        .diagnosticStudies;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -16,76 +114,58 @@ class EspecificacionesWidget extends ConsumerWidget {
         _buildSection('ESPECIFICACIONES'),
         _buildMultilineFormField(
           label: 'Intensión comunicativa',
-          initialValue: hcState
-              .createHcGeneral
-              .antecedentesPerinatales
-              .antecedentesPostnatales
-              .especificaciones
-              .intensionComunicativaHospitalizaciones,
+          controller: intensionComunicativaController,
           onChanged: hcNotifier.onIntensionComunicativaHospitalizacionesChanged,
         ),
         _buildMultilineFormField(
           label: 'Traumatismo',
-          initialValue: hcState.createHcGeneral.antecedentesPerinatales
-              .antecedentesPostnatales.especificaciones.traumatismo,
+          controller: traumatismoController,
           onChanged: hcNotifier.onEspecificacionesTraumatismoChanged,
         ),
         _buildMultilineFormField(
           label: 'Infecciones, alergias, otitis, farin......',
-          initialValue: hcState.createHcGeneral.antecedentesPerinatales
-              .antecedentesPostnatales.especificaciones.infecciones,
+          controller: infeccionesController,
           onChanged: hcNotifier.onEspecificacionesInfeccionesChanged,
         ),
         _buildMultilineFormField(
-            label: 'Reacciones peculiares vacunas',
-            initialValue: hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .antecedentesPostnatales
-                .especificaciones
-                .reaccionesPeculiaresVacunas,
-            onChanged: hcNotifier
-                .onEspecificacionesReaccionesPeculiaresVacunasChanged),
+          label: 'Reacciones peculiares vacunas',
+          controller: reaccionesVacunasController,
+          onChanged:
+              hcNotifier.onEspecificacionesReaccionesPeculiaresVacunasChanged,
+        ),
         _buildMultilineFormField(
           label: 'Desnutrición/Obesidad',
-          initialValue: hcState.createHcGeneral.antecedentesPerinatales
-              .antecedentesPostnatales.especificaciones.desnutricionOObesidad,
+          controller: desnutricionObesidadController,
           onChanged: hcNotifier.onEspecificacionesDesnutricionOObesidadChanged,
         ),
         _buildMultilineFormField(
           label: 'Cirugías',
-          initialValue: hcState.createHcGeneral.antecedentesPerinatales
-              .antecedentesPostnatales.especificaciones.cirugias,
+          controller: cirugiasController,
           onChanged: hcNotifier.onEspecificacionesCirugiasChanged,
         ),
         _buildMultilineFormField(
           label: 'Convulsiones fabriles o epilepsia.....',
-          initialValue: hcState.createHcGeneral.antecedentesPerinatales
-              .antecedentesPostnatales.especificaciones.convulsiones,
+          controller: convulsionesController,
           onChanged: hcNotifier.onEspecificacionesConvulcionesChanged,
         ),
         _buildMultilineFormField(
           label: 'Medicación',
-          initialValue: hcState.createHcGeneral.antecedentesPerinatales
-              .antecedentesPostnatales.especificaciones.medicacion,
+          controller: medicacionController,
           onChanged: hcNotifier.onEspecificacionesMedicacionChanged,
         ),
         _buildMultilineFormField(
           label: 'Síndromes',
-          initialValue: hcState.createHcGeneral.antecedentesPerinatales
-              .antecedentesPostnatales.especificaciones.sindromes,
+          controller: sindromesController,
           onChanged: hcNotifier.onEspecificacionesSindromesChanged,
         ),
         _buildMultilineFormField(
           label: 'Observaciones',
-          initialValue: hcState.createHcGeneral.antecedentesPerinatales
-              .antecedentesPostnatales.especificaciones.observaciones,
+          controller: observacionesController,
           onChanged: hcNotifier.onEspecificacionesObservacionesChanged,
         ),
         _buildMultilineFormField(
           label: 'EEG, TAC, RM......',
-          initialValue: hcState.createHcGeneral.antecedentesPerinatales
-              .antecedentesPostnatales.especificaciones.diagnosticStudies,
+          controller: diagnosticStudiesController,
           onChanged: hcNotifier.onEspecificacionesDiagnosticStudiesChanged,
         ),
       ],
@@ -106,13 +186,13 @@ class EspecificacionesWidget extends ConsumerWidget {
   // 🔹 Campo de texto multilínea conectado al estado
   Widget _buildMultilineFormField({
     required String label,
-    required String initialValue,
+    required TextEditingController controller,
     required Function(String) onChanged,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
-        initialValue: initialValue,
+        controller: controller,
         onChanged: onChanged,
         maxLines: 5, // Permite múltiples líneas para respuestas detalladas
         decoration: InputDecoration(

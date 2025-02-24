@@ -4,6 +4,8 @@ class CreateAppointments {
   String appointmentTime;
   String medicalInsurance;
   String doctorId;
+  String patient;
+  String status;
   String specialtyTherapyId;
   String diagnosis;
 
@@ -13,6 +15,8 @@ class CreateAppointments {
     required this.appointmentTime,
     required this.medicalInsurance,
     required this.doctorId,
+    required this.patient,
+    required this.status,
     required this.specialtyTherapyId,
     required this.diagnosis,
   });
@@ -20,6 +24,8 @@ class CreateAppointments {
   CreateAppointments copyWith({
     String? patientId,
     DateTime? date,
+    String? patient,
+    String? status,
     String? appointmentTime,
     String? medicalInsurance,
     String? doctorId,
@@ -29,6 +35,8 @@ class CreateAppointments {
     return CreateAppointments(
       patientId: patientId ?? this.patientId,
       date: date ?? this.date,
+      patient: patient ?? this.patient,
+      status: status ?? this.status,
       appointmentTime: appointmentTime ?? this.appointmentTime,
       medicalInsurance: medicalInsurance ?? this.medicalInsurance,
       doctorId: doctorId ?? this.doctorId,
@@ -40,27 +48,16 @@ class CreateAppointments {
   //To Json
   Map<String, dynamic> toJson() {
     return {
-      'patientId': patientId,
+      'patientID': patientId,
       'date':
           "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
       'appointmentTime': appointmentTime,
       'medicalInsurance': medicalInsurance,
-      'doctorId': doctorId,
+      'doctorID': doctorId,
+      'patient': patient,
+      'status': status,
       'specialtyTherapyId': specialtyTherapyId,
       'diagnosis': diagnosis,
     };
-  }
-
-  //From Json
-  factory CreateAppointments.fromJson(Map<String, dynamic> json) {
-    return CreateAppointments(
-      patientId: json['patientId'],
-      date: json['date'],
-      appointmentTime: json['appointmentTime'],
-      medicalInsurance: json['medicalInsurance'],
-      doctorId: json['doctorId'],
-      specialtyTherapyId: json['specialtyTherapyId'],
-      diagnosis: json['diagnosis'],
-    );
   }
 }

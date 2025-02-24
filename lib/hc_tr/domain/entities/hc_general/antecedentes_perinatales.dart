@@ -8,8 +8,8 @@ class AntecedentesPerinatales {
   String tipoDeParto;
   String duracionDelParto;
   String presentacion;
-  bool lloroAlNacer;
-  bool sufrimientoFetal;
+  bool? lloroAlNacer;
+  bool? sufrimientoFetal;
   AlNacerNecesito alNacerNecesito;
   AlNacerPresento alNacerPresento;
   String observaciones;
@@ -21,8 +21,8 @@ class AntecedentesPerinatales {
     required this.tipoDeParto,
     required this.duracionDelParto,
     required this.presentacion,
-    required this.lloroAlNacer,
-    required this.sufrimientoFetal,
+    this.lloroAlNacer,
+    this.sufrimientoFetal,
     required this.alNacerNecesito,
     required this.alNacerPresento,
     required this.observaciones,

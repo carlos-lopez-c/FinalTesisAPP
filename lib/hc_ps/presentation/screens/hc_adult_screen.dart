@@ -4,13 +4,101 @@ import 'package:h_c_1/hc_ps/presentation/providers/hc_ps_form_provider.dart';
 import '/hc_ps/presentation/screens/search_hc_ps_adults.dart';
 import '../widgets/headerPS.dart';
 
-class HistoriaClinicaAdultPS extends ConsumerWidget {
+class HistoriaClinicaAdultPS extends ConsumerStatefulWidget {
+  @override
+  _HistoriaClinicaAdultPSState createState() => _HistoriaClinicaAdultPSState();
+}
+
+class _HistoriaClinicaAdultPSState
+    extends ConsumerState<HistoriaClinicaAdultPS> {
   final _formKey = GlobalKey<FormState>();
 
+  late TextEditingController nombreCompletoController;
+  late TextEditingController fechaNacimientoController;
+  late TextEditingController telefonoController;
+  late TextEditingController institucionController;
+  late TextEditingController direccionController;
+  late TextEditingController remisionController;
+  late TextEditingController fechaEvaluacionController;
+  late TextEditingController coberturaController;
+  late TextEditingController observacionesController;
+  late TextEditingController responsableController;
+  late TextEditingController motivoConsultaController;
+  late TextEditingController desencadenantesController;
+  late TextEditingController antecedentesFamiliaresController;
+  late TextEditingController pruebasAplicadasController;
+  late TextEditingController impresionDiagnosticaController;
+  late TextEditingController areasIntervencionController;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    nombreCompletoController = TextEditingController();
+    fechaNacimientoController = TextEditingController();
+    telefonoController = TextEditingController();
+    institucionController = TextEditingController();
+    direccionController = TextEditingController();
+    remisionController = TextEditingController();
+    fechaEvaluacionController = TextEditingController();
+    coberturaController = TextEditingController();
+    observacionesController = TextEditingController();
+    responsableController = TextEditingController();
+    motivoConsultaController = TextEditingController();
+    desencadenantesController = TextEditingController();
+    antecedentesFamiliaresController = TextEditingController();
+    pruebasAplicadasController = TextEditingController();
+    impresionDiagnosticaController = TextEditingController();
+    areasIntervencionController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    nombreCompletoController.dispose();
+    fechaNacimientoController.dispose();
+    telefonoController.dispose();
+    institucionController.dispose();
+    direccionController.dispose();
+    remisionController.dispose();
+    fechaEvaluacionController.dispose();
+    coberturaController.dispose();
+    observacionesController.dispose();
+    responsableController.dispose();
+    motivoConsultaController.dispose();
+    desencadenantesController.dispose();
+    antecedentesFamiliaresController.dispose();
+    pruebasAplicadasController.dispose();
+    impresionDiagnosticaController.dispose();
+    areasIntervencionController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final hcState = ref.watch(hcPsAdultFormProvider);
     final hcNotifier = ref.read(hcPsAdultFormProvider.notifier);
+
+    // Actualizar los controladores con los valores del estado
+    nombreCompletoController.text = hcState.createHcPsAdult.nombreCompleto;
+    fechaNacimientoController.text =
+        hcState.createHcPsAdult.fechaNacimiento.toString();
+    telefonoController.text = hcState.createHcPsAdult.telefono;
+    institucionController.text = hcState.createHcPsAdult.institucion;
+    direccionController.text = hcState.createHcPsAdult.direccion;
+    remisionController.text = hcState.createHcPsAdult.remision;
+    fechaEvaluacionController.text =
+        hcState.createHcPsAdult.fechaEvalucion.toString();
+    coberturaController.text = hcState.createHcPsAdult.cobertura;
+    observacionesController.text = hcState.createHcPsAdult.observaciones;
+    responsableController.text = hcState.createHcPsAdult.responsable;
+    motivoConsultaController.text = hcState.createHcPsAdult.motivoConsulta;
+    desencadenantesController.text =
+        hcState.createHcPsAdult.desencadenantesMotivoConsulta;
+    antecedentesFamiliaresController.text =
+        hcState.createHcPsAdult.antecedenteFamiliares;
+    pruebasAplicadasController.text = hcState.createHcPsAdult.pruebasAplicadas;
+    impresionDiagnosticaController.text =
+        hcState.createHcPsAdult.impresionDiagnostica;
+    areasIntervencionController.text = hcState.createHcPsAdult.areasIntervecion;
 
     return Scaffold(
       appBar: AppBar(
@@ -29,95 +117,96 @@ class HistoriaClinicaAdultPS extends ConsumerWidget {
               ),
               const SizedBox(height: 20),
               Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => BusquedaPsA()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    side: const BorderSide(color: Colors.black, width: 1.5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                  child: _buildRadioButtonGroup(
+                title: '',
+                options: ['Nuevo', 'Buscar'],
+                selectedValue: hcState.tipo,
+                onChanged: hcNotifier.onTipoChanged,
+              )),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      onChanged: hcNotifier.onCedulaChanged,
+                      decoration:
+                          const InputDecoration(labelText: 'Buscar por cédula'),
                     ),
                   ),
-                  child: const Text(
-                    'BUSCAR HISTORIA CLÍNICA',
-                    style: TextStyle(color: Colors.black),
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (hcState.tipo == 'Nuevo') {
+                        hcNotifier.getPacienteByDni(hcState.cedula);
+                      } else {
+                        hcNotifier.onSearchHcPsAdult(hcState.cedula);
+                      }
+                    },
+                    child: const Text('Buscar'),
                   ),
-                ),
+                ],
               ),
               const SizedBox(height: 25),
               _buildSection('1.- DATOS PERSONALES:'),
               _buildFormField(
                 label: 'Nombres y Apellidos',
-                initialValue: hcState.createHcPsAdult.nombreCompleto,
+                controller: nombreCompletoController,
                 onChanged: hcNotifier.setNombreCompleto,
                 validator: (value) => _validateRequired(value),
               ),
               _buildFormField(
                 label: 'Fecha de Nacimiento (AAAA-MM-DD)',
-                initialValue:
-                    hcState.createHcPsAdult.fechaNacimiento.toString(),
-                onChanged: (value) => hcNotifier.setFechaNacimiento(
-                    DateTime.tryParse(value) ?? DateTime.now()),
+                controller: fechaNacimientoController,
+                onChanged: (value) => hcNotifier.setFechaNacimiento,
                 validator: (value) => _validateDate(value),
               ),
               _buildFormField(
                 label: 'Teléfono',
-                initialValue: hcState.createHcPsAdult.telefono,
+                controller: telefonoController,
                 onChanged: hcNotifier.setTelefono,
                 keyboardType: TextInputType.phone,
                 validator: (value) => _validatePhone(value),
               ),
               _buildFormField(
-                label: 'Curso Escolar Actual',
-                initialValue: hcState.createHcPsAdult.curso,
-                onChanged: hcNotifier.setCurso,
-                validator: (value) => _validateRequired(value),
-              ),
-              _buildFormField(
                 label: 'Institución',
-                initialValue: hcState.createHcPsAdult.institucion,
+                controller: institucionController,
                 onChanged: hcNotifier.setInstitucion,
                 validator: (value) => _validateRequired(value),
               ),
               _buildFormField(
                 label: 'Dirección',
-                initialValue: hcState.createHcPsAdult.direccion,
+                controller: direccionController,
                 onChanged: hcNotifier.setDireccion,
                 validator: (value) => _validateRequired(value),
               ),
               _buildFormField(
                 label: 'Remisión',
-                initialValue: hcState.createHcPsAdult.remision,
+                controller: remisionController,
                 onChanged: hcNotifier.setRemision,
                 validator: (value) => _validateRequired(value),
               ),
               _buildFormField(
                 label: 'Fecha de Evaluación (AAAA-MM-DD)',
-                initialValue: hcState.createHcPsAdult.fechaEvalucion.toString(),
-                onChanged: (value) => hcNotifier.setFechaEvaluacion(
-                    DateTime.tryParse(value) ?? DateTime.now()),
+                controller: fechaEvaluacionController,
+                onChanged: (value) => hcNotifier.setFechaEvaluacion,
                 validator: (value) => _validateDate(value),
               ),
               _buildFormField(
                 label: 'Final de Cobertura',
-                initialValue: hcState.createHcPsAdult.cobertura,
+                controller: coberturaController,
                 onChanged: hcNotifier.setCobertura,
                 validator: (value) => _validateRequired(value),
               ),
               _buildFormField(
                 label: 'Observaciones',
-                initialValue: hcState.createHcPsAdult.observaciones,
+                controller: observacionesController,
                 onChanged: hcNotifier.setObservaciones,
                 maxLines: 3,
                 validator: (value) => _validateRequired(value),
               ),
               _buildFormField(
                 label: 'Responsable',
-                initialValue: hcState.createHcPsAdult.responsable,
+                controller: responsableController,
                 onChanged: hcNotifier.setResponsable,
                 validator: (value) => _validateRequired(value),
               ),
@@ -125,7 +214,7 @@ class HistoriaClinicaAdultPS extends ConsumerWidget {
               _buildSection('2.- MOTIVO DE CONSULTA:'),
               _buildFormField(
                 label: 'Describa el motivo de la consulta',
-                initialValue: hcState.createHcPsAdult.motivoConsulta,
+                controller: motivoConsultaController,
                 onChanged: hcNotifier.setMotivoConsulta,
                 maxLines: 3,
                 validator: (value) => _validateRequired(value),
@@ -134,8 +223,7 @@ class HistoriaClinicaAdultPS extends ConsumerWidget {
               _buildSection('3.- DESENCADENANTES DE MOTIVO DE CONSULTA:'),
               _buildFormField(
                 label: 'Describa los desencadenantes',
-                initialValue:
-                    hcState.createHcPsAdult.desencadenantesMotivoConsulta,
+                controller: desencadenantesController,
                 onChanged: hcNotifier.setDesencadenantesMotivoConsulta,
                 maxLines: 3,
                 validator: (value) => _validateRequired(value),
@@ -144,7 +232,7 @@ class HistoriaClinicaAdultPS extends ConsumerWidget {
               _buildSection('4.- ANTECEDENTES FAMILIARES:'),
               _buildFormField(
                 label: 'Describa los antecedentes familiares',
-                initialValue: hcState.createHcPsAdult.antecedenteFamiliares,
+                controller: antecedentesFamiliaresController,
                 onChanged: hcNotifier.setAntecedenteFamiliares,
                 maxLines: 4,
                 validator: (value) => _validateRequired(value),
@@ -153,7 +241,7 @@ class HistoriaClinicaAdultPS extends ConsumerWidget {
               _buildSection('5.- PRUEBAS APLICADAS:'),
               _buildFormField(
                 label: 'Describa las pruebas aplicadas',
-                initialValue: hcState.createHcPsAdult.pruebasAplicadas,
+                controller: pruebasAplicadasController,
                 onChanged: hcNotifier.setPruebasAplicadas,
                 maxLines: 3,
                 validator: (value) => _validateRequired(value),
@@ -162,7 +250,7 @@ class HistoriaClinicaAdultPS extends ConsumerWidget {
               _buildSection('6.- IMPRESIÓN DIAGNÓSTICA:'),
               _buildFormField(
                 label: 'Describa la impresión diagnóstica',
-                initialValue: hcState.createHcPsAdult.impresionDiagnostica,
+                controller: impresionDiagnosticaController,
                 onChanged: hcNotifier.setImpresionDiagnostica,
                 maxLines: 3,
                 validator: (value) => _validateRequired(value),
@@ -171,7 +259,7 @@ class HistoriaClinicaAdultPS extends ConsumerWidget {
               _buildSection('7.- ÁREAS DE INTERVENCIÓN:'),
               _buildFormField(
                 label: 'Describa las áreas de intervención',
-                initialValue: hcState.createHcPsAdult.areasIntervecion,
+                controller: areasIntervencionController,
                 onChanged: hcNotifier.setAreasIntervencion,
                 maxLines: 3,
                 validator: (value) => _validateRequired(value),
@@ -183,9 +271,7 @@ class HistoriaClinicaAdultPS extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (_formKey.currentState!.validate()) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Procesando datos')),
-            );
+            hcNotifier.onCreateHcPsAdult();
           }
         },
         child: const Icon(Icons.save),
@@ -202,10 +288,48 @@ class HistoriaClinicaAdultPS extends ConsumerWidget {
     );
   }
 
+  Widget _buildRadioButtonGroup({
+    required String title,
+    required List<String> options,
+    required String selectedValue,
+    required Function(String) onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+          ),
+        ),
+        Wrap(
+          spacing: 20.0,
+          runSpacing: 10.0,
+          alignment: WrapAlignment.start,
+          children: options.map((option) {
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Radio(
+                  value: option,
+                  groupValue: selectedValue,
+                  onChanged: (value) => onChanged(value as String),
+                ),
+                Text(option),
+              ],
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
   // 🔹 Campo de texto conectado al estado
   Widget _buildFormField({
     required String label,
-    required String initialValue,
+    required TextEditingController controller,
     required Function(String) onChanged,
     int maxLines = 1,
     TextInputType keyboardType = TextInputType.text,
@@ -214,7 +338,7 @@ class HistoriaClinicaAdultPS extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
-        initialValue: initialValue,
+        controller: controller,
         onChanged: onChanged,
         maxLines: maxLines,
         keyboardType: keyboardType,

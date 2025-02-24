@@ -1,28 +1,28 @@
 class AbusoVocal {
-  bool toseEnExceso;
-  bool gritaEnExceso;
-  bool hablaMucho;
-  bool hablaRapido;
-  bool imitaVoces;
-  bool hablaConExcesoDeRuido;
-  bool reduceElUsoDeLaVozEnResfrios;
-  bool carraspeaEnExceso;
-  bool hablaForzandoLaVoz;
-  bool hablaAlMismoTiempoQueOtrasPersonas;
-  bool hablaConDientesHombroYCuelloApretados;
+  bool? toseEnExceso;
+  bool? gritaEnExceso;
+  bool? hablaMucho;
+  bool? hablaRapido;
+  bool? imitaVoces;
+  bool? hablaConExcesoDeRuido;
+  bool? reduceElUsoDeLaVozEnResfrios;
+  bool? carraspeaEnExceso;
+  bool? hablaForzandoLaVoz;
+  bool? hablaAlMismoTiempoQueOtrasPersonas;
+  bool? hablaConDientesHombroYCuelloApretados;
 
   AbusoVocal({
-    required this.toseEnExceso,
-    required this.gritaEnExceso,
-    required this.hablaMucho,
-    required this.hablaRapido,
-    required this.imitaVoces,
-    required this.hablaConExcesoDeRuido,
-    required this.reduceElUsoDeLaVozEnResfrios,
-    required this.carraspeaEnExceso,
-    required this.hablaForzandoLaVoz,
-    required this.hablaAlMismoTiempoQueOtrasPersonas,
-    required this.hablaConDientesHombroYCuelloApretados,
+    this.toseEnExceso,
+    this.gritaEnExceso,
+    this.hablaMucho,
+    this.hablaRapido,
+    this.imitaVoces,
+    this.hablaConExcesoDeRuido,
+    this.reduceElUsoDeLaVozEnResfrios,
+    this.carraspeaEnExceso,
+    this.hablaForzandoLaVoz,
+    this.hablaAlMismoTiempoQueOtrasPersonas,
+    this.hablaConDientesHombroYCuelloApretados,
   });
 
   AbusoVocal copyWith({

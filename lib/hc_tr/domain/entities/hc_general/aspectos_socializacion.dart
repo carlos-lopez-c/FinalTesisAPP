@@ -1,26 +1,26 @@
 class AspectosSocializacion {
-  bool mayores;
-  bool menores;
-  bool todos;
-  bool socializacionConFamilia;
-  bool reaccionConPersonasExtranas;
-  bool lograConcentrarse5Min;
-  bool reconocePartesDelCuerpo;
-  bool asociaObjetos;
-  bool reconoceASusFamiliares;
-  bool reconoceColoresBasicos;
+  bool? mayores;
+  bool? menores;
+  bool? todos;
+  bool? socializacionConFamilia;
+  bool? reaccionConPersonasExtranas;
+  bool? lograConcentrarse5Min;
+  bool? reconocePartesDelCuerpo;
+  bool? asociaObjetos;
+  bool? reconoceASusFamiliares;
+  bool? reconoceColoresBasicos;
 
   AspectosSocializacion({
-    required this.mayores,
-    required this.menores,
-    required this.todos,
-    required this.socializacionConFamilia,
-    required this.reaccionConPersonasExtranas,
-    required this.lograConcentrarse5Min,
-    required this.reconocePartesDelCuerpo,
-    required this.asociaObjetos,
-    required this.reconoceASusFamiliares,
-    required this.reconoceColoresBasicos,
+    this.mayores,
+    this.menores,
+    this.todos,
+    this.socializacionConFamilia,
+    this.reaccionConPersonasExtranas,
+    this.lograConcentrarse5Min,
+    this.reconocePartesDelCuerpo,
+    this.asociaObjetos,
+    this.reconoceASusFamiliares,
+    this.reconoceColoresBasicos,
   });
 
   AspectosSocializacion copyWith({

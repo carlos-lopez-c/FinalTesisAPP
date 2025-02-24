@@ -1,26 +1,26 @@
 class Seguridad {
-  final bool seAtoraConSuSaliva;
+  final bool? seAtoraConSuSaliva;
   final String conQueFrecuencia;
-  final bool tieneTosOAhogosCuandoSeAlimentaOConsumeMedicamentos;
+  final bool? tieneTosOAhogosCuandoSeAlimentaOConsumeMedicamentos;
   final String conQueAlimentosLiquidosMedicamentos;
-  final bool presentaAlgunaDificultadParaTomarLiquidosDeUnVaso;
-  final bool presentaDificultadConSopasOLosGranosPequenosComoArroz;
-  final bool haPresentadoNeumonias;
+  final bool? presentaAlgunaDificultadParaTomarLiquidosDeUnVaso;
+  final bool? presentaDificultadConSopasOLosGranosPequenosComoArroz;
+  final bool? haPresentadoNeumonias;
   final String conQueFrecuenciaPresentoNeumonia;
-  final bool seQuedaConRestosDeAlimentosEnLaBocaLuegoDeAlimentarse;
-  final bool sienteQueElAlimentoSeVaHaciaSuNariz;
+  final bool? seQuedaConRestosDeAlimentosEnLaBocaLuegoDeAlimentarse;
+  final bool? sienteQueElAlimentoSeVaHaciaSuNariz;
 
   Seguridad({
-    required this.seAtoraConSuSaliva,
+    this.seAtoraConSuSaliva,
     required this.conQueFrecuencia,
-    required this.tieneTosOAhogosCuandoSeAlimentaOConsumeMedicamentos,
+    this.tieneTosOAhogosCuandoSeAlimentaOConsumeMedicamentos,
     required this.conQueAlimentosLiquidosMedicamentos,
-    required this.presentaAlgunaDificultadParaTomarLiquidosDeUnVaso,
-    required this.presentaDificultadConSopasOLosGranosPequenosComoArroz,
-    required this.haPresentadoNeumonias,
+    this.presentaAlgunaDificultadParaTomarLiquidosDeUnVaso,
+    this.presentaDificultadConSopasOLosGranosPequenosComoArroz,
+    this.haPresentadoNeumonias,
     required this.conQueFrecuenciaPresentoNeumonia,
-    required this.seQuedaConRestosDeAlimentosEnLaBocaLuegoDeAlimentarse,
-    required this.sienteQueElAlimentoSeVaHaciaSuNariz,
+    this.seQuedaConRestosDeAlimentosEnLaBocaLuegoDeAlimentarse,
+    this.sienteQueElAlimentoSeVaHaciaSuNariz,
   });
 
   Seguridad copyWith({

@@ -1,36 +1,36 @@
 class AntecedentesPersonales {
-  bool deseado;
-  bool automedicacion;
-  bool depresion;
-  bool estres;
-  bool ansiedad;
-  bool traumatismo;
-  bool radiaciones;
-  bool medicina;
-  bool riesgoDeAborto;
-  bool maltratoFisico;
-  bool consumoDeDrogas;
-  bool consumoDeAlcohol;
-  bool consumoDeTabaco;
-  bool hipertension;
-  bool dietaBalanceada;
+  bool? deseado;
+  bool? automedicacion;
+  bool? depresion;
+  bool? estres;
+  bool? ansiedad;
+  bool? traumatismo;
+  bool? radiaciones;
+  bool? medicina;
+  bool? riesgoDeAborto;
+  bool? maltratoFisico;
+  bool? consumoDeDrogas;
+  bool? consumoDeAlcohol;
+  bool? consumoDeTabaco;
+  bool? hipertension;
+  bool? dietaBalanceada;
 
   AntecedentesPersonales({
-    required this.deseado,
-    required this.automedicacion,
-    required this.depresion,
-    required this.estres,
-    required this.ansiedad,
-    required this.traumatismo,
-    required this.radiaciones,
-    required this.medicina,
-    required this.riesgoDeAborto,
-    required this.maltratoFisico,
-    required this.consumoDeDrogas,
-    required this.consumoDeAlcohol,
-    required this.consumoDeTabaco,
-    required this.hipertension,
-    required this.dietaBalanceada,
+    this.deseado,
+    this.automedicacion,
+    this.depresion,
+    this.estres,
+    this.ansiedad,
+    this.traumatismo,
+    this.radiaciones,
+    this.medicina,
+    this.riesgoDeAborto,
+    this.maltratoFisico,
+    this.consumoDeDrogas,
+    this.consumoDeAlcohol,
+    this.consumoDeTabaco,
+    this.hipertension,
+    this.dietaBalanceada,
   });
 
   AntecedentesPersonales copyWith({
@@ -89,20 +89,20 @@ class AntecedentesPersonales {
 
   factory AntecedentesPersonales.fromJson(Map<String, dynamic> json) =>
       AntecedentesPersonales(
-        deseado: json['deseado'] ?? true,
-        automedicacion: json['automedicacion'] ?? true,
-        depresion: json['depresion'] ?? true,
-        estres: json['estres'] ?? true,
-        ansiedad: json['ansiedad'] ?? true,
-        traumatismo: json['traumatismo'] ?? true,
-        radiaciones: json['radiaciones'] ?? true,
-        medicina: json['medicina'] ?? true,
-        riesgoDeAborto: json['riesgoDeAborto'] ?? true,
-        maltratoFisico: json['maltratoFisico'] ?? true,
-        consumoDeDrogas: json['consumoDeDrogas'] ?? true,
-        consumoDeAlcohol: json['consumoDeAlcohol'] ?? true,
-        consumoDeTabaco: json['consumoDeTabaco'] ?? true,
-        hipertension: json['hipertension'] ?? true,
-        dietaBalanceada: json['dietaBalanceada'] ?? true,
+        deseado: json['deseado'],
+        automedicacion: json['automedicacion'],
+        depresion: json['depresion'],
+        estres: json['estres'],
+        ansiedad: json['ansiedad'],
+        traumatismo: json['traumatismo'],
+        radiaciones: json['radiaciones'],
+        medicina: json['medicina'],
+        riesgoDeAborto: json['riesgoDeAborto'],
+        maltratoFisico: json['maltratoFisico'],
+        consumoDeDrogas: json['consumoDeDrogas'],
+        consumoDeAlcohol: json['consumoDeAlcohol'],
+        consumoDeTabaco: json['consumoDeTabaco'],
+        hipertension: json['hipertension'],
+        dietaBalanceada: json['dietaBalanceada'],
       );
 }

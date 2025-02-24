@@ -117,6 +117,28 @@ class CreateHcGeneral {
 
   factory CreateHcGeneral.fromJson(Map<String, dynamic> json) {
     try {
+      // Verificar que los campos obligatorios no sean nulos
+      if (json['patientId'] == null ||
+          json['fechaEntrevista'] == null ||
+          json['nombreCompleto'] == null ||
+          json['fechaNacimiento'] == null ||
+          json['sexo'] == null ||
+          json['escolaridad'] == null ||
+          json['nombreDeInstitucion'] == null ||
+          json['tipoDeInstitucion'] == null ||
+          json['domicilio'] == null ||
+          json['email'] == null ||
+          json['telefono'] == null ||
+          json['entrevistadoPor'] == null ||
+          json['remitidoPor'] == null ||
+          json['motivoDeConsulta'] == null ||
+          json['caracterizacionDelProblema'] == null ||
+          json['historiaEscolar'] == null ||
+          json['antecedentesPersonales'] == null ||
+          json['antecedentesPerinatales'] == null) {
+        throw Exception('Uno o más campos obligatorios son nulos');
+      }
+
       return CreateHcGeneral(
         id: json['id'],
         patientId: json['patientId'],
@@ -135,18 +157,14 @@ class CreateHcGeneral {
         motivoDeConsulta: json['motivoDeConsulta'],
         caracterizacionDelProblema: json['caracterizacionDelProblema'],
         historiaEscolar: json['historiaEscolar'],
-
-        // ✅ Cambio aquí: Usamos la clase directamente para `fromJson`
         antecedentesPersonales:
             AntecedentesPersonales.fromJson(json['antecedentesPersonales']),
-
-        // ✅ Asegurar que `AntecedentesPerinatales` tenga `fromJson`
         antecedentesPerinatales:
             AntecedentesPerinatales.fromJson(json['antecedentesPerinatales']),
       );
     } catch (e) {
-      print(e);
-      throw Exception(e.toString());
+      print('Error al convertir JSON a CreateHcGeneral: $e');
+      throw Exception('Error al convertir JSON a CreateHcGeneral');
     }
   }
 }

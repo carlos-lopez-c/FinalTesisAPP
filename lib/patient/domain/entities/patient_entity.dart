@@ -15,7 +15,6 @@ class Patient {
   final List<String> currentMedications;
   final List<String> allergies;
   final List<String> historyTreatmentsReceived;
-  final String observations;
 
   Patient({
     required this.id,
@@ -32,7 +31,6 @@ class Patient {
     required this.currentMedications,
     required this.allergies,
     required this.historyTreatmentsReceived,
-    required this.observations,
   });
 
   /// 🔹 **Factory constructor para convertir JSON a `Patient`**
@@ -55,7 +53,6 @@ class Patient {
       allergies: List<String>.from(json["allergies"]),
       historyTreatmentsReceived:
           List<String>.from(json["historyTreatmentsReceived"]),
-      observations: json["observations"] ?? "", // 🔹 Evitar `null`
     );
   }
 
@@ -77,7 +74,6 @@ class Patient {
       "currentMedications": currentMedications,
       "allergies": allergies,
       "historyTreatmentsReceived": historyTreatmentsReceived,
-      "observations": observations,
     };
   }
 
@@ -122,7 +118,6 @@ class Patient {
       allergies: allergies ?? this.allergies,
       historyTreatmentsReceived:
           historyTreatmentsReceived ?? this.historyTreatmentsReceived,
-      observations: observations ?? this.observations,
     );
   }
 

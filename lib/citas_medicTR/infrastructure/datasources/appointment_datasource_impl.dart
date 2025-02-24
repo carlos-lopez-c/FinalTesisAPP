@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:h_c_1/auth/infrastructure/errors/auth_errors.dart';
 import 'package:h_c_1/citas_medicTR/domain/datasources/appointment_datasource.dart';
@@ -7,62 +8,31 @@ import 'package:h_c_1/config/constants/enviroments.dart';
 import 'package:h_c_1/shared/infrastructure/services/key_value_storage_service_impl.dart';
 
 class AppointmentDatasourceImpl implements AppointmentDatasource {
-  final keyValueStorageService = KeyValueStorageServiceImpl();
-  final dio = Dio(BaseOptions(
-    baseUrl: Environment.apiUrl,
-    headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer '},
-  ));
-
-  Future<String?> _getToken() async {
-    return await keyValueStorageService.getValue<String>('token');
-  }
-
-  Future<void> _setAuthorizationHeader() async {
-    final token = await _getToken();
-    print('token: $token');
-    if (token != null && token.isNotEmpty) {
-      dio.options.headers['Authorization'] = 'Bearer $token';
-    }
-  }
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
-  Future<void> createAppointment(CreateAppointments appointment) async {
+  Future<void> createAppointment(
+      CreateAppointments appointment, String medicID) async {
     try {
-      await _setAuthorizationHeader();
+      DocumentSnapshot docSnapshot =
+          await _firestore.collection('medics').doc(medicID).get();
 
-      final response =
-          await dio.post('/appointments', data: appointment.toJson());
-
-      print("response: ${response.data}");
-    } on DioException catch (error) {
-      if (error.response?.statusCode == 400) {
-        print('Error: ${error.response?.data}');
-        throw CustomError(
-            error.response?.data['message'] ?? 'Error al crear cita');
-      }
-      if (error.response?.statusCode == 401) {
-        print('Error: ${error.response?.data}');
-        throw CustomError(
-            error.response?.data['message'] ?? 'No has iniciado sesión');
-      }
-      if (error.response?.statusCode == 403) {
-        print('Error: ${error.response?.data}');
-        throw CustomError(error.response?.data['message'] ??
-            'No tienes permisos suficientes');
-      }
-      if (error.response?.statusCode == 404) {
-        print('Error: ${error.response?.data}');
-        throw CustomError(
-            error.response?.data['message'] ?? 'No se encontraron citas');
-      }
-      if (error.response?.statusCode == 500) {
-        print('Error: ${error.response?.data}');
-        throw CustomError(
-            error.response?.data['message'] ?? 'Error en el servidor');
+      if (!docSnapshot.exists) {
+        throw Exception('Médico no encontrado');
       }
 
-      print('Error: $error');
-      throw CustomError('Error al crear cita');
+      // Obtiene el nombre del médico
+      String name = ('${docSnapshot['firsname']} ${docSnapshot['lastname']}') ??
+          'Nombre no disponible';
+      // Convierte el objeto appointment a un mapa
+      Map<String, dynamic> appointmentData = appointment.toJson();
+      appointmentData['doctor'] = name;
+      // Agrega la cita a la colección "appointments" en Firestore
+      await _firestore.collection('appointments').add(appointmentData);
+      print("Cita creada correctamente en Firestore");
+    } catch (e) {
+      print("Error al crear la cita: $e");
+      throw Exception('Error al crear la cita');
     }
   }
 
@@ -75,110 +45,124 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
   @override
   Future<List<Appointments>> getAppointmentsByStatus(String status) async {
     try {
-      print('getAppointmentsByStatus  $status');
-      await _setAuthorizationHeader();
-      final response =
-          await dio.get('/appointments/find-appointments-unassigned');
-      print("response: ${response.data['data']}");
-      final appointments = (response.data['data'] as List)
-          .map((appointment) => Appointments.fromJson(appointment))
-          .toList();
-      print("appointments: $appointments");
+      print('getAppointmentsByStatus: $status');
+
+      // Consulta Firestore para obtener las citas con el estado "Pendiente"
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('appointments') // Colección de citas
+          .where('status', isEqualTo: status) // Filtra por estado
+          .get();
+
+      // Mapea los documentos a objetos Appointments
+      List<Appointments> appointments = querySnapshot.docs.map((doc) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        return Appointments.fromJson({
+          ...data,
+          'id': doc.id, // Asegúrate de incluir el ID del documento
+        });
+      }).toList();
+
+      print("Citas obtenidas: ${appointments.length}");
       return appointments;
     } catch (e) {
-      final error = e as DioError;
-
-      if (error.response?.statusCode == 400) {
-        print('Error: ${error.response?.data}');
-        throw CustomError(
-            error.response?.data['message'] ?? 'Error al obtener citas');
-      }
-      if (error.response?.statusCode == 401) {
-        print('Error: ${error.response?.data}');
-        throw CustomError(
-            error.response?.data['message'] ?? 'No has iniciado sesión');
-      }
-      if (error.response?.statusCode == 403) {
-        print('Error: ${error.response?.data}');
-        throw CustomError(error.response?.data['message'] ??
-            'No tienes permisos suficientes');
-      }
-      if (error.response?.statusCode == 404) {
-        print('Error: ${error.response?.data}');
-        throw CustomError(
-            error.response?.data['message'] ?? 'No se encontraron citas');
-      }
-      if (error.response?.statusCode == 500) {
-        print('Error: ${error.response?.data}');
-        throw CustomError(
-            error.response?.data['message'] ?? 'Error en el servidor');
-      }
-
-      print('Error: $e');
-      throw CustomError('Error al obtener citas');
+      print("Error al obtener las citas: $e");
+      throw CustomError('Error al obtener las citas');
     }
   }
 
   @override
-  Future<List<Appointments>> getAppointmentsByDate(DateTime date) async {
+  Future<List<Appointments>> getAppointmentsByDate(
+      DateTime date, String medicID) async {
     try {
-      await _setAuthorizationHeader();
-      final response =
-          await dio.get('/appointments/find-by-medic-and-date?date=$date');
-      print("response: ${response.data['data']}");
-      final appointments = (response.data['data'] as List)
-          .map((appointment) => Appointments.fromJson(appointment))
+      // Formatea la fecha para que coincida con el formato almacenado en Firestore
+      String formattedDate =
+          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+
+      // Consulta las citas que coinciden con la fecha y el medicID proporcionados
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('appointments')
+          .where('date', isEqualTo: formattedDate)
+          .where('doctorID', isEqualTo: medicID)
+          .get();
+
+      // Mapea los documentos obtenidos a objetos Appointments
+      List<Appointments> appointments = querySnapshot.docs
+          .map((doc) =>
+              Appointments.fromJson(doc.data() as Map<String, dynamic>))
           .toList();
+
       return appointments;
     } catch (e) {
-      print('Error: $e');
-      return [];
+      print("Error al obtener las citas: $e");
+      throw Exception('Error al obtener las citas');
     }
   }
 
   @override
-  Future<void> updateAppointment(Appointments appointment) async {
+  Future<void> updateAppointment(
+      Appointments appointment, String medicID) async {
     try {
-      await _setAuthorizationHeader();
-      print('appointment: ${appointment.toJson()}');
-      final response = await dio.patch(
-          '/appointments/status-and-assigned-doctor/${appointment.id}',
-          data: {
-            "status": appointment.status,
-          });
+      // Obtener el nombre del médico desde Firestore
+      print('Actualizando cita: ${medicID}');
+      DocumentSnapshot medicSnapshot = await _firestore
+          .collection('medics') // Colección de médicos
+          .doc(medicID) // ID del médico
+          .get();
 
-      print("response: ${response.data}");
+      if (!medicSnapshot.exists) {
+        throw Exception('Médico no encontrado');
+      }
+
+      // Obtener el nombre del médico
+      String firstName = medicSnapshot['firsname'] ?? 'Nombre no disponible';
+      String lastName = medicSnapshot['lastname'] ?? 'Apellido no disponible';
+
+      // Actualizar la cita en Firestore
+      await _firestore
+          .collection('appointments') // Colección de citas
+          .doc(appointment.id) // ID de la cita
+          .update({
+        'status': appointment.status, // Actualizar el estado
+        'doctor': '$firstName $lastName',
+        'doctorID': medicID,
+        // Puedes agregar más campos si es necesario
+      });
+
+      print("Cita actualizada correctamente en Firestore");
     } catch (e) {
-      final error = e as DioError;
+      print("Error al actualizar la cita: $e");
+      throw Exception('Error al actualizar la cita');
+    }
+  }
 
-      if (error.response?.statusCode == 400) {
-        print('Error: ${error.response?.data}');
-        throw CustomError(
-            error.response?.data['message'] ?? 'Error al actualizar cita');
-      }
-      if (error.response?.statusCode == 401) {
-        print('Error: ${error.response?.data}');
-        throw CustomError(
-            error.response?.data['message'] ?? 'No has iniciado sesión');
-      }
-      if (error.response?.statusCode == 403) {
-        print('Error: ${error.response?.data}');
-        throw CustomError(error.response?.data['message'] ??
-            'No tienes permisos suficientes');
-      }
-      if (error.response?.statusCode == 404) {
-        print('Error: ${error.response?.data}');
-        throw CustomError(
-            error.response?.data['message'] ?? 'No se encontraron citas');
-      }
-      if (error.response?.statusCode == 500) {
-        print('Error: ${error.response?.data}');
-        throw CustomError(
-            error.response?.data['message'] ?? 'Error en el servidor');
-      }
+  @override
+  Future<List<Appointments>> getAppointmentsByStatusAndMedicID(
+      String status, String medicID) async {
+    try {
+      print(
+          'getAppointmentsByStatusAndMedicID: status=$status, medicID=$medicID');
 
-      print('Error: $e');
-      throw CustomError('Error al actualizar cita');
+      // Consulta Firestore para obtener las citas con el estado "Agendado" y el medicID especificado
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('appointments') // Colección de citas
+          .where('status', isEqualTo: status) // Filtra por estado "Agendado"
+          .where('doctorID', isEqualTo: medicID) // Filtra por medicID
+          .get();
+
+      // Mapea los documentos a objetos Appointments
+      List<Appointments> appointments = querySnapshot.docs.map((doc) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        return Appointments.fromJson({
+          ...data,
+          'id': doc.id, // Asegúrate de incluir el ID del documento
+        });
+      }).toList();
+
+      print("Citas obtenidas: ${appointments.length}");
+      return appointments;
+    } catch (e) {
+      print("Error al obtener las citas: $e");
+      throw CustomError('Error al obtener las citas');
     }
   }
 }

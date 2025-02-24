@@ -1,15 +1,15 @@
 class ProcesoDeAlimentacion {
-  final bool seDemoraMasTiempoQueElRestoDeLaFamiliaEnComer;
+  final bool? seDemoraMasTiempoQueElRestoDeLaFamiliaEnComer;
   final String cuantoTiempo;
-  final bool creeUstedQueComeMuyRapido;
-  final bool sueleRealizarAlgunaOtraActividadMientrasCome;
+  final bool? creeUstedQueComeMuyRapido;
+  final bool? sueleRealizarAlgunaOtraActividadMientrasCome;
   final String queOtraActividad;
 
   ProcesoDeAlimentacion({
-    required this.seDemoraMasTiempoQueElRestoDeLaFamiliaEnComer,
+     this.seDemoraMasTiempoQueElRestoDeLaFamiliaEnComer,
     required this.cuantoTiempo,
-    required this.creeUstedQueComeMuyRapido,
-    required this.sueleRealizarAlgunaOtraActividadMientrasCome,
+     this.creeUstedQueComeMuyRapido,
+     this.sueleRealizarAlgunaOtraActividadMientrasCome,
     required this.queOtraActividad,
   });
 

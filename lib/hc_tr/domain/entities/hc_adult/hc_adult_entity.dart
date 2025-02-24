@@ -5,10 +5,10 @@ import 'package:h_c_1/hc_tr/domain/entities/hc_adult/salud_bocal.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_adult/seguridad.dart';
 
 class CreateHcAdultEntity {
-  final String patientId;
-  final String nombreCompleto;
-  final String fechaEvalucion;
-  final String lateralidad;
+  final String? patientId;
+  final String? nombreCompleto;
+  final String? fechaEvalucion;
+  final String? lateralidad;
   final IndependenciaAutonomia independenciaAutonomia;
   final Eficiencia eficiencia;
   final Seguridad seguridad;
@@ -16,10 +16,10 @@ class CreateHcAdultEntity {
   final SaludBocal saludBocal;
 
   CreateHcAdultEntity({
-    required this.patientId,
-    required this.nombreCompleto,
-    required this.fechaEvalucion,
-    required this.lateralidad,
+    this.patientId,
+    this.nombreCompleto,
+    this.fechaEvalucion,
+    this.lateralidad,
     required this.independenciaAutonomia,
     required this.eficiencia,
     required this.seguridad,
@@ -68,18 +68,32 @@ class CreateHcAdultEntity {
   }
 
   factory CreateHcAdultEntity.fromJson(Map<String, dynamic> json) {
-    return CreateHcAdultEntity(
-      patientId: json['patientId'],
-      nombreCompleto: json['nombreCompleto'],
-      fechaEvalucion: json['fechaEvalucion'],
-      lateralidad: json['lateralidad'],
-      independenciaAutonomia:
-          IndependenciaAutonomia.fromJson(json['independenciaAutonomia']),
-      eficiencia: Eficiencia.fromJson(json['eficiencia']),
-      seguridad: Seguridad.fromJson(json['seguridad']),
-      procesoDeAlimentacion:
-          ProcesoDeAlimentacion.fromJson(json['procesoDeAlimentacion']),
-      saludBocal: SaludBocal.fromJson(json['saludBocal']),
-    );
+    try {
+      // Verificar que los campos obligatorios no sean nulos
+      if (json['independenciaAutonomia'] == null ||
+          json['eficiencia'] == null ||
+          json['seguridad'] == null ||
+          json['procesoDeAlimentacion'] == null ||
+          json['saludBocal'] == null) {
+        throw Exception('Uno o más campos obligatorios son nulos');
+      }
+
+      return CreateHcAdultEntity(
+        patientId: json['patientId'],
+        nombreCompleto: json['nombreCompleto'],
+        fechaEvalucion: json['fechaEvalucion'],
+        lateralidad: json['lateralidad'],
+        independenciaAutonomia:
+            IndependenciaAutonomia.fromJson(json['independenciaAutonomia']),
+        eficiencia: Eficiencia.fromJson(json['eficiencia']),
+        seguridad: Seguridad.fromJson(json['seguridad']),
+        procesoDeAlimentacion:
+            ProcesoDeAlimentacion.fromJson(json['procesoDeAlimentacion']),
+        saludBocal: SaludBocal.fromJson(json['saludBocal']),
+      );
+    } catch (e) {
+      print('Error al convertir JSON a CreateHcAdultEntity: $e');
+      throw Exception('Error al convertir JSON a CreateHcAdultEntity');
+    }
   }
 }

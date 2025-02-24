@@ -13,9 +13,4 @@ class PatientRepositoryImpl implements PatientRepository {
   Future<Patient> getPatientByDni(String dni) {
     return datasource.getPatientByDni(dni);
   }
-
-  @override
-  Future<List<Patient>> getPatients() {
-    return datasource.getPatients();
-  }
 }

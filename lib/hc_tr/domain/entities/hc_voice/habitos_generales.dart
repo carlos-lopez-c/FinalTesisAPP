@@ -1,29 +1,29 @@
 class HabitosGenerales {
-  bool realizaReposoVocal;
+  bool? realizaReposoVocal;
   String cuantoTiempo;
-  bool hablaMuchoTiempoSinBebeLiquido;
-  bool asisteAlOtorrinolaringologo;
-  bool consumeAlimentosMuyCondimentados;
-  bool consumeAlimentosMuyCalientesOMuyFrios;
-  bool consumeAlcohol;
-  bool consumeTabaco;
-  bool consumeCafe;
-  bool consumeDrogas;
-  bool utilizaRopaAjustada;
+  bool? hablaMuchoTiempoSinBebeLiquido;
+  bool? asisteAlOtorrinolaringologo;
+  bool? consumeAlimentosMuyCondimentados;
+  bool? consumeAlimentosMuyCalientesOMuyFrios;
+  bool? consumeAlcohol;
+  bool? consumeTabaco;
+  bool? consumeCafe;
+  bool? consumeDrogas;
+  bool? utilizaRopaAjustada;
   int horasDeSueno;
 
   HabitosGenerales({
-    required this.realizaReposoVocal,
+    this.realizaReposoVocal,
     required this.cuantoTiempo,
-    required this.hablaMuchoTiempoSinBebeLiquido,
-    required this.asisteAlOtorrinolaringologo,
-    required this.consumeAlimentosMuyCondimentados,
-    required this.consumeAlimentosMuyCalientesOMuyFrios,
-    required this.consumeAlcohol,
-    required this.consumeTabaco,
-    required this.consumeCafe,
-    required this.consumeDrogas,
-    required this.utilizaRopaAjustada,
+    this.hablaMuchoTiempoSinBebeLiquido,
+    this.asisteAlOtorrinolaringologo,
+    this.consumeAlimentosMuyCondimentados,
+    this.consumeAlimentosMuyCalientesOMuyFrios,
+    this.consumeAlcohol,
+    this.consumeTabaco,
+    this.consumeCafe,
+    this.consumeDrogas,
+    this.utilizaRopaAjustada,
     required this.horasDeSueno,
   });
 

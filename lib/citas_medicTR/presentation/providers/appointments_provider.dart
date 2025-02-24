@@ -16,7 +16,7 @@ final appointmentProvider =
   final patientRepository = PatientRepositoryImpl();
   final authState = ref.watch(authProvider);
   return AppointmentNotifier(repository, patientRepository,
-      medicID: authState.user!.id, ref: ref);
+      medicID: authState.user!.medicID, ref: ref);
 });
 
 class AppointmentNotifier extends StateNotifier<AppointmentState> {
@@ -48,12 +48,15 @@ class AppointmentNotifier extends StateNotifier<AppointmentState> {
   Future<void> crearCita(CreateAppointments nuevaCita) async {
     try {
       state = state.copyWith(loading: true);
-      await repository.createAppointment(nuevaCita);
-      await listarCitas(); // ✅ Recargar citas después de crear una nueva
+      await repository.createAppointment(nuevaCita, medicID);
+      await getAppointmentsByStatusAndMedicID(
+          "Agendado"); // ✅ Recargar citas después de crear una nueva
+
       ref.read(goRouterProvider).pop();
-    } on CustomError catch (e) {
+    } catch (e) {
+      print('🔴 Error al crear cita: $e');
       state = state.copyWith(
-          loading: false, errorMessage: e.message ?? 'Error al crear cita');
+          loading: false, errorMessage: e.toString() ?? 'Error al crear cita');
     }
   }
 
@@ -86,12 +89,12 @@ class AppointmentNotifier extends StateNotifier<AppointmentState> {
       print('🔹 Buscando citas para la fecha: $date');
 
       final formattedDate = date.toIso8601String().split('T')[0]; // YYYY-MM-DD
-      final appointments =
-          await repository.getAppointmentsByDate(DateTime.parse(formattedDate));
+      final appointments = await repository.getAppointmentsByDate(
+          DateTime.parse(formattedDate), medicID);
 
       state = state.copyWith(
         loading: false,
-        citas: appointments,
+        citasDelDia: appointments,
         calendarioCitaSeleccionada: date,
       );
 
@@ -102,13 +105,30 @@ class AppointmentNotifier extends StateNotifier<AppointmentState> {
     }
   }
 
+  Future<void> getAppointmentsByStatusAndMedicID(String status) async {
+    try {
+      state = state.copyWith(loading: true);
+      print('🔹 Buscando citas por estado: $status');
+
+      final appointments =
+          await repository.getAppointmentsByStatusAndMedicID(status, medicID);
+
+      state = state.copyWith(loading: false, citasAgendadas: appointments);
+
+      print('✅ Citas encontradas: ${appointments.length}');
+    } catch (e) {
+      state = state.copyWith(
+          loading: false, errorMessage: 'Error al obtener citas por estado');
+    }
+  }
+
   Future<void> actualizarCita(Appointments cita) async {
     try {
       print('🔹 Actualizando cita...');
       state = state.copyWith(loading: true);
       print("IID: " + medicID);
       cita.copyWith(status: 'Agendado', doctorId: medicID);
-      await repository.updateAppointment(cita);
+      await repository.updateAppointment(cita, medicID);
       await listarCitas(
           estado: "Pendiente"); // ✅ Recargar citas después de actualizar
       ref.read(goRouterProvider).pop();
@@ -152,6 +172,8 @@ class AppointmentNotifier extends StateNotifier<AppointmentState> {
 class AppointmentState {
   final bool loading;
   final List<Appointments> citas;
+  final List<Appointments> citasAgendadas;
+  final List<Appointments> citasDelDia;
   final Patient? paciente;
   final Appointments? citaSeleccionada;
   final DateTime calendarioCitaSeleccionada;
@@ -160,6 +182,8 @@ class AppointmentState {
   AppointmentState(
       {this.loading = false,
       this.citas = const [],
+      this.citasAgendadas = const [],
+      this.citasDelDia = const [],
       this.citaSeleccionada,
       DateTime? calendarioCitaSeleccionada,
       this.errorMessage = '',
@@ -170,6 +194,8 @@ class AppointmentState {
   AppointmentState copyWith({
     bool? loading,
     List<Appointments>? citas,
+    List<Appointments>? citasDelDia,
+    List<Appointments>? citasAgendadas,
     DateTime? calendarioCitaSeleccionada,
     Appointments? citaSeleccionada,
     Patient? paciente,
@@ -178,6 +204,8 @@ class AppointmentState {
     return AppointmentState(
       loading: loading ?? this.loading,
       citas: citas ?? this.citas,
+      citasDelDia: citasDelDia ?? this.citasDelDia,
+      citasAgendadas: citasAgendadas ?? this.citasAgendadas,
       citaSeleccionada: citaSeleccionada ?? this.citaSeleccionada,
       calendarioCitaSeleccionada:
           calendarioCitaSeleccionada ?? this.calendarioCitaSeleccionada,

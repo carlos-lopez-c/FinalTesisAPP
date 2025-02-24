@@ -1,16 +1,16 @@
 class IndependenciaAutonomia {
   final String seAlimentaSoloOConAyuda;
   final String queTipoDeAyudaNecesita;
-  final bool preparaSusAlimentos;
+  final bool? preparaSusAlimentos;
   final String quePrepara;
-  final bool decideQueComer;
+  final bool? decideQueComer;
 
   IndependenciaAutonomia({
     required this.seAlimentaSoloOConAyuda,
     required this.queTipoDeAyudaNecesita,
-    required this.preparaSusAlimentos,
+    this.preparaSusAlimentos,
     required this.quePrepara,
-    required this.decideQueComer,
+    this.decideQueComer,
   });
 
   IndependenciaAutonomia copyWith({

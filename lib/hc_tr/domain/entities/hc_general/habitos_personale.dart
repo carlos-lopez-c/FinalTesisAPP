@@ -4,14 +4,14 @@ import 'package:h_c_1/hc_tr/domain/entities/hc_general/datos_familiares.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_general/integracion_sensorial.dart';
 
 class HabitosPersonales {
-  bool berrinches;
-  bool insulta;
-  bool llora;
-  bool grita;
-  bool agrede;
-  bool seEncierra;
-  bool pideAyuda;
-  bool pegaALosPadres;
+  bool? berrinches;
+  bool? insulta;
+  bool? llora;
+  bool? grita;
+  bool? agrede;
+  bool? seEncierra;
+  bool? pideAyuda;
+  bool? pegaALosPadres;
   String aptitudesEInteresesEscolares;
   String rendimientoGeneralEscolaridad;
   ComportamientoGeneral comportamientoGeneral;
@@ -21,14 +21,14 @@ class HabitosPersonales {
   IntegracionSensorial integracionSensorial;
 
   HabitosPersonales({
-    required this.berrinches,
-    required this.insulta,
-    required this.llora,
-    required this.grita,
-    required this.agrede,
-    required this.seEncierra,
-    required this.pideAyuda,
-    required this.pegaALosPadres,
+    this.berrinches,
+    this.insulta,
+    this.llora,
+    this.grita,
+    this.agrede,
+    this.seEncierra,
+    this.pideAyuda,
+    this.pegaALosPadres,
     required this.aptitudesEInteresesEscolares,
     required this.rendimientoGeneralEscolaridad,
     required this.comportamientoGeneral,

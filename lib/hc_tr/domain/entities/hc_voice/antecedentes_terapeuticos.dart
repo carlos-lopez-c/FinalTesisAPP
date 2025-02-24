@@ -1,16 +1,16 @@
 class AntecedentesTerapeuticos {
-  bool haRecibidoTratamientoMedicoPorProblemasDeLaVoz;
-  bool seHaRealizadoExamenes;
-  bool haRecibidoTratamientoFonoaudiologicoPorProblemasDeVoz;
-  bool haRecibidoTecnicaVocal;
-  bool aplicaLaTecnicaVocal;
+  bool? haRecibidoTratamientoMedicoPorProblemasDeLaVoz;
+  bool? seHaRealizadoExamenes;
+  bool? haRecibidoTratamientoFonoaudiologicoPorProblemasDeVoz;
+  bool? haRecibidoTecnicaVocal;
+  bool? aplicaLaTecnicaVocal;
 
   AntecedentesTerapeuticos({
-    required this.haRecibidoTratamientoMedicoPorProblemasDeLaVoz,
-    required this.seHaRealizadoExamenes,
-    required this.haRecibidoTratamientoFonoaudiologicoPorProblemasDeVoz,
-    required this.haRecibidoTecnicaVocal,
-    required this.aplicaLaTecnicaVocal,
+    this.haRecibidoTratamientoMedicoPorProblemasDeLaVoz,
+    this.seHaRealizadoExamenes,
+    this.haRecibidoTratamientoFonoaudiologicoPorProblemasDeVoz,
+    this.haRecibidoTecnicaVocal,
+    this.aplicaLaTecnicaVocal,
   });
 
   AntecedentesTerapeuticos copyWith({

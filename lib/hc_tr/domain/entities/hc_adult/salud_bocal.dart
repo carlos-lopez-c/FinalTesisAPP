@@ -1,23 +1,23 @@
 class SaludBocal {
-  final bool cuentaConTodasSusPiezasDentales;
+  final bool? cuentaConTodasSusPiezasDentales;
   final String porQueNoCuentaConTodasSusPiezasDentales;
-  final bool utilizaPlacaDental;
-  final bool seRealizaAseoBucalDespuesDeCadaComida;
+  final bool? utilizaPlacaDental;
+  final bool? seRealizaAseoBucalDespuesDeCadaComida;
   final String conQueFrecuenciaSeLavaLosDientes;
-  final bool asisteRegularmenteAControlesDentales;
+  final bool? asisteRegularmenteAControlesDentales;
   final String conQueFrecuenciaAsisteAControlesDentales;
-  final bool tieneAlgunaMolestiaODolorDentroDeSuBoca;
+  final bool? tieneAlgunaMolestiaODolorDentroDeSuBoca;
   final String queMolestiaODolor;
 
   SaludBocal({
-    required this.cuentaConTodasSusPiezasDentales,
+    this.cuentaConTodasSusPiezasDentales,
     required this.porQueNoCuentaConTodasSusPiezasDentales,
-    required this.utilizaPlacaDental,
-    required this.seRealizaAseoBucalDespuesDeCadaComida,
+    this.utilizaPlacaDental,
+    this.seRealizaAseoBucalDespuesDeCadaComida,
     required this.conQueFrecuenciaSeLavaLosDientes,
-    required this.asisteRegularmenteAControlesDentales,
+    this.asisteRegularmenteAControlesDentales,
     required this.conQueFrecuenciaAsisteAControlesDentales,
-    required this.tieneAlgunaMolestiaODolorDentroDeSuBoca,
+    this.tieneAlgunaMolestiaODolorDentroDeSuBoca,
     required this.queMolestiaODolor,
   });
 

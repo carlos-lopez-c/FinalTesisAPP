@@ -1,21 +1,21 @@
 class Eficiencia {
-  final bool consumeLaTotalidadDeLosAlimentos;
+  final bool? consumeLaTotalidadDeLosAlimentos;
   final String quePorcionConsume;
-  final bool haPresentadoPerdidasImportantesDePesoEnElUltimoTiempo;
+  final bool? haPresentadoPerdidasImportantesDePesoEnElUltimoTiempo;
   final double cuantoPesoHaPerdido;
-  final bool manifiestaInteresPorAlimentarse;
-  final bool manifiestaRechazoOPreferenciasPorAlgunTipoDeAlimento;
+  final bool? manifiestaInteresPorAlimentarse;
+  final bool? manifiestaRechazoOPreferenciasPorAlgunTipoDeAlimento;
   final String queTipoDeAlimento;
   final String queTipoDeLiquidoConsumeHabitualmente;
   final String cuantoLiquidoConsumeAlDia;
 
   Eficiencia({
-    required this.consumeLaTotalidadDeLosAlimentos,
+    this.consumeLaTotalidadDeLosAlimentos,
     required this.quePorcionConsume,
-    required this.haPresentadoPerdidasImportantesDePesoEnElUltimoTiempo,
+    this.haPresentadoPerdidasImportantesDePesoEnElUltimoTiempo,
     required this.cuantoPesoHaPerdido,
-    required this.manifiestaInteresPorAlimentarse,
-    required this.manifiestaRechazoOPreferenciasPorAlgunTipoDeAlimento,
+    this.manifiestaInteresPorAlimentarse,
+    this.manifiestaRechazoOPreferenciasPorAlgunTipoDeAlimento,
     required this.queTipoDeAlimento,
     required this.queTipoDeLiquidoConsumeHabitualmente,
     required this.cuantoLiquidoConsumeAlDia,

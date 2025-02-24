@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_c_1/hc_tr/presentation/providers/hc_form_voice_provider.dart';
-import '/hc_tr/presentation/screens/search_hc_TR_VOZ.dart';
-import '/hc_tr/presentation/widgets/NavigationButton.dart';
 import '/hc_tr/presentation/widgets/headerTR.dart';
 
 class HcTrAnamVoz extends ConsumerStatefulWidget {
@@ -220,8 +218,35 @@ class _HcTrAnamVozState extends ConsumerState<HcTrAnamVoz> {
               textoDinamico: '         ANAMNESIS DE VOZ',
             ),
             const SizedBox(height: 20),
-            NavigationButton(
-              navigationRoute: (context) => SearchHcTrVoz(),
+            Center(
+                child: _buildRadioButtonGroup(
+              title: '',
+              options: ['Nuevo', 'Buscar'],
+              selectedValue: hcState.tipo,
+              onChanged: hcNotifier.onTipoChanged,
+            )),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    onChanged: hcNotifier.onCedulaChanged,
+                    decoration:
+                        const InputDecoration(labelText: 'Buscar por cédula'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    if (hcState.tipo == 'Nuevo') {
+                      hcNotifier.getPacienteByDni(hcState.cedula);
+                    } else {
+                      hcNotifier.onSearchHcVoice(hcState.cedula);
+                    }
+                  },
+                  child: const Text('Buscar'),
+                ),
+              ],
             ),
             _buildSection('1.- Datos de identificación'),
             _buildFormField(
@@ -792,7 +817,7 @@ class _HcTrAnamVozState extends ConsumerState<HcTrAnamVoz> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Acción al guardar
+          hcNotifier.onCreateHcGeneral();
         },
         child: const Icon(Icons.save),
       ),

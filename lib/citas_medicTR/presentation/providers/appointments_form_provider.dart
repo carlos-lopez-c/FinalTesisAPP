@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_c_1/auth/presentation/providers/auth_provider.dart';
 import 'package:h_c_1/citas_medicTR/domain/entities/cita.entity.dart';
 import 'package:h_c_1/citas_medicTR/domain/entities/registerCita.entity.dart';
+import 'package:h_c_1/citas_medicTR/presentation/providers/appointments_provider.dart';
 import 'package:h_c_1/patient/domain/entities/patient_entity.dart';
 import 'package:h_c_1/patient/domain/repositories/patient_repository.dart';
 import 'package:h_c_1/citas_medicTR/domain/repositories/appointment_repository.dart';
@@ -19,7 +20,10 @@ final appointmentFormProvider = StateNotifierProvider.autoDispose<
     final patientRepo = PatientRepositoryImpl();
     final typeTherapyRepo = TypeTherapyRepositoryImpl();
     final authState = ref.watch(authProvider);
+    final onCallbackAppointment =
+        ref.read(appointmentProvider.notifier).crearCita;
     return AppointmentFormNotifier(
+        onCallbackAppointment: onCallbackAppointment,
         appointmentRepository: appointmentRepo,
         patientRepository: patientRepo,
         typeTherapyRepository: typeTherapyRepo,
@@ -30,12 +34,14 @@ final appointmentFormProvider = StateNotifierProvider.autoDispose<
 // 🔹 Notifier que maneja el estado del formulario de citas
 class AppointmentFormNotifier extends StateNotifier<AppointmentFormState> {
   final AppointmentRepository appointmentRepository;
+  final Function(CreateAppointments) onCallbackAppointment;
   final PatientRepository patientRepository;
   final TypeTherapyRepository typeTherapyRepository;
   final String medicID;
 
   AppointmentFormNotifier(
       {required this.appointmentRepository,
+      required this.onCallbackAppointment,
       required this.patientRepository,
       required this.typeTherapyRepository,
       required this.medicID})
@@ -118,18 +124,21 @@ class AppointmentFormNotifier extends StateNotifier<AppointmentFormState> {
       // Formatear hora a 12:30 sin segundos ni AM/PM
       final time = (state.selectedTime!.split(':').sublist(0, 2).join(':'))
           .split(' ')[0];
-      print("Este es el tiempo: $medicID");
       final newAppointment = CreateAppointments(
         date: state.selectedDate!,
         appointmentTime: time,
         medicalInsurance: state.patientEntity?.healthInsurance ?? 'No seguro',
         diagnosis: state.diagnosis,
+        status: 'Agendado',
+        patient:
+            '${state.patientEntity?.firstname} ${state.patientEntity?.lastname}' ??
+                'No asignado',
         doctorId: medicID,
         patientId: state.patientId,
         specialtyTherapyId: state.specialtyTherapyId!,
       );
 
-      await appointmentRepository.createAppointment(newAppointment);
+      await onCallbackAppointment(newAppointment);
       state = state.copyWith(loading: false);
       print('✅ Cita guardada correctamente');
       await getTypeTherapics(); // ✅ Recargar áreas terapéuticas después de guardar

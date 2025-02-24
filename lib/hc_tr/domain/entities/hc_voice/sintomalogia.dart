@@ -1,24 +1,24 @@
 class Sintomologia {
   String fonastenia;
   String fonalgia;
-  bool tensionEnFonacion;
-  bool sensacionDeConstriccionEnElCuello;
-  bool sensacionDeCuerpoExtrano;
-  bool descargaPosterior;
-  bool odinofagia;
-  bool extensionTonalReducida;
-  bool picorLaringeo;
+  bool? tensionEnFonacion;
+  bool? sensacionDeConstriccionEnElCuello;
+  bool? sensacionDeCuerpoExtrano;
+  bool? descargaPosterior;
+  bool? odinofagia;
+  bool? extensionTonalReducida;
+  bool? picorLaringeo;
 
   Sintomologia({
     required this.fonastenia,
     required this.fonalgia,
-    required this.tensionEnFonacion,
-    required this.sensacionDeConstriccionEnElCuello,
-    required this.sensacionDeCuerpoExtrano,
-    required this.descargaPosterior,
-    required this.odinofagia,
-    required this.extensionTonalReducida,
-    required this.picorLaringeo,
+    this.tensionEnFonacion,
+    this.sensacionDeConstriccionEnElCuello,
+    this.sensacionDeCuerpoExtrano,
+    this.descargaPosterior,
+    this.odinofagia,
+    this.extensionTonalReducida,
+    this.picorLaringeo,
   });
 
   Sintomologia copyWith({

@@ -257,18 +257,19 @@ class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
     );
   }
 
-void onFechaEntrevistaChanged(DateTime fecha) {
-  final fechaFormato = DateFormat('yyyy-MM-dd').format(fecha);
-  state = state.copyWith(
-    createHcGeneral: state.createHcGeneral.copyWith(fechaEntrevista: fechaFormato),
-  );
-}
+  void onFechaEntrevistaChanged(DateTime fecha) {
+    final fechaFormato = DateFormat('yyyy-MM-dd').format(fecha);
+    state = state.copyWith(
+      createHcGeneral:
+          state.createHcGeneral.copyWith(fechaEntrevista: fechaFormato),
+    );
+  }
 
   Future<void> getPacienteByDni(String dni) async {
     try {
       state = state.copyWith(loading: true);
       final paciente = await patientRepository.getPatientByDni(dni);
-
+      print("Aqui llega ${paciente.toJson()}");
       // Formatear la fecha de nacimiento a 'yyyy-MM-dd'
       final fechaNacimiento =
           DateFormat('yyyy-MM-dd').format(paciente.birthdate);
@@ -307,31 +308,38 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   Future<void> onCreateHcGeneral() async {
     try {
       state = state.copyWith(loading: true);
-      // Asegúrate de que 'fechaEntrevista' esté en el formato correcto
+
+      // Asegúrate de que 'fechaEntrevista' y 'fechaNacimiento' estén en el formato correcto
       final fechaEntrevista = state.createHcGeneral.fechaEntrevista;
       final fechaNacimiento = state.createHcGeneral.fechaNacimiento;
-      // Verifica si la cadena contiene una 'T'; si no, agrégala junto con la hora
-      final fechaFormatoCorrecto = fechaEntrevista.contains('T')
-          ? fechaEntrevista
-          : '${fechaEntrevista}T00:00:00Z';
-      final fechaNacimientoFormatoCorrecto = fechaNacimiento.contains('T')
-          ? fechaNacimiento
-          : '${fechaNacimiento}T00:00:00Z';
-      // Analiza la cadena de fecha y obtén el objeto DateTime
-      final fechaParsed = DateTime.parse(fechaFormatoCorrecto);
-      final fechaNacimientoParsed =
-          DateTime.parse(fechaNacimientoFormatoCorrecto);
-      // Actualiza el estado con la fecha en formato ISO 8601
+
+      // Función para formatear la fecha si es necesario
+      String formatearFecha(String fecha) {
+        if (fecha.contains('T')) {
+          return fecha; // Ya está en formato ISO 8601
+        } else {
+          return '${fecha}T00:00:00Z'; // Agregar hora si no está presente
+        }
+      }
+
+      // Formatear las fechas (opcional, solo si necesitas un formato específico)
+      final fechaEntrevistaFormateada = formatearFecha(fechaEntrevista);
+      final fechaNacimientoFormateada = formatearFecha(fechaNacimiento);
+
+      // Actualizar el estado con las fechas formateadas (opcional)
       state = state.copyWith(
         createHcGeneral: state.createHcGeneral.copyWith(
-          fechaEntrevista: fechaParsed.toIso8601String(),
-          fechaNacimiento: fechaNacimientoParsed.toIso8601String(),
+          fechaEntrevista: fechaEntrevistaFormateada,
+          fechaNacimiento: fechaNacimientoFormateada,
         ),
       );
-      print(state.createHcGeneral.fechaEntrevista);
+
+      print('Fecha de entrevista: ${state.createHcGeneral.fechaEntrevista}');
+      print('Fecha de nacimiento: ${state.createHcGeneral.fechaNacimiento}');
       print('🔹 Creando historia clínica general...');
       print(state.createHcGeneral.toJson());
-      print("Se creó la historia clínica general");
+
+      // Crear la historia clínica general
       await createHcGeneral(state.createHcGeneral);
 
       // Limpiar campos
@@ -344,6 +352,12 @@ void onFechaEntrevistaChanged(DateTime fecha) {
         successMessage: '',
       );
       print('🔴 Error al crear historia clínica: $e');
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Error inesperado al crear historia clínica',
+        successMessage: '',
+      );
+      print('🔴 Error inesperado: $e');
     } finally {
       state = state.copyWith(loading: false);
     }
@@ -371,7 +385,6 @@ void onFechaEntrevistaChanged(DateTime fecha) {
       tipo: value,
     );
   }
-
 
   void onNombreCompletoChanged(String value) {
     state = state.copyWith(
@@ -464,7 +477,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
   // 🔹 Métodos para actualizar los campos de antecedentes personales
-  void onDeseadoChanged(bool value) {
+  void onDeseadoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPersonales: state.createHcGeneral.antecedentesPersonales
@@ -473,7 +486,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onAutomedicacionChanged(bool value) {
+  void onAutomedicacionChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPersonales: state.createHcGeneral.antecedentesPersonales
@@ -482,7 +495,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onDepresionChanged(bool value) {
+  void onDepresionChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPersonales: state.createHcGeneral.antecedentesPersonales
@@ -491,7 +504,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onEstresChanged(bool value) {
+  void onEstresChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPersonales: state.createHcGeneral.antecedentesPersonales
@@ -500,7 +513,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onAnsiedadChanged(bool value) {
+  void onAnsiedadChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPersonales: state.createHcGeneral.antecedentesPersonales
@@ -509,7 +522,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onTraumatismoChanged(bool value) {
+  void onTraumatismoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPersonales: state.createHcGeneral.antecedentesPersonales
@@ -518,7 +531,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onRadiacionesChanged(bool value) {
+  void onRadiacionesChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPersonales: state.createHcGeneral.antecedentesPersonales
@@ -527,7 +540,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onMedicinaChanged(bool value) {
+  void onMedicinaChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPersonales: state.createHcGeneral.antecedentesPersonales
@@ -536,7 +549,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onRiesgoDeAbortoChanged(bool value) {
+  void onRiesgoDeAbortoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPersonales: state.createHcGeneral.antecedentesPersonales
@@ -545,7 +558,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onMaltratoFisicoChanged(bool value) {
+  void onMaltratoFisicoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPersonales: state.createHcGeneral.antecedentesPersonales
@@ -554,7 +567,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onConsumoDeDrogasChanged(bool value) {
+  void onConsumoDeDrogasChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPersonales: state.createHcGeneral.antecedentesPersonales
@@ -563,7 +576,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onConsumoDeAlcoholChanged(bool value) {
+  void onConsumoDeAlcoholChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPersonales: state.createHcGeneral.antecedentesPersonales
@@ -572,7 +585,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onConsumoDeTabacoChanged(bool value) {
+  void onConsumoDeTabacoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPersonales: state.createHcGeneral.antecedentesPersonales
@@ -581,7 +594,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onHipertensionChanged(bool value) {
+  void onHipertensionChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPersonales: state.createHcGeneral.antecedentesPersonales
@@ -590,7 +603,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onDietaBalanceadaChanged(bool value) {
+  void onDietaBalanceadaChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPersonales: state.createHcGeneral.antecedentesPersonales
@@ -645,7 +658,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onLloroAlNacerChanged(bool value) {
+  void onLloroAlNacerChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales: state.createHcGeneral.antecedentesPerinatales
@@ -654,7 +667,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onSufrimientoFetalChanged(bool value) {
+  void onSufrimientoFetalChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales: state.createHcGeneral.antecedentesPerinatales
@@ -672,7 +685,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onAlNacerNecesitoIncubadoraChanged(bool value) {
+  void onAlNacerNecesitoIncubadoraChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -685,7 +698,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onAlNacerNecesitoOxigenoChanged(bool value) {
+  void onAlNacerNecesitoOxigenoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -711,7 +724,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onAlNacerPresentoCianosisChanged(bool value) {
+  void onAlNacerPresentoCianosisChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -724,7 +737,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onAlNacerPresentoIctericiaChanged(bool value) {
+  void onAlNacerPresentoIctericiaChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -737,7 +750,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onAlNacerPresentoMalformacionesChanged(bool value) {
+  void onAlNacerPresentoMalformacionesChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -750,7 +763,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onAlNacerPresentoCirculacionDelCordonEnElCuelloChanged(bool value) {
+  void onAlNacerPresentoCirculacionDelCordonEnElCuelloChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -763,7 +776,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onAlNacerPresentoSufrimientoFetalChanged(bool value) {
+  void onAlNacerPresentoSufrimientoFetalChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -830,7 +843,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
 
   // 🔹 Métodos para antecedentres Postnatales
   // 🔹 Métodos para actualizar alimentación
-  void onAlimentacionMaternaChanged(bool value) {
+  void onAlimentacionMaternaChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -847,7 +860,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onAlimentacionArtificialChanged(bool value) {
+  void onAlimentacionArtificialChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -864,7 +877,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onAlimentacionMaticacionChanged(bool value) {
+  void onAlimentacionMaticacionChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -882,7 +895,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
   // 🔹 Métodos para actualizar desarrollo motor grueso
-  void onControlCefalicoChanged(bool value) {
+  void onControlCefalicoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -899,7 +912,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onGateoChanged(bool value) {
+  void onGateoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -916,7 +929,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onMarchaChanged(bool value) {
+  void onMarchaChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -933,7 +946,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onSedestacionChanged(bool value) {
+  void onSedestacionChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -950,7 +963,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onSincinesiasChanged(bool value) {
+  void onSincinesiasChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -967,7 +980,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onSubeBajaGradasChanged(bool value) {
+  void onSubeBajaGradasChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -984,7 +997,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onRotacionPiesChanged(bool value) {
+  void onRotacionPiesChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1002,7 +1015,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
   // 🔹 Métodos para actualizar reflejos primitivos
-  void onPalmarChanged(bool value) {
+  void onPalmarChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1019,7 +1032,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onMoroChanged(bool value) {
+  void onMoroChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1036,7 +1049,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onPresionChanged(bool value) {
+  void onPresionChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1053,7 +1066,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onDeBusquedaChanged(bool value) {
+  void onDeBusquedaChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1070,7 +1083,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
     );
   }
 
-  void onBanbiskiChanged(bool value) {
+  void onBanbiskiChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1088,7 +1101,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
   // 🔹 Método para actualizar `pinzaDigital`
-  void onPinzaDigitalChanged(bool value) {
+  void onPinzaDigitalChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1106,7 +1119,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `garabateo`
-  void onGarabateoChanged(bool value) {
+  void onGarabateoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1124,7 +1137,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `sostenerObjetos`
-  void onSostenerObjetosChanged(bool value) {
+  void onSostenerObjetosChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1142,7 +1155,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `problemasAlimenticios`
-  void onProblemasAlimenticiosChanged(bool value) {
+  void onProblemasAlimenticiosChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1160,7 +1173,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `garabato`
-  void onGarabatoChanged(bool value) {
+  void onGarabatoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1178,7 +1191,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `ticsMotores`
-  void onTicsMotoresChanged(bool value) {
+  void onTicsMotoresChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1196,7 +1209,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `ticsVocales`
-  void onTicsVocalesChanged(bool value) {
+  void onTicsVocalesChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1214,7 +1227,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `conductasProblematicas`
-  void onConductasProblematicasChanged(bool value) {
+  void onConductasProblematicasChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1232,7 +1245,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `sonrisaSocial`
-  void onSonrisaSocialChanged(bool value) {
+  void onSonrisaSocialChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1250,7 +1263,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `movimientosEstereotipados`
-  void onMovimientosEstereotipadosChanged(bool value) {
+  void onMovimientosEstereotipadosChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1268,7 +1281,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `manipulaPermanentementeUnObjeto`
-  void onManipulaPermanentementeUnObjetoChanged(bool value) {
+  void onManipulaPermanentementeUnObjetoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1286,7 +1299,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `balanceos`
-  void onBalanceosChanged(bool value) {
+  void onBalanceosChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1304,7 +1317,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
   // 🔹 Método para actualizar `juegoRepetitivo`
-  void onJuegoRepetitivoChanged(bool value) {
+  void onJuegoRepetitivoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1322,7 +1335,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `tendenciaARutinas`
-  void onTendenciaARutinasChanged(bool value) {
+  void onTendenciaARutinasChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1340,7 +1353,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `caminaSinSentido`
-  void onCaminaSinSentidoChanged(bool value) {
+  void onCaminaSinSentidoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1358,7 +1371,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `problemaDeSueno`
-  void onProblemaDeSuenoChanged(bool value) {
+  void onProblemaDeSuenoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1376,7 +1389,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `reiteraTemasFavoritos`
-  void onReiteraTemasFavoritosChanged(bool value) {
+  void onReiteraTemasFavoritosChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1394,7 +1407,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `caminaEnPuntitas`
-  void onCaminaEnPuntitasChanged(bool value) {
+  void onCaminaEnPuntitasChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1412,7 +1425,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `irritabilidad`
-  void onIrritabilidadChanged(bool value) {
+  void onIrritabilidadChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1430,7 +1443,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `manipulaPermanentementeAlgo`
-  void onManipulaPermanentementeAlgoChanged(bool value) {
+  void onManipulaPermanentementeAlgoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1448,7 +1461,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `iniciaYMantieneConversaciones`
-  void onIniciaYMantieneConversacionesChanged(bool value) {
+  void onIniciaYMantieneConversacionesChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1466,7 +1479,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `ecolalia`
-  void onEcolaliaChanged(bool value) {
+  void onEcolaliaChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1484,7 +1497,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
   // 🔹 Método para actualizar `conocimientoDeAlgunTema`
-  void onConocimientoDeAlgunTemaChanged(bool value) {
+  void onConocimientoDeAlgunTemaChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1502,7 +1515,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `lenguajeLiteral`
-  void onLenguajeLiteralChanged(bool value) {
+  void onLenguajeLiteralChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1520,7 +1533,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `miraALosOjos`
-  void onMiraALosOjosChanged(bool value) {
+  void onMiraALosOjosChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1538,7 +1551,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `otrosSistemasDeComunicacion`
-  void onOtrosSistemasDeComunicacionChanged(bool value) {
+  void onOtrosSistemasDeComunicacionChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1556,7 +1569,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `selectivoEnLaComida`
-  void onSelectivoEnLaComidaChanged(bool value) {
+  void onSelectivoEnLaComidaChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1574,7 +1587,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `intencionComunicativa`
-  void onIntencionComunicativaChanged(bool value) {
+  void onIntencionComunicativaChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1592,7 +1605,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `interesRestringido`
-  void onInteresRestringidoChanged(bool value) {
+  void onInteresRestringidoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1610,7 +1623,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `angustiaSinCausa`
-  void onAngustiaSinCausaChanged(bool value) {
+  void onAngustiaSinCausaChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1628,7 +1641,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
   // 🔹 Método para actualizar `preferenciaPorAlgunAlimento`
-  void onPreferenciaPorAlgunAlimentoChanged(bool value) {
+  void onPreferenciaPorAlgunAlimentoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1646,7 +1659,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `sonidosExtranos`
-  void onSonidosExtranosChanged(bool value) {
+  void onSonidosExtranosChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1664,7 +1677,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `hablaComoAdulto`
-  void onHablaComoAdultoChanged(bool value) {
+  void onHablaComoAdultoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1682,7 +1695,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `frioParaHablar`
-  void onFrioParaHablarChanged(bool value) {
+  void onFrioParaHablarChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1700,7 +1713,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `pensamientosObsesivos`
-  void onPensamientosObsesivosChanged(bool value) {
+  void onPensamientosObsesivosChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1718,7 +1731,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `cambioDeCaracterExtremo`
-  void onCambioDeCaracterExtremoChanged(bool value) {
+  void onCambioDeCaracterExtremoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1736,7 +1749,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
   // 🔹 Método para actualizar `ingenuo`
-  void onIngenuoChanged(bool value) {
+  void onIngenuoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1754,7 +1767,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `torpezaMotriz`
-  void onTorpezaMotrizChanged(bool value) {
+  void onTorpezaMotrizChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1772,7 +1785,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `frioEmocional`
-  void onFrioEmocionalChanged(bool value) {
+  void onFrioEmocionalChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1790,7 +1803,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `pocosAmigos`
-  void onPocosAmigosChanged(bool value) {
+  void onPocosAmigosChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -1808,7 +1821,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `juegoImaginativo`
-  void onJuegoImaginativoChanged(bool value) {
+  void onJuegoImaginativoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2009,7 +2022,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   // 🔹 Método para actualizar la subclase de Habitos Personales
   //berrinches, insulta, llora, grita, agrede, seEncierra, pideAyuda, pegaALosPadres, aptitudesInteresesEscolares, rendimientoGeneralEscolaridad
 
-  void onHabitosPersonalesBerrinchesChanged(bool value) {
+  void onHabitosPersonalesBerrinchesChanged(bool? value) {
     state = state.copyWith(
         createHcGeneral: state.createHcGeneral.copyWith(
             antecedentesPerinatales:
@@ -2025,7 +2038,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
                                 .copyWith(berrinches: value)))));
   }
 
-  void onHabitosPersonalesInsultaChanged(bool value) {
+  void onHabitosPersonalesInsultaChanged(bool? value) {
     state = state.copyWith(
         createHcGeneral: state.createHcGeneral.copyWith(
             antecedentesPerinatales:
@@ -2041,7 +2054,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
                                 .copyWith(insulta: value)))));
   }
 
-  void onHabitosPersonalesLloraChanged(bool value) {
+  void onHabitosPersonalesLloraChanged(bool? value) {
     state = state.copyWith(
         createHcGeneral: state.createHcGeneral.copyWith(
             antecedentesPerinatales:
@@ -2057,7 +2070,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
                                 .copyWith(llora: value)))));
   }
 
-  void onHabitosPersonalesGritaChanged(bool value) {
+  void onHabitosPersonalesGritaChanged(bool? value) {
     state = state.copyWith(
         createHcGeneral: state.createHcGeneral.copyWith(
             antecedentesPerinatales:
@@ -2073,7 +2086,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
                                 .copyWith(grita: value)))));
   }
 
-  void onHabitosPersonalesAgredeChanged(bool value) {
+  void onHabitosPersonalesAgredeChanged(bool? value) {
     state = state.copyWith(
         createHcGeneral: state.createHcGeneral.copyWith(
             antecedentesPerinatales:
@@ -2089,7 +2102,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
                                 .copyWith(agrede: value)))));
   }
 
-  void onHabitosPersonalesSeEncierraChanged(bool value) {
+  void onHabitosPersonalesSeEncierraChanged(bool? value) {
     state = state.copyWith(
         createHcGeneral: state.createHcGeneral.copyWith(
             antecedentesPerinatales:
@@ -2105,7 +2118,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
                                 .copyWith(seEncierra: value)))));
   }
 
-  void onHabitosPersonalesPideAyudaChanged(bool value) {
+  void onHabitosPersonalesPideAyudaChanged(bool? value) {
     state = state.copyWith(
         createHcGeneral: state.createHcGeneral.copyWith(
             antecedentesPerinatales:
@@ -2121,7 +2134,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
                                 .copyWith(pideAyuda: value)))));
   }
 
-  void onHabitosPersonalesPegaALosPadresChanged(bool value) {
+  void onHabitosPersonalesPegaALosPadresChanged(bool? value) {
     state = state.copyWith(
         createHcGeneral: state.createHcGeneral.copyWith(
             antecedentesPerinatales:
@@ -2173,7 +2186,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
 
 // Metodos para actualizar Comportamiento General de Habitos
 
-  void onHabitosPersonalesComportamientoGeneralAgresivoChanged(bool value) {
+  void onHabitosPersonalesComportamientoGeneralAgresivoChanged(bool? value) {
     state = state.copyWith(
         createHcGeneral: state.createHcGeneral.copyWith(
             antecedentesPerinatales: state.createHcGeneral.antecedentesPerinatales.copyWith(
@@ -2195,7 +2208,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
                                     .copyWith(agresivo: value))))));
   }
 
-  void onHabitosPersonalesComportamientoGeneralPasivoChanged(bool value) {
+  void onHabitosPersonalesComportamientoGeneralPasivoChanged(bool? value) {
     state = state.copyWith(
         createHcGeneral: state.createHcGeneral.copyWith(
             antecedentesPerinatales: state.createHcGeneral.antecedentesPerinatales.copyWith(
@@ -2218,7 +2231,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
   // 🔹 Método para actualizar `destructor`
-  void onHabitosPersonalesComportamientoGeneralDestructorChanged(bool value) {
+  void onHabitosPersonalesComportamientoGeneralDestructorChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2246,7 +2259,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `sociable`
-  void onHabitosPersonalesComportamientoGeneralSociableChanged(bool value) {
+  void onHabitosPersonalesComportamientoGeneralSociableChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2275,7 +2288,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
 
 // 🔹 Método para actualizar `hipercinetico`
   void onHabitosPersonalesComportamientoGeneralHipercineticoChanged(
-      bool value) {
+      bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2303,7 +2316,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `empatia`
-  void onHabitosPersonalesComportamientoGeneralEmpatiaChanged(bool value) {
+  void onHabitosPersonalesComportamientoGeneralEmpatiaChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2332,7 +2345,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
 
 // 🔹 Método para actualizar `interesesPeculiares`
   void onHabitosPersonalesComportamientoGeneralInteresesPeculiaresChanged(
-      bool value) {
+      bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2361,7 +2374,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
 
 // 🔹 Método para actualizar `interesPorInteraccion`
   void onHabitosPersonalesComportamientoGeneralInteresPorInteraccionChanged(
-      bool value) {
+      bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2389,7 +2402,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
   // 🔹 Método para actualizar `mayores`
-  void onHabitosPersonalesAspectosSocializacionMayoresChanged(bool value) {
+  void onHabitosPersonalesAspectosSocializacionMayoresChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2417,7 +2430,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `menores`
-  void onHabitosPersonalesAspectosSocializacionMenoresChanged(bool value) {
+  void onHabitosPersonalesAspectosSocializacionMenoresChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2445,7 +2458,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `todos`
-  void onHabitosPersonalesAspectosSocializacionTodosChanged(bool value) {
+  void onHabitosPersonalesAspectosSocializacionTodosChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2474,7 +2487,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
 
 // 🔹 Método para actualizar `socializacionConFamilia`
   void onHabitosPersonalesAspectosSocializacionSocializacionConFamiliaChanged(
-      bool value) {
+      bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2504,7 +2517,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
 // 🔹 Método para actualizar `reaccionConPersonasExtrañas`
   void
       onHabitosPersonalesAspectosSocializacionReaccionConPersonasExtranasChanged(
-          bool value) {
+          bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2533,7 +2546,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
 
 // 🔹 Método para actualizar `lograConcentrarse5Min`
   void onHabitosPersonalesAspectosSocializacionLograConcentrarse5MinChanged(
-      bool value) {
+      bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2562,7 +2575,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
 
 // 🔹 Método para actualizar `reconocePartesDelCuerpo`
   void onHabitosPersonalesAspectosSocializacionReconocePartesDelCuerpoChanged(
-      bool value) {
+      bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2591,7 +2604,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
 
 // 🔹 Método para actualizar `asociaObjetos`
   void onHabitosPersonalesAspectosSocializacionAsociaObjetosChanged(
-      bool value) {
+      bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2620,7 +2633,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
 
 // 🔹 Método para actualizar `reconoceASusFamiliares`
   void onHabitosPersonalesAspectosSocializacionReconoceASusFamiliaresChanged(
-      bool value) {
+      bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2649,7 +2662,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
 
 // 🔹 Método para actualizar `reconoceColoresBasicos`
   void onHabitosPersonalesAspectosSocializacionReconoceColoresBasicosChanged(
-      bool value) {
+      bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2677,7 +2690,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
   // 🔹 Método para actualizar `nuclear`
-  void onHabitosPersonalesDatosFamiliaresNuclearChanged(bool value) {
+  void onHabitosPersonalesDatosFamiliaresNuclearChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2701,7 +2714,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `monoParental`
-  void onHabitosPersonalesDatosFamiliaresMonoParentalChanged(bool value) {
+  void onHabitosPersonalesDatosFamiliaresMonoParentalChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2725,7 +2738,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `funcional`
-  void onHabitosPersonalesDatosFamiliaresFuncionalChanged(bool value) {
+  void onHabitosPersonalesDatosFamiliaresFuncionalChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2749,7 +2762,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `reconstituida`
-  void onHabitosPersonalesDatosFamiliaresReconstituidaChanged(bool value) {
+  void onHabitosPersonalesDatosFamiliaresReconstituidaChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2773,7 +2786,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `disfuncional`
-  void onHabitosPersonalesDatosFamiliaresDisfuncionalChanged(bool value) {
+  void onHabitosPersonalesDatosFamiliaresDisfuncionalChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2797,7 +2810,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `extensa`
-  void onHabitosPersonalesDatosFamiliaresExtensaChanged(bool value) {
+  void onHabitosPersonalesDatosFamiliaresExtensaChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2837,7 +2850,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
   // 🔹 Método para actualizar `vista`
-  void onHabitosPersonalesIntegracionSensorialVistaChanged(bool value) {
+  void onHabitosPersonalesIntegracionSensorialVistaChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2865,7 +2878,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `oido`
-  void onHabitosPersonalesIntegracionSensorialOidoChanged(bool value) {
+  void onHabitosPersonalesIntegracionSensorialOidoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2893,7 +2906,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `tacto`
-  void onHabitosPersonalesIntegracionSensorialTactoChanged(bool value) {
+  void onHabitosPersonalesIntegracionSensorialTactoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:
@@ -2921,7 +2934,7 @@ void onFechaEntrevistaChanged(DateTime fecha) {
   }
 
 // 🔹 Método para actualizar `gustoYolfato`
-  void onHabitosPersonalesIntegracionSensorialGustoYolfatoChanged(bool value) {
+  void onHabitosPersonalesIntegracionSensorialGustoYolfatoChanged(bool? value) {
     state = state.copyWith(
       createHcGeneral: state.createHcGeneral.copyWith(
         antecedentesPerinatales:

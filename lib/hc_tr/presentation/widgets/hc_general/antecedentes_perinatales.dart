@@ -18,6 +18,7 @@ class _AntecedentesPerinatalesWidgetState
   late TextEditingController tallaController;
   late TextEditingController perimetroCefalicoController;
   late TextEditingController apgarController;
+  late TextEditingController observacionesAdicionalesController;
 
   @override
   void initState() {
@@ -28,6 +29,7 @@ class _AntecedentesPerinatalesWidgetState
     tallaController = TextEditingController();
     perimetroCefalicoController = TextEditingController();
     apgarController = TextEditingController();
+    observacionesAdicionalesController = TextEditingController();
   }
 
   @override
@@ -38,6 +40,7 @@ class _AntecedentesPerinatalesWidgetState
     tallaController.dispose();
     perimetroCefalicoController.dispose();
     apgarController.dispose();
+    observacionesAdicionalesController.dispose();
     super.dispose();
   }
 
@@ -58,6 +61,8 @@ class _AntecedentesPerinatalesWidgetState
         .antecedentesPerinatales.alNacerPresento.perimetroCefalico;
     apgarController.text =
         hcState.createHcGeneral.antecedentesPerinatales.alNacerPresento.apgar;
+    observacionesAdicionalesController.text =
+        hcState.createHcGeneral.antecedentesPerinatales.observaciones;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,9 +124,11 @@ class _AntecedentesPerinatalesWidgetState
           title: "Al nacer necesito:",
           options: {
             "Oxígeno": hcState.createHcGeneral.antecedentesPerinatales
-                .alNacerNecesito.oxigeno,
+                    .alNacerNecesito.oxigeno ??
+                false,
             "Incubadora": hcState.createHcGeneral.antecedentesPerinatales
-                .alNacerNecesito.incubadora,
+                    .alNacerNecesito.incubadora ??
+                false,
           },
           onChanged: {
             "Oxígeno": hcNotifier.onAlNacerNecesitoOxigenoChanged,
@@ -138,18 +145,23 @@ class _AntecedentesPerinatalesWidgetState
           title: "Al nacer presentó:",
           options: {
             "Cianosis": hcState.createHcGeneral.antecedentesPerinatales
-                .alNacerPresento.cianosis,
+                    .alNacerPresento.cianosis ??
+                false,
             "Ictericia": hcState.createHcGeneral.antecedentesPerinatales
-                .alNacerPresento.ictericia,
+                    .alNacerPresento.ictericia ??
+                false,
             "Malformaciones": hcState.createHcGeneral.antecedentesPerinatales
-                .alNacerPresento.malformaciones,
+                    .alNacerPresento.malformaciones ??
+                false,
             "Circulación del cordón en el cuello": hcState
-                .createHcGeneral
-                .antecedentesPerinatales
-                .alNacerPresento
-                .circulacionDelCordonEnElCuello,
+                    .createHcGeneral
+                    .antecedentesPerinatales
+                    .alNacerPresento
+                    .circulacionDelCordonEnElCuello ??
+                false,
             "Sufrimiento fetal": hcState.createHcGeneral.antecedentesPerinatales
-                .alNacerPresento.sufrimientoFetal,
+                    .alNacerPresento.sufrimientoFetal ??
+                false,
           },
           onChanged: {
             "Cianosis": hcNotifier.onAlNacerPresentoCianosisChanged,
@@ -185,8 +197,7 @@ class _AntecedentesPerinatalesWidgetState
         _buildSection('Observaciones'),
         _buildMultilineFormField(
             label: 'Observaciones adicionales',
-            initialValue:
-                hcState.createHcGeneral.antecedentesPerinatales.observaciones,
+            controller: observacionesAdicionalesController,
             onChanged: hcNotifier.onObservacionesChanged),
       ],
     );
@@ -232,15 +243,15 @@ class _AntecedentesPerinatalesWidgetState
   // 🔹 Campo de texto multilínea conectado al estado
   Widget _buildMultilineFormField({
     required String label,
-    required String initialValue,
+    required TextEditingController controller,
     required Function(String) onChanged,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
-        initialValue: initialValue,
+        controller: controller,
         onChanged: onChanged,
-        maxLines: 5,
+        maxLines: 5, // Permite múltiples líneas para respuestas detalladas
         decoration: InputDecoration(
           labelText: label,
           filled: true,
@@ -300,8 +311,8 @@ class _AntecedentesPerinatalesWidgetState
   Widget _buildRadioButtonGroupBool({
     required String title,
     required List<String> options,
-    required bool selectedValue,
-    required Function(bool) onChanged,
+    required bool? selectedValue, // Cambiar a bool?
+    required Function(bool?) onChanged, // Cambiar a bool?
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,10 +332,13 @@ class _AntecedentesPerinatalesWidgetState
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Radio(
-                  value: option == "SI",
-                  groupValue: selectedValue,
-                  onChanged: (value) => onChanged(value as bool),
+                Radio<bool?>(
+                  value: option == "SI" ? true : false, // Convertir a bool
+                  groupValue: selectedValue, // Puede ser null
+                  onChanged: (bool? value) {
+                    onChanged(
+                        value); // Pasar el valor seleccionado (puede ser null)
+                  },
                 ),
                 Text(option),
               ],

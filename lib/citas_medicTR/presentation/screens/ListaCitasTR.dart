@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:h_c_1/auth/presentation/providers/auth_provider.dart';
 import 'package:h_c_1/citas_medicTR/presentation/providers/appointments_provider.dart';
 import 'package:h_c_1/citas_medicTR/presentation/screens/DetalleCitaTR.dart';
 import 'package:h_c_1/citas_medicTR/presentation/screens/HorarioCitasTR.dart';
@@ -12,9 +13,9 @@ class ListaCitasTR extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appointmentState = ref.watch(appointmentProvider);
-
+    final user = ref.watch(authProvider).user;
     return Scaffold(
-      appBar: AppBar(title: Text('Área de Terapias')),
+      appBar: AppBar(title: Text('Área de ${user!.role}')),
       body: Column(
         children: [
           const SizedBox(height: 20),
@@ -27,6 +28,14 @@ class ListaCitasTR extends ConsumerWidget {
             navigationRoute: (context) => HorarioCitasTr(),
             buttonText: 'HORARIO',
           ),
+          const SizedBox(height: 20),
+          IconButton(
+              onPressed: () {
+                ref
+                    .read(appointmentProvider.notifier)
+                    .listarCitas(estado: 'Pendiente');
+              },
+              icon: Icon(Icons.refresh)),
           Divider(),
           IndicacionTrWidget(),
           Divider(),

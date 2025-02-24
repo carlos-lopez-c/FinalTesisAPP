@@ -1,16 +1,16 @@
 class ReflejosPrimitivos {
-  bool palmar;
-  bool moro;
-  bool presion;
-  bool deBusqueda;
-  bool banbiski;
+  bool? palmar;
+  bool? moro;
+  bool? presion;
+  bool? deBusqueda;
+  bool? banbiski;
 
   ReflejosPrimitivos({
-    required this.palmar,
-    required this.moro,
-    required this.presion,
-    required this.deBusqueda,
-    required this.banbiski,
+    this.palmar,
+    this.moro,
+    this.presion,
+    this.deBusqueda,
+    this.banbiski,
   });
 
   ReflejosPrimitivos copyWith({

@@ -16,78 +16,98 @@ class AntecedentesPrenatalesWidget extends ConsumerWidget {
         _buildSection('4.1.- ANTECEDENTES PRENATALES'),
         _buildCheckboxList(
           title: 'Deseado / Planificado',
-          value: hcState.createHcGeneral.antecedentesPersonales.deseado,
+          value:
+              hcState.createHcGeneral.antecedentesPersonales.deseado ?? false,
           onChanged: hcNotifier.onDeseadoChanged,
         ),
         _buildCheckboxList(
           title: 'Automedicación',
-          value: hcState.createHcGeneral.antecedentesPersonales.automedicacion,
+          value:
+              hcState.createHcGeneral.antecedentesPersonales.automedicacion ??
+                  false,
           onChanged: hcNotifier.onAutomedicacionChanged,
         ),
         _buildCheckboxList(
           title: 'Depresión',
-          value: hcState.createHcGeneral.antecedentesPersonales.depresion,
+          value:
+              hcState.createHcGeneral.antecedentesPersonales.depresion ?? false,
           onChanged: hcNotifier.onDepresionChanged,
         ),
         _buildCheckboxList(
           title: 'Estrés',
-          value: hcState.createHcGeneral.antecedentesPersonales.estres,
+          value: hcState.createHcGeneral.antecedentesPersonales.estres ?? false,
           onChanged: hcNotifier.onEstresChanged,
         ),
         _buildCheckboxList(
           title: 'Ansiedad',
-          value: hcState.createHcGeneral.antecedentesPersonales.ansiedad,
+          value:
+              hcState.createHcGeneral.antecedentesPersonales.ansiedad ?? false,
           onChanged: hcNotifier.onAnsiedadChanged,
         ),
         _buildCheckboxList(
           title: 'Traumatismo',
-          value: hcState.createHcGeneral.antecedentesPersonales.traumatismo,
+          value: hcState.createHcGeneral.antecedentesPersonales.traumatismo ??
+              false,
           onChanged: hcNotifier.onTraumatismoChanged,
         ),
         _buildCheckboxList(
           title: 'Radiaciones',
-          value: hcState.createHcGeneral.antecedentesPersonales.radiaciones,
+          value: hcState.createHcGeneral.antecedentesPersonales.radiaciones ??
+              false,
           onChanged: hcNotifier.onRadiacionesChanged,
         ),
         _buildCheckboxList(
           title: 'Medicina',
-          value: hcState.createHcGeneral.antecedentesPersonales.medicina,
+          value:
+              hcState.createHcGeneral.antecedentesPersonales.medicina ?? false,
           onChanged: hcNotifier.onMedicinaChanged,
         ),
         _buildCheckboxList(
           title: 'Riesgos de aborto',
-          value: hcState.createHcGeneral.antecedentesPersonales.riesgoDeAborto,
+          value:
+              hcState.createHcGeneral.antecedentesPersonales.riesgoDeAborto ??
+                  false,
           onChanged: hcNotifier.onRiesgoDeAbortoChanged,
         ),
         _buildCheckboxList(
           title: 'Maltrato físico',
-          value: hcState.createHcGeneral.antecedentesPersonales.maltratoFisico,
+          value:
+              hcState.createHcGeneral.antecedentesPersonales.maltratoFisico ??
+                  false,
           onChanged: hcNotifier.onMaltratoFisicoChanged,
         ),
         _buildCheckboxList(
           title: 'Consumo de drogas',
-          value: hcState.createHcGeneral.antecedentesPersonales.consumoDeDrogas,
+          value:
+              hcState.createHcGeneral.antecedentesPersonales.consumoDeDrogas ??
+                  false,
           onChanged: hcNotifier.onConsumoDeDrogasChanged,
         ),
         _buildCheckboxList(
           title: 'Consumo de alcohol',
           value:
-              hcState.createHcGeneral.antecedentesPersonales.consumoDeAlcohol,
+              hcState.createHcGeneral.antecedentesPersonales.consumoDeAlcohol ??
+                  false,
           onChanged: hcNotifier.onConsumoDeAlcoholChanged,
         ),
         _buildCheckboxList(
           title: 'Consumo de tabaco',
-          value: hcState.createHcGeneral.antecedentesPersonales.consumoDeTabaco,
+          value:
+              hcState.createHcGeneral.antecedentesPersonales.consumoDeTabaco ??
+                  false,
           onChanged: hcNotifier.onConsumoDeTabacoChanged,
         ),
         _buildCheckboxList(
           title: 'Hipertensión',
-          value: hcState.createHcGeneral.antecedentesPersonales.hipertension,
+          value: hcState.createHcGeneral.antecedentesPersonales.hipertension ??
+              false,
           onChanged: hcNotifier.onHipertensionChanged,
         ),
         _buildCheckboxList(
           title: 'Dieta balanceada',
-          value: hcState.createHcGeneral.antecedentesPersonales.dietaBalanceada,
+          value:
+              hcState.createHcGeneral.antecedentesPersonales.dietaBalanceada ??
+                  false,
           onChanged: hcNotifier.onDietaBalanceadaChanged,
         ),
         const Divider(),

@@ -1,88 +1,88 @@
 class DesarrolloMotorFino {
-  bool pinzaDigital;
-  bool garabateo;
-  bool sostenerObjetos;
-  bool problemasAlimenticios;
-  bool garabato;
-  bool ticsMotores;
-  bool ticsVocales;
-  bool conductasProblematicas;
-  bool sonrisaSocial;
-  bool movimientosEstereotipados;
-  bool manipulaPermanentementeUnObjeto;
-  bool balanceos;
-  bool juegoRepetitivo;
-  bool tendenciaARutinas;
-  bool caminaSinSentido;
-  bool problemaDeSueno;
-  bool reiteraTemasFavoritos;
-  bool caminaEnPuntitas;
-  bool irritabilidad;
-  bool manipulaPermanentementeAlgo;
-  bool iniciaYMantieneConversaciones;
-  bool ecolalia;
-  bool conocimientoDeAlgunTema;
-  bool lenguajeLiteral;
-  bool miraALosOjos;
-  bool otrosSistemasDeComunicacion;
-  bool selectivoEnLaComida;
-  bool intencionComunicativa;
-  bool interesRestringido;
-  bool angustiaSinCausa;
-  bool preferenciaPorAlgunAlimento;
-  bool sonidosExtranos;
-  bool hablaComoAdulto;
-  bool frioParaHablar;
-  bool pensamientosObsesivos;
-  bool cambioDeCaracterExtremo;
-  bool ingenuo;
-  bool torpezaMotriz;
-  bool frioEmocional;
-  bool pocosAmigos;
-  bool juegoImaginativo;
+  bool? pinzaDigital;
+  bool? garabateo;
+  bool? sostenerObjetos;
+  bool? problemasAlimenticios;
+  bool? garabato;
+  bool? ticsMotores;
+  bool? ticsVocales;
+  bool? conductasProblematicas;
+  bool? sonrisaSocial;
+  bool? movimientosEstereotipados;
+  bool? manipulaPermanentementeUnObjeto;
+  bool? balanceos;
+  bool? juegoRepetitivo;
+  bool? tendenciaARutinas;
+  bool? caminaSinSentido;
+  bool? problemaDeSueno;
+  bool? reiteraTemasFavoritos;
+  bool? caminaEnPuntitas;
+  bool? irritabilidad;
+  bool? manipulaPermanentementeAlgo;
+  bool? iniciaYMantieneConversaciones;
+  bool? ecolalia;
+  bool? conocimientoDeAlgunTema;
+  bool? lenguajeLiteral;
+  bool? miraALosOjos;
+  bool? otrosSistemasDeComunicacion;
+  bool? selectivoEnLaComida;
+  bool? intencionComunicativa;
+  bool? interesRestringido;
+  bool? angustiaSinCausa;
+  bool? preferenciaPorAlgunAlimento;
+  bool? sonidosExtranos;
+  bool? hablaComoAdulto;
+  bool? frioParaHablar;
+  bool? pensamientosObsesivos;
+  bool? cambioDeCaracterExtremo;
+  bool? ingenuo;
+  bool? torpezaMotriz;
+  bool? frioEmocional;
+  bool? pocosAmigos;
+  bool? juegoImaginativo;
 
   DesarrolloMotorFino({
-    required this.pinzaDigital,
-    required this.garabateo,
-    required this.sostenerObjetos,
-    required this.problemasAlimenticios,
-    required this.garabato,
-    required this.ticsMotores,
-    required this.ticsVocales,
-    required this.conductasProblematicas,
-    required this.sonrisaSocial,
-    required this.movimientosEstereotipados,
-    required this.manipulaPermanentementeUnObjeto,
-    required this.balanceos,
-    required this.juegoRepetitivo,
-    required this.tendenciaARutinas,
-    required this.caminaSinSentido,
-    required this.problemaDeSueno,
-    required this.reiteraTemasFavoritos,
-    required this.caminaEnPuntitas,
-    required this.irritabilidad,
-    required this.manipulaPermanentementeAlgo,
-    required this.iniciaYMantieneConversaciones,
-    required this.ecolalia,
-    required this.conocimientoDeAlgunTema,
-    required this.lenguajeLiteral,
-    required this.miraALosOjos,
-    required this.otrosSistemasDeComunicacion,
-    required this.selectivoEnLaComida,
-    required this.intencionComunicativa,
-    required this.interesRestringido,
-    required this.angustiaSinCausa,
-    required this.preferenciaPorAlgunAlimento,
-    required this.sonidosExtranos,
-    required this.hablaComoAdulto,
-    required this.frioParaHablar,
-    required this.pensamientosObsesivos,
-    required this.cambioDeCaracterExtremo,
-    required this.ingenuo,
-    required this.torpezaMotriz,
-    required this.frioEmocional,
-    required this.pocosAmigos,
-    required this.juegoImaginativo,
+    this.pinzaDigital,
+    this.garabateo,
+    this.sostenerObjetos,
+    this.problemasAlimenticios,
+    this.garabato,
+    this.ticsMotores,
+    this.ticsVocales,
+    this.conductasProblematicas,
+    this.sonrisaSocial,
+    this.movimientosEstereotipados,
+    this.manipulaPermanentementeUnObjeto,
+    this.balanceos,
+    this.juegoRepetitivo,
+    this.tendenciaARutinas,
+    this.caminaSinSentido,
+    this.problemaDeSueno,
+    this.reiteraTemasFavoritos,
+    this.caminaEnPuntitas,
+    this.irritabilidad,
+    this.manipulaPermanentementeAlgo,
+    this.iniciaYMantieneConversaciones,
+    this.ecolalia,
+    this.conocimientoDeAlgunTema,
+    this.lenguajeLiteral,
+    this.miraALosOjos,
+    this.otrosSistemasDeComunicacion,
+    this.selectivoEnLaComida,
+    this.intencionComunicativa,
+    this.interesRestringido,
+    this.angustiaSinCausa,
+    this.preferenciaPorAlgunAlimento,
+    this.sonidosExtranos,
+    this.hablaComoAdulto,
+    this.frioParaHablar,
+    this.pensamientosObsesivos,
+    this.cambioDeCaracterExtremo,
+    this.ingenuo,
+    this.torpezaMotriz,
+    this.frioEmocional,
+    this.pocosAmigos,
+    this.juegoImaginativo,
   });
 
   DesarrolloMotorFino copyWith({

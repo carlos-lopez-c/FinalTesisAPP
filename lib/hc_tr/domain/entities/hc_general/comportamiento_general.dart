@@ -1,22 +1,22 @@
 class ComportamientoGeneral {
-  bool agresivo;
-  bool pasivo;
-  bool destructor;
-  bool sociable;
-  bool hipercinetico;
-  bool empatia;
-  bool interesesPeculiares;
-  bool interesPorInteraccion;
+  bool? agresivo;
+  bool? pasivo;
+  bool? destructor;
+  bool? sociable;
+  bool? hipercinetico;
+  bool? empatia;
+  bool? interesesPeculiares;
+  bool? interesPorInteraccion;
 
   ComportamientoGeneral({
-    required this.agresivo,
-    required this.pasivo,
-    required this.destructor,
-    required this.sociable,
-    required this.hipercinetico,
-    required this.empatia,
-    required this.interesesPeculiares,
-    required this.interesPorInteraccion,
+    this.agresivo,
+    this.pasivo,
+    this.destructor,
+    this.sociable,
+    this.hipercinetico,
+    this.empatia,
+    this.interesesPeculiares,
+    this.interesPorInteraccion,
   });
 
   ComportamientoGeneral copyWith({

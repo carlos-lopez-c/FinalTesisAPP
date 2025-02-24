@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_c_1/hc_ps/domain/entities/hc_ps_adult/create_hc_adult.dart';
+import 'package:h_c_1/hc_ps/presentation/providers/hc_provider.dart';
 import 'package:h_c_1/patient/domain/repositories/patient_repository.dart';
 import 'package:h_c_1/patient/infrastructure/repositories/patient_repository_impl.dart';
 
@@ -13,9 +14,9 @@ final initialPsAdult = CreateHcPsAdult(
   desencadenantesMotivoConsulta: '',
   direccion: '',
   estructuraFamiliar: '',
-  fechaCreacion: DateTime.now(),
-  fechaEvalucion: DateTime.now(),
-  fechaNacimiento: DateTime.now(),
+  fechaCreacion: '',
+  fechaEvalucion: '',
+  fechaNacimiento: '',
   impresionDiagnostica: '',
   institucion: '',
   motivoConsulta: '',
@@ -32,9 +33,13 @@ class HcFormAdultState {
   final String errorMessage;
   final CreateHcPsAdult createHcPsAdult;
   final String cedula;
+  final String successMessage;
+  final String tipo;
 
   HcFormAdultState({
     this.loading = false,
+    this.successMessage = '',
+    this.tipo = '',
     this.errorMessage = '',
     required this.createHcPsAdult,
     this.cedula = '',
@@ -43,11 +48,15 @@ class HcFormAdultState {
   HcFormAdultState copyWith({
     bool? loading,
     String? errorMessage,
+    String? successMessage,
+    String? tipo,
     CreateHcPsAdult? createHcPsAdult,
     String? cedula,
   }) {
     return HcFormAdultState(
       loading: loading ?? this.loading,
+      successMessage: successMessage ?? this.successMessage,
+      tipo: tipo ?? this.tipo,
       errorMessage: errorMessage ?? this.errorMessage,
       createHcPsAdult: createHcPsAdult ?? this.createHcPsAdult,
       cedula: cedula ?? this.cedula,
@@ -60,20 +69,82 @@ final hcPsAdultFormProvider =
     StateNotifierProvider.autoDispose<HcPsAdultFormNotifier, HcFormAdultState>(
   (ref) {
     final patientRepo = PatientRepositoryImpl();
-    return HcPsAdultFormNotifier(patientRepository: patientRepo);
+    final onCallbackHcPsAdult = ref.read(hcProvider.notifier).createHcPsAdult;
+    final onCallbackSearchHcPsAdult =
+        ref.read(hcProvider.notifier).getHcPsAdult;
+    return HcPsAdultFormNotifier(
+        patientRepository: patientRepo,
+        onCallbackHcPsAdult: onCallbackHcPsAdult,
+        onCallbackSearchHcPsAdult: onCallbackSearchHcPsAdult);
   },
 );
 
 class HcPsAdultFormNotifier extends StateNotifier<HcFormAdultState> {
   final PatientRepository patientRepository;
+  final Function(CreateHcPsAdult) onCallbackHcPsAdult;
+  final Function(String) onCallbackSearchHcPsAdult;
 
-  HcPsAdultFormNotifier({required this.patientRepository})
+  HcPsAdultFormNotifier(
+      {required this.patientRepository,
+      required this.onCallbackSearchHcPsAdult,
+      required this.onCallbackHcPsAdult})
       : super(HcFormAdultState(createHcPsAdult: initialPsAdult));
 
   // 🔹 Métodos para actualizar los campos
   void setPatientId(String patientId) {
     state = state.copyWith(
         createHcPsAdult: state.createHcPsAdult.copyWith(patientId: patientId));
+  }
+
+  void onCedulaChanged(String value) {
+    state = state.copyWith(cedula: value);
+  }
+
+  void onTipoChanged(String value) {
+    state = state.copyWith(tipo: value);
+  }
+
+  Future<void> onCreateHcPsAdult() async {
+    try {
+      state = state.copyWith(loading: true);
+      // Asegúrate de que 'fechaEntrevista' esté en el formato correcto
+
+      await onCallbackHcPsAdult(state.createHcPsAdult);
+
+      // Limpiar campos
+      ;
+      state = state.copyWith(
+          createHcPsAdult: initialPsAdult,
+          successMessage: 'Historia clínica creada con éxito',
+          errorMessage: '');
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: e.toString() ?? 'Error al crear historia clínica',
+        successMessage: '',
+      );
+      print('🔴 Error al crear historia clínica: $e');
+    } finally {
+      state = state.copyWith(loading: false);
+    }
+  }
+
+  Future<void> onSearchHcPsAdult(String cedula) async {
+    try {
+      state = state.copyWith(loading: true);
+      final hcGeneral = await onCallbackSearchHcPsAdult(cedula);
+      print("Aqui tambien llega ${hcGeneral?.toJson()}");
+      state = state.copyWith(
+        createHcPsAdult: hcGeneral,
+        errorMessage: '',
+        successMessage: 'Historia clínica encontrada',
+      );
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: e.toString() ?? 'Error al obtener historia clínica',
+      );
+    } finally {
+      state = state.copyWith(loading: false);
+    }
   }
 
   void setAntecedenteFamiliares(String value) {
@@ -115,17 +186,17 @@ class HcPsAdultFormNotifier extends StateNotifier<HcFormAdultState> {
             state.createHcPsAdult.copyWith(estructuraFamiliar: value));
   }
 
-  void setFechaCreacion(DateTime value) {
+  void setFechaCreacion(String value) {
     state = state.copyWith(
         createHcPsAdult: state.createHcPsAdult.copyWith(fechaCreacion: value));
   }
 
-  void setFechaEvaluacion(DateTime value) {
+  void setFechaEvaluacion(String value) {
     state = state.copyWith(
         createHcPsAdult: state.createHcPsAdult.copyWith(fechaEvalucion: value));
   }
 
-  void setFechaNacimiento(DateTime value) {
+  void setFechaNacimiento(String value) {
     state = state.copyWith(
         createHcPsAdult:
             state.createHcPsAdult.copyWith(fechaNacimiento: value));
@@ -188,7 +259,8 @@ class HcPsAdultFormNotifier extends StateNotifier<HcFormAdultState> {
         createHcPsAdult: state.createHcPsAdult.copyWith(
           patientId: paciente.id,
           nombreCompleto: '${paciente.firstname} ${paciente.lastname}',
-          fechaNacimiento: paciente.birthdate,
+          fechaNacimiento:
+              '${paciente.birthdate.year}-${paciente.birthdate.month}-${paciente.birthdate.day}',
         ),
       );
     } catch (e) {

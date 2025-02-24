@@ -81,8 +81,8 @@ class _HcTrAnamAdultState extends ConsumerState<HcTrAnamAdult> {
     final hcState = ref.watch(hcAdultFormProvider);
     final hcNotifier = ref.read(hcAdultFormProvider.notifier);
 
-    fechaEntrevistaController.text = hcState.createHcAdult.fechaEvalucion;
-    nombreCompletoController.text = hcState.createHcAdult.nombreCompleto;
+    fechaEntrevistaController.text = hcState.createHcAdult.fechaEvalucion!;
+    nombreCompletoController.text = hcState.createHcAdult.nombreCompleto!;
     quePreparaController.text =
         hcState.createHcAdult.independenciaAutonomia.quePrepara;
     quePorcionConsumeController.text =
@@ -126,7 +126,13 @@ class _HcTrAnamAdultState extends ConsumerState<HcTrAnamAdult> {
           children: [
             headerTRWidget(textoDinamico: 'ANAMNESIS ALIMENTARIA ADULTOS'),
             const SizedBox(height: 20),
-            NavigationButton(navigationRoute: (context) => SearchHcTrAa()),
+            Center(
+                child: _buildRadioButtonGroup(
+              title: '',
+              options: ['Nuevo', 'Buscar'],
+              selectedValue: hcState.tipo,
+              onChanged: hcNotifier.onTipoChanged,
+            )),
             const SizedBox(height: 20),
             Row(
               children: [
@@ -140,7 +146,11 @@ class _HcTrAnamAdultState extends ConsumerState<HcTrAnamAdult> {
                 const SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: () {
-                    hcNotifier.getPacienteByDni(hcState.cedula);
+                    if (hcState.tipo == 'Nuevo') {
+                      hcNotifier.getPacienteByDni(hcState.cedula);
+                    } else {
+                      hcNotifier.onSearchHcAdult(hcState.cedula);
+                    }
                   },
                   child: const Text('Buscar'),
                 ),
@@ -161,7 +171,7 @@ class _HcTrAnamAdultState extends ConsumerState<HcTrAnamAdult> {
             _buildRadioButtonGroup(
               title: "Lateralidad:",
               options: ["Diestro", "Zurdo", "Ambidiestro"],
-              selectedValue: hcState.createHcAdult.lateralidad,
+              selectedValue: hcState.createHcAdult.lateralidad ?? '',
               onChanged: hcNotifier.setLateralidad,
             ),
             Divider(),

@@ -8,22 +8,21 @@ import 'package:h_c_1/citas_medicTR/presentation/widgets/headerCT_TR.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 
-class HorarioCitasTr extends ConsumerWidget {
-  final DateTime _focusedDay = DateTime.now();
-  final DateTime? _selectedDay = null;
+class HorarioCitasTr extends ConsumerStatefulWidget {
+  @override
+  _HorarioCitasTrState createState() => _HorarioCitasTrState();
+}
 
-  final List<Map<String, dynamic>> citas = List.generate(10, (index) {
-    return {
-      'area': 'Área ${index + 1}',
-      'fecha': DateTime(2025, 1, (index % 9) + 1),
-      'hora': '${9 + index % 12}:00 AM',
-      'estado': index % 2 == 0 ? 'pendiente' : 'aceptado',
-    };
-  });
-
-  bool _isCitaAsignada(DateTime day) {
-    return citas.any((cita) =>
-        isSameDay(cita['fecha'], day) && cita['estado'] == 'pendiente');
+class _HorarioCitasTrState extends ConsumerState<HorarioCitasTr> {
+  @override
+  void initState() {
+    super.initState();
+    // Cargar las citas con estado "Agendado" al iniciar la pantalla
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(appointmentProvider.notifier)
+          .getAppointmentsByStatusAndMedicID("Agendado");
+    });
   }
 
   void _editarCita(BuildContext context, Appointments cita) {
@@ -88,11 +87,12 @@ class HorarioCitasTr extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final appointmentState = ref.watch(appointmentProvider);
     final notifier = ref.read(appointmentProvider.notifier);
 
     final selectedDate = appointmentState.calendarioCitaSeleccionada;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Horario de Citas'),
@@ -121,6 +121,19 @@ class HorarioCitasTr extends ConsumerWidget {
             onDaySelected: (selectedDay, focusedDay) {
               notifier.onDateSelected(selectedDay);
             },
+            eventLoader: (day) {
+              // Verificar si hay citas agendadas para este día
+              return appointmentState.citasAgendadas.where((cita) {
+                try {
+                  // Convertir la fecha de la cita a DateTime
+                  final citaDate =
+                      DateFormat('MMMM d, y', 'en_US').parse(cita.date);
+                  return isSameDay(day, citaDate);
+                } catch (_) {
+                  return false;
+                }
+              }).toList();
+            },
             calendarStyle: CalendarStyle(
               todayDecoration: BoxDecoration(
                 color: Colors.blue,
@@ -130,24 +143,30 @@ class HorarioCitasTr extends ConsumerWidget {
                 color: Colors.orange,
                 shape: BoxShape.circle,
               ),
+              // Estilo para los días con eventos (citas agendadas)
+              markerDecoration: BoxDecoration(
+                color: Colors.green,
+                shape: BoxShape.circle,
+              ),
             ),
             calendarBuilders: CalendarBuilders(
               defaultBuilder: (context, day, focusedDay) {
-                final citasDelDia = appointmentState.citas.where((cita) {
+                // Verificar si hay citas agendadas para este día
+                final citas = appointmentState.citasAgendadas.where((cita) {
                   try {
-                    final citaDate =
-                        DateFormat('MMMM d, y', 'en_US').parse(cita.date);
+                    final citaDate = DateFormat('yyyy-MM-dd').parse(cita.date);
+
                     return isSameDay(day, citaDate);
-                  } catch (_) {
+                  } catch (e) {
+                    print("Error al comparar fechas: $e");
                     return false;
                   }
                 }).toList();
+                // Pintar de verde si hay citas agendadas para este día
+
                 Color? backgroundColor;
-                if (citasDelDia.any((cita) => cita.status == 'Agendado')) {
-                  backgroundColor = Colors.green; // Agendado
-                } else if (citasDelDia
-                    .any((cita) => cita.status == 'Pendiente')) {
-                  backgroundColor = Colors.orange; // Pendiente
+                if (citas.isNotEmpty) {
+                  backgroundColor = Colors.green; // Días con citas agendadas
                 }
                 return Container(
                   margin: const EdgeInsets.all(4),
@@ -171,16 +190,61 @@ class HorarioCitasTr extends ConsumerWidget {
           ),
           Divider(),
           Expanded(
-            child: ListView(
-              children: appointmentState.citas.map((cita) {
-                return ListTile(
-                  leading: Icon(Icons.event_available, color: Colors.green),
-                  title: Text('${cita.specialtyTherapy}'),
-                  subtitle: Text('${cita.date} a las ${cita.appointmentTime}'),
-                  onTap: () => _editarCita(context, cita),
-                );
-              }).toList(),
-            ),
+            child: appointmentState.loading
+                ? Center(
+                    child: CircularProgressIndicator()) // 🔄 Indicador de carga
+                : Column(
+                    children: [
+                      Text(
+                        "Citas para el día seleccionado",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (appointmentState.citasDelDia.isNotEmpty)
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: appointmentState.citasDelDia.length,
+                            itemBuilder: (context, index) {
+                              final cita = appointmentState.citasDelDia[index];
+                              return Card(
+                                margin: EdgeInsets.all(10),
+                                elevation: 5,
+                                child: Padding(
+                                  padding: EdgeInsets.all(10),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Especialidad: ${cita.specialtyTherapy}",
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      Text("Fecha: ${cita.date}"),
+                                      Text("Hora: ${cita.appointmentTime}"),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      if (appointmentState.citasDelDia.isEmpty)
+                        Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Text(
+                            "No hay citas para este día.",
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                                fontStyle: FontStyle.italic),
+                          ),
+                        ),
+                    ],
+                  ),
           ),
         ],
       ),

@@ -1,3 +1,4 @@
+import 'package:h_c_1/hc_ps/domain/entities/hc_ps_adult/create_hc_adult.dart';
 import 'package:h_c_1/hc_tr/domain/datasources/hc_datasource.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_adult/hc_adult_entity.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_general/hc_general_entity.dart';
@@ -28,5 +29,25 @@ class HcRepositoryImpl implements HcRepository {
   @override
   Future<CreateHcGeneral> getHcGeneral(String cedula) {
     return datasource.getHcGeneral(cedula);
+  }
+
+  @override
+  Future<CreateHcAdultEntity> getHcAdult(String cedula) {
+    return datasource.getHcAdult(cedula);
+  }
+
+  @override
+  Future<CreateHcVoice> getHcVoice(String cedula) {
+    return datasource.getHcVoice(cedula);
+  }
+
+  @override
+  Future<CreateHcPsAdult> getHcPsAdult(String cedula) {
+    return datasource.getHcPsAdult(cedula);
+  }
+
+  @override
+  Future<void> createHcPsAdult(CreateHcPsAdult hc) {
+    return datasource.createHcPsAdult(hc);
   }
 }

@@ -1,20 +1,20 @@
 class DesarrolloMotorGrueso {
-  bool controlCefalico;
-  bool gateo;
-  bool marcha;
-  bool sedestacion;
-  bool sincinesias;
-  bool subeBajaGradas;
-  bool rotacionPies;
+  bool? controlCefalico;
+  bool? gateo;
+  bool? marcha;
+  bool? sedestacion;
+  bool? sincinesias;
+  bool? subeBajaGradas;
+  bool? rotacionPies;
 
   DesarrolloMotorGrueso({
-    required this.controlCefalico,
-    required this.gateo,
-    required this.marcha,
-    required this.sedestacion,
-    required this.sincinesias,
-    required this.subeBajaGradas,
-    required this.rotacionPies,
+    this.controlCefalico,
+    this.gateo,
+    this.marcha,
+    this.sedestacion,
+    this.sincinesias,
+    this.subeBajaGradas,
+    this.rotacionPies,
   });
 
   DesarrolloMotorGrueso copyWith({

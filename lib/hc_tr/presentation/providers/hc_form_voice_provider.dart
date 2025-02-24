@@ -13,6 +13,7 @@ import 'package:h_c_1/hc_tr/domain/entities/hc_voice/antecedentes_terapeuticos.d
 import 'package:h_c_1/hc_tr/domain/entities/hc_voice/factores_externos.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_voice/habitos_generales.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_voice/uso_laboral_profesional_de_la_voz.dart';
+import 'package:h_c_1/hc_tr/presentation/providers/hc_provider.dart';
 import 'package:h_c_1/hc_tr/presentation/providers/state/hc_voice_state.dart';
 import 'package:h_c_1/patient/domain/repositories/patient_repository.dart';
 import 'package:h_c_1/patient/infrastructure/repositories/patient_repository_impl.dart';
@@ -45,18 +46,10 @@ final initialVoice = HcVoiceState(
       sintomologia: Sintomologia(
         fonastenia: '',
         fonalgia: '',
-        tensionEnFonacion: false,
-        sensacionDeConstriccionEnElCuello: false,
-        sensacionDeCuerpoExtrano: false,
-        descargaPosterior: false,
-        odinofagia: false,
-        extensionTonalReducida: false,
-        picorLaringeo: false,
       ),
       antecedentesMorbidos: AntecedentesMorbidos(
         problemasDeVozEnSuFamilia: '',
         presentaAlgunaEnfermedad: '',
-        sufreDeEstres: false,
         lasEmocionesDananSuVoz: '',
         medicamentosQueToma: '',
         accidentesOenfermedadesGravesQueHayaTenido: '',
@@ -64,51 +57,12 @@ final initialVoice = HcVoiceState(
         haSidoEntubado: '',
         haConsultadoConOtrosProfesionales: '',
       ),
-      antecedentesTerapeuticos: AntecedentesTerapeuticos(
-        haRecibidoTratamientoMedicoPorProblemasDeLaVoz: false,
-        seHaRealizadoExamenes: false,
-        haRecibidoTratamientoFonoaudiologicoPorProblemasDeVoz: false,
-        haRecibidoTecnicaVocal: false,
-        aplicaLaTecnicaVocal: false,
-      ),
-      abusoVocal: AbusoVocal(
-        toseEnExceso: false,
-        gritaEnExceso: false,
-        hablaMucho: false,
-        hablaRapido: false,
-        imitaVoces: false,
-        hablaConExcesoDeRuido: false,
-        reduceElUsoDeLaVozEnResfrios: false,
-        carraspeaEnExceso: false,
-        hablaForzandoLaVoz: false,
-        hablaAlMismoTiempoQueOtrasPersonas: false,
-        hablaConDientesHombroYCuelloApretados: false,
-      ),
-      malUsoVocal: MalUsoVocal(
-        trataDeHablarConUnTonoMasAgudoOGraveQueElSuyo: false,
-        trataDeHablarConUnVolumenMasDebilOAltoDeLoUsual: false,
-        cantaFueraDeSuRegistro: false,
-        cantaSinVocalizar: false,
-      ),
-      factoresExternos: FactoresExternos(
-        viveEnAmbienteDeFumadores: false,
-        trabajaEnAmbienteRuidoso: false,
-        permaneceEnAmbientesConAireAcondicionado: false,
-        permaneceEnAmbientesConPocaVentilacion: false,
-        seExponeACambiosBruscosDeTemperatura: false,
-      ),
+      antecedentesTerapeuticos: AntecedentesTerapeuticos(),
+      abusoVocal: AbusoVocal(),
+      malUsoVocal: MalUsoVocal(),
+      factoresExternos: FactoresExternos(),
       habitosGenerales: HabitosGenerales(
-        realizaReposoVocal: false,
         cuantoTiempo: '',
-        hablaMuchoTiempoSinBebeLiquido: false,
-        asisteAlOtorrinolaringologo: false,
-        consumeAlimentosMuyCondimentados: false,
-        consumeAlimentosMuyCalientesOMuyFrios: false,
-        consumeAlcohol: false,
-        consumeTabaco: false,
-        consumeCafe: false,
-        consumeDrogas: false,
-        utilizaRopaAjustada: false,
         horasDeSueno: 0,
       ),
       usoLaboralProfesionalDeLaVoz: UsoLaboralProfesionalDeLaVoz(
@@ -129,13 +83,22 @@ final hcVoiceFormProvider =
     StateNotifierProvider.autoDispose<HcVoiceFormNotifier, HcVoiceState>(
   (ref) {
     final patientRepo = PatientRepositoryImpl();
-    return HcVoiceFormNotifier(patientRepository: patientRepo);
+    final getHcVoice = ref.watch(hcProvider.notifier).getHcVoice;
+    final createHcVoice = ref.watch(hcProvider.notifier).createHcVoice;
+    return HcVoiceFormNotifier(
+        patientRepository: patientRepo,
+        getHcVoice: getHcVoice,
+        createHcVoice: createHcVoice);
   },
 );
 
 class HcVoiceFormNotifier extends StateNotifier<HcVoiceState> {
   final PatientRepository patientRepository;
+  final Function(String) getHcVoice;
+  final Function(CreateHcVoice) createHcVoice;
   HcVoiceFormNotifier({
+    required this.getHcVoice,
+    required this.createHcVoice,
     required this.patientRepository,
   }) : super(initialVoice);
 
@@ -143,6 +106,54 @@ class HcVoiceFormNotifier extends StateNotifier<HcVoiceState> {
     state = state.copyWith(
       cedula: value,
     );
+  }
+
+  void onTipoChanged(String value) {
+    state = state.copyWith(
+      tipo: value,
+    );
+  }
+
+  Future<void> onSearchHcVoice(String cedula) async {
+    try {
+      print('🟢 Obteniendo historia clínica....');
+      state = state.copyWith(loading: true);
+      final hcGeneral = await getHcVoice(cedula);
+      print("Aqui tambien llega ${hcGeneral?.toJson()}");
+      state = state.copyWith(
+        createHcVoice: hcGeneral,
+      );
+    } on CustomError catch (e) {
+      state = state.copyWith(
+        errorMessage: e.message ?? 'Error al obtener historia clínica',
+      );
+    } finally {
+      state = state.copyWith(loading: false);
+    }
+  }
+
+  Future<void> onCreateHcGeneral() async {
+    try {
+      state = state.copyWith(loading: true);
+      // Asegúrate de que 'fechaEntrevista' esté en el formato correcto
+      // Verifica si la cadena contiene una 'T'; si no, agrégala junto con la hora
+
+      await createHcVoice(state.createHcVoice);
+
+      // Limpiar campos
+      state = initialVoice;
+      state = state.copyWith(
+          successMessage: 'Historia clínica creada con éxito',
+          errorMessage: '');
+    } on CustomError catch (e) {
+      state = state.copyWith(
+        errorMessage: e.message ?? 'Error al crear historia clínica',
+        successMessage: '',
+      );
+      print('🔴 Error al crear historia clínica: $e');
+    } finally {
+      state = state.copyWith(loading: false);
+    }
   }
 
   void getPacienteByDni(String dni) async {
@@ -153,8 +164,10 @@ class HcVoiceFormNotifier extends StateNotifier<HcVoiceState> {
       state = state.copyWith(
         loading: false,
         createHcVoice: state.createHcVoice.copyWith(
-          nombreCompleto: paciente.firstname,
+          nombreCompleto: '${paciente.firstname} ${paciente.lastname}',
           patientId: paciente.id,
+          fechaNacimiento:
+              '${paciente.birthdate.year}-${paciente.birthdate.month}-${paciente.birthdate.day}',
         ),
       );
     } on CustomError catch (e) {

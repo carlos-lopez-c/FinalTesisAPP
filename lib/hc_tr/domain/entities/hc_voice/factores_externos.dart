@@ -1,16 +1,16 @@
 class FactoresExternos {
-  bool viveEnAmbienteDeFumadores;
-  bool trabajaEnAmbienteRuidoso;
-  bool permaneceEnAmbientesConAireAcondicionado;
-  bool permaneceEnAmbientesConPocaVentilacion;
-  bool seExponeACambiosBruscosDeTemperatura;
+  bool? viveEnAmbienteDeFumadores;
+  bool? trabajaEnAmbienteRuidoso;
+  bool? permaneceEnAmbientesConAireAcondicionado;
+  bool? permaneceEnAmbientesConPocaVentilacion;
+  bool? seExponeACambiosBruscosDeTemperatura;
 
   FactoresExternos({
-    required this.viveEnAmbienteDeFumadores,
-    required this.trabajaEnAmbienteRuidoso,
-    required this.permaneceEnAmbientesConAireAcondicionado,
-    required this.permaneceEnAmbientesConPocaVentilacion,
-    required this.seExponeACambiosBruscosDeTemperatura,
+    this.viveEnAmbienteDeFumadores,
+    this.trabajaEnAmbienteRuidoso,
+    this.permaneceEnAmbientesConAireAcondicionado,
+    this.permaneceEnAmbientesConPocaVentilacion,
+    this.seExponeACambiosBruscosDeTemperatura,
   });
 
   FactoresExternos copyWith({

@@ -10,8 +10,9 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   AppointmentRepositoryImpl({AppointmentDatasource? datasource})
       : datasource = datasource ?? AppointmentDatasourceImpl();
   @override
-  Future<void> createAppointment(CreateAppointments appointment) {
-    return datasource.createAppointment(appointment);
+  Future<void> createAppointment(
+      CreateAppointments appointment, String medicID) {
+    return datasource.createAppointment(appointment, medicID);
   }
 
   @override
@@ -26,12 +27,19 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   }
 
   @override
-  Future<void> updateAppointment(Appointments appointment) {
-    return datasource.updateAppointment(appointment);
+  Future<void> updateAppointment(Appointments appointment, String medicID) {
+    return datasource.updateAppointment(appointment, medicID);
   }
 
   @override
-  Future<List<Appointments>> getAppointmentsByDate(DateTime date) {
-    return datasource.getAppointmentsByDate(date);
+  Future<List<Appointments>> getAppointmentsByDate(
+      DateTime date, String medicID) {
+    return datasource.getAppointmentsByDate(date, medicID);
+  }
+
+  @override
+  Future<List<Appointments>> getAppointmentsByStatusAndMedicID(
+      String status, String medicID) {
+    return datasource.getAppointmentsByStatusAndMedicID(status, medicID);
   }
 }

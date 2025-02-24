@@ -21,11 +21,14 @@ class AntecedentesPostnatalesWidget extends ConsumerWidget {
           options: ["Materna", "Artificial", "Maticación"],
           selectedValues: [
             hcState.createHcGeneral.antecedentesPerinatales
-                .antecedentesPostnatales.alimentacion.materna,
+                    .antecedentesPostnatales.alimentacion.materna ??
+                false,
             hcState.createHcGeneral.antecedentesPerinatales
-                .antecedentesPostnatales.alimentacion.artificial,
+                    .antecedentesPostnatales.alimentacion.artificial ??
+                false,
             hcState.createHcGeneral.antecedentesPerinatales
-                .antecedentesPostnatales.alimentacion.maticacion,
+                    .antecedentesPostnatales.alimentacion.maticacion ??
+                false,
           ],
           onChangedList: [
             hcNotifier.onAlimentacionMaternaChanged,
@@ -48,20 +51,47 @@ class AntecedentesPostnatalesWidget extends ConsumerWidget {
             "Rotación de pies",
           ],
           selectedValues: [
+            hcState
+                    .createHcGeneral
+                    .antecedentesPerinatales
+                    .antecedentesPostnatales
+                    .desarrolloMotorGrueso
+                    .controlCefalico ??
+                false,
             hcState.createHcGeneral.antecedentesPerinatales
-                .antecedentesPostnatales.desarrolloMotorGrueso.controlCefalico,
+                    .antecedentesPostnatales.desarrolloMotorGrueso.gateo ??
+                false,
             hcState.createHcGeneral.antecedentesPerinatales
-                .antecedentesPostnatales.desarrolloMotorGrueso.gateo,
-            hcState.createHcGeneral.antecedentesPerinatales
-                .antecedentesPostnatales.desarrolloMotorGrueso.marcha,
-            hcState.createHcGeneral.antecedentesPerinatales
-                .antecedentesPostnatales.desarrolloMotorGrueso.sedestacion,
-            hcState.createHcGeneral.antecedentesPerinatales
-                .antecedentesPostnatales.desarrolloMotorGrueso.sincinesias,
-            hcState.createHcGeneral.antecedentesPerinatales
-                .antecedentesPostnatales.desarrolloMotorGrueso.subeBajaGradas,
-            hcState.createHcGeneral.antecedentesPerinatales
-                .antecedentesPostnatales.desarrolloMotorGrueso.rotacionPies,
+                    .antecedentesPostnatales.desarrolloMotorGrueso.marcha ??
+                false,
+            hcState
+                    .createHcGeneral
+                    .antecedentesPerinatales
+                    .antecedentesPostnatales
+                    .desarrolloMotorGrueso
+                    .sedestacion ??
+                false,
+            hcState
+                    .createHcGeneral
+                    .antecedentesPerinatales
+                    .antecedentesPostnatales
+                    .desarrolloMotorGrueso
+                    .sincinesias ??
+                false,
+            hcState
+                    .createHcGeneral
+                    .antecedentesPerinatales
+                    .antecedentesPostnatales
+                    .desarrolloMotorGrueso
+                    .subeBajaGradas ??
+                false,
+            hcState
+                    .createHcGeneral
+                    .antecedentesPerinatales
+                    .antecedentesPostnatales
+                    .desarrolloMotorGrueso
+                    .rotacionPies ??
+                false,
           ],
           onChangedList: [
             hcNotifier.onControlCefalicoChanged,
@@ -170,8 +200,8 @@ class AntecedentesPostnatalesWidget extends ConsumerWidget {
   Widget _buildRadioButtonGroupBool({
     required String title,
     required List<String> options,
-    required bool selectedValue,
-    required Function(bool) onChanged,
+    required bool? selectedValue, // Cambiar a bool?
+    required Function(bool?) onChanged, // Cambiar a bool?
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,10 +221,13 @@ class AntecedentesPostnatalesWidget extends ConsumerWidget {
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Radio(
-                  value: option == "SI",
-                  groupValue: selectedValue,
-                  onChanged: (value) => onChanged(value as bool),
+                Radio<bool?>(
+                  value: option == "SI" ? true : false, // Convertir a bool
+                  groupValue: selectedValue, // Puede ser null
+                  onChanged: (bool? value) {
+                    onChanged(
+                        value); // Pasar el valor seleccionado (puede ser null)
+                  },
                 ),
                 Text(option),
               ],

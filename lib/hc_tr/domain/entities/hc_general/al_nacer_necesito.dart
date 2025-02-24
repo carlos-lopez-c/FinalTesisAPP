@@ -1,11 +1,11 @@
 class AlNacerNecesito {
-  bool incubadora;
-  bool oxigeno;
+  bool? incubadora;
+  bool? oxigeno;
   String? tiempo;
 
   AlNacerNecesito({
-    required this.incubadora,
-    required this.oxigeno,
+    this.incubadora,
+    this.oxigeno,
     this.tiempo,
   });
 

@@ -21,14 +21,13 @@ class HomeScreen extends ConsumerWidget {
       );
     }
 
-    final userRoles =
-        authState.user!.userRoles.map((role) => role.role.name).toList();
+    final role = authState.user!.role;
 
     // Verificar el rol del usuario y asignar tabs dinámicamente
     List<Tab> tabs = [];
     List<Widget> tabViews = [];
 
-    if (userRoles.contains('TERAPIA')) {
+    if (role == ('TERAPIA')) {
       tabs = [
         const Tab(icon: Icon(Icons.home), text: "Inicio"),
         const Tab(icon: Icon(Icons.folder), text: "Historias Clínicas"),
@@ -40,7 +39,7 @@ class HomeScreen extends ConsumerWidget {
         Terapiatab(),
         ListaCitasTR(),
       ];
-    } else if (userRoles.contains('PSICOLOGIA')) {
+    } else if (role == ('PSICOLOGIA')) {
       tabs = [
         const Tab(icon: Icon(Icons.home), text: "Inicio"),
         const Tab(icon: Icon(Icons.folder), text: "Historias Clínicas"),
@@ -50,9 +49,15 @@ class HomeScreen extends ConsumerWidget {
       tabViews = [
         HomeContent(),
         PsicologiaTab(),
-        ListaCitas(),
+        ListaCitasTR(),
       ];
-    } 
+    } else {
+      return const Scaffold(
+        body: Center(
+          child: Text('Acceso denegado. No tienes un rol asignado.'),
+        ),
+      );
+    }
 
     return DefaultTabController(
       length: tabs.length,

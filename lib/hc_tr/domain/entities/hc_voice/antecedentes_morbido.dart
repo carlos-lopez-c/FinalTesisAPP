@@ -1,7 +1,7 @@
 class AntecedentesMorbidos {
   String problemasDeVozEnSuFamilia;
   String presentaAlgunaEnfermedad;
-  bool sufreDeEstres;
+  bool? sufreDeEstres;
   String lasEmocionesDananSuVoz;
   String medicamentosQueToma;
   String accidentesOenfermedadesGravesQueHayaTenido;
@@ -12,7 +12,7 @@ class AntecedentesMorbidos {
   AntecedentesMorbidos({
     required this.problemasDeVozEnSuFamilia,
     required this.presentaAlgunaEnfermedad,
-    required this.sufreDeEstres,
+    this.sufreDeEstres,
     required this.lasEmocionesDananSuVoz,
     required this.medicamentosQueToma,
     required this.accidentesOenfermedadesGravesQueHayaTenido,

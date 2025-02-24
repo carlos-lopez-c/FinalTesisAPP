@@ -20,67 +20,52 @@ final initialAdult = HcAdultState(
       fechaEvalucion: '',
       lateralidad: '',
       independenciaAutonomia: IndependenciaAutonomia(
-          decideQueComer: false,
-          preparaSusAlimentos: false,
           quePrepara: '',
           queTipoDeAyudaNecesita: '',
           seAlimentaSoloOConAyuda: ''),
       eficiencia: Eficiencia(
-          consumeLaTotalidadDeLosAlimentos: false,
           cuantoLiquidoConsumeAlDia: '',
           cuantoPesoHaPerdido: 0,
-          haPresentadoPerdidasImportantesDePesoEnElUltimoTiempo: false,
-          manifiestaInteresPorAlimentarse: false,
-          manifiestaRechazoOPreferenciasPorAlgunTipoDeAlimento: false,
           quePorcionConsume: '',
           queTipoDeAlimento: '',
           queTipoDeLiquidoConsumeHabitualmente: ''),
       seguridad: Seguridad(
-          conQueAlimentosLiquidosMedicamentos: '',
-          conQueFrecuencia: '',
-          conQueFrecuenciaPresentoNeumonia: '',
-          haPresentadoNeumonias: false,
-          presentaAlgunaDificultadParaTomarLiquidosDeUnVaso: false,
-          presentaDificultadConSopasOLosGranosPequenosComoArroz: false,
-          seAtoraConSuSaliva: false,
-          seQuedaConRestosDeAlimentosEnLaBocaLuegoDeAlimentarse: false,
-          sienteQueElAlimentoSeVaHaciaSuNariz: false,
-          tieneTosOAhogosCuandoSeAlimentaOConsumeMedicamentos: false),
-      procesoDeAlimentacion: ProcesoDeAlimentacion(
-          creeUstedQueComeMuyRapido: false,
-          seDemoraMasTiempoQueElRestoDeLaFamiliaEnComer: false,
-          sueleRealizarAlgunaOtraActividadMientrasCome: false,
-          cuantoTiempo: '',
-          queOtraActividad: ''),
+        conQueAlimentosLiquidosMedicamentos: '',
+        conQueFrecuencia: '',
+        conQueFrecuenciaPresentoNeumonia: '',
+      ),
+      procesoDeAlimentacion:
+          ProcesoDeAlimentacion(cuantoTiempo: '', queOtraActividad: ''),
       saludBocal: SaludBocal(
-        asisteRegularmenteAControlesDentales: false,
         conQueFrecuenciaAsisteAControlesDentales: '',
         conQueFrecuenciaSeLavaLosDientes: '',
-        cuentaConTodasSusPiezasDentales: false,
-        seRealizaAseoBucalDespuesDeCadaComida: false,
-        tieneAlgunaMolestiaODolorDentroDeSuBoca: false,
-        utilizaPlacaDental: false,
         porQueNoCuentaConTodasSusPiezasDentales: '',
         queMolestiaODolor: '',
       ),
     ),
     loading: false,
-    cedula: '');
+    cedula: '',
+    tipo: 'Nuevo');
 
 final hcAdultFormProvider =
     StateNotifierProvider.autoDispose<HcAdultFormNotifier, HcAdultState>(
   (ref) {
     final patientRepo = PatientRepositoryImpl();
     final createAdultHc = ref.read(hcProvider.notifier).createHcAdult;
+    final getHcAdult = ref.read(hcProvider.notifier).getHcAdult;
     return HcAdultFormNotifier(
-        patientRepository: patientRepo, createAdultHc: createAdultHc);
+        patientRepository: patientRepo,
+        createAdultHc: createAdultHc,
+        getHcAdult: getHcAdult);
   },
 );
 
 class HcAdultFormNotifier extends StateNotifier<HcAdultState> {
   final PatientRepository patientRepository;
   final Function(CreateHcAdultEntity) createAdultHc;
+  final Function(String) getHcAdult;
   HcAdultFormNotifier({
+    required this.getHcAdult,
     required this.createAdultHc,
     required this.patientRepository,
   }) : super(initialAdult);
@@ -113,13 +98,37 @@ class HcAdultFormNotifier extends StateNotifier<HcAdultState> {
     }
   }
 
+  void onTipoChanged(String value) {
+    state = state.copyWith(
+      tipo: value,
+    );
+  }
+
+  Future<void> onSearchHcAdult(String cedula) async {
+    try {
+      print('🟢 Obteniendo historia clínica....');
+      state = state.copyWith(loading: true);
+      final hcGeneral = await getHcAdult(cedula);
+      print("Aqui tambien llega ${hcGeneral?.toJson()}");
+      state = state.copyWith(
+        createHcAdult: hcGeneral,
+      );
+    } on CustomError catch (e) {
+      state = state.copyWith(
+        errorMessage: e.message ?? 'Error al obtener historia clínica',
+      );
+    } finally {
+      state = state.copyWith(loading: false);
+    }
+  }
+
   Future<void> onCreateHcGeneral() async {
     try {
       state = state.copyWith(loading: true);
       // Asegúrate de que 'fechaEntrevista' esté en el formato correcto
       final fechaEvalucion = state.createHcAdult.fechaEvalucion;
       // Verifica si la cadena contiene una 'T'; si no, agrégala junto con la hora
-      final fechaFormatoCorrecto = fechaEvalucion.contains('T')
+      final fechaFormatoCorrecto = fechaEvalucion!.contains('T')
           ? fechaEvalucion
           : '${fechaEvalucion}T00:00:00Z';
       // Analiza la cadena de fecha y obtén el objeto DateTime

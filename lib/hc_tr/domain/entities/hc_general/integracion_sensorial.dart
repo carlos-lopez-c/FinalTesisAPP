@@ -1,14 +1,14 @@
 class IntegracionSensorial {
-  bool vista;
-  bool oido;
-  bool tacto;
-  bool gustoYolfato;
+  bool? vista;
+  bool? oido;
+  bool? tacto;
+  bool? gustoYolfato;
 
   IntegracionSensorial({
-    required this.vista,
-    required this.oido,
-    required this.tacto,
-    required this.gustoYolfato,
+    this.vista,
+    this.oido,
+    this.tacto,
+    this.gustoYolfato,
   });
 
   IntegracionSensorial copyWith({

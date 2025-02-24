@@ -3,35 +3,27 @@ import 'package:h_c_1/auth/domain/entities/user_entities.dart';
 import 'package:h_c_1/auth/domain/repositories/auth_repository.dart';
 import 'package:h_c_1/auth/infrastructure/errors/auth_errors.dart';
 import 'package:h_c_1/auth/infrastructure/repositories/auth_repository_impl.dart';
-import 'package:h_c_1/shared/infrastructure/services/key_value_storage_service.dart';
-import 'package:h_c_1/shared/infrastructure/services/key_value_storage_service_impl.dart';
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final authRepository = AuthRepositoryImpl();
-  final keyValueStorageService = KeyValueStorageServiceImpl();
 
   return AuthNotifier(
-      authRepository: authRepository,
-      keyValueStorageService: keyValueStorageService);
+    authRepository: authRepository,
+  );
 });
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository authRepository;
-  final KeyValueStorageService keyValueStorageService;
 
   AuthNotifier({
     required this.authRepository,
-    required this.keyValueStorageService,
   }) : super(AuthState()) {
     checkAuthStatus();
   }
 
   void checkAuthStatus() async {
-    final token = await keyValueStorageService.getValue<String>('token');
-    if (token == null) return logout();
-
     try {
-      final user = await authRepository.checkAuthStatus(token);
+      final user = await authRepository.checkAuthStatus();
       _setLoggedUser(user);
     } catch (e) {
       logout();
@@ -53,8 +45,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   void _setLoggedUser(User user) async {
-    await keyValueStorageService.setKeyValue('token', user.token);
-
     state = state.copyWith(
       user: user,
       authStatus: AuthStatus.authenticated,
@@ -63,7 +53,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> logout([String? errorMessage]) async {
-    await keyValueStorageService.removeKey('token');
+    await authRepository.logout();
     print(errorMessage);
     state = state.copyWith(
         authStatus: AuthStatus.notAuthenticated,

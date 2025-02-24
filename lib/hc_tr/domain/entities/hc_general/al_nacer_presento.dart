@@ -1,20 +1,20 @@
 class AlNacerPresento {
-  bool cianosis;
-  bool ictericia;
-  bool malformaciones;
-  bool circulacionDelCordonEnElCuello;
-  bool sufrimientoFetal;
+  bool? cianosis;
+  bool? ictericia;
+  bool? malformaciones;
+  bool? circulacionDelCordonEnElCuello;
+  bool? sufrimientoFetal;
   String peso;
   String talla;
   String perimetroCefalico;
   String apgar;
 
   AlNacerPresento({
-    required this.cianosis,
-    required this.ictericia,
-    required this.malformaciones,
-    required this.circulacionDelCordonEnElCuello,
-    required this.sufrimientoFetal,
+    this.cianosis,
+    this.ictericia,
+    this.malformaciones,
+    this.circulacionDelCordonEnElCuello,
+    this.sufrimientoFetal,
     required this.peso,
     required this.talla,
     required this.perimetroCefalico,

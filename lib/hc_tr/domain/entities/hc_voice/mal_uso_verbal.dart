@@ -1,14 +1,14 @@
 class MalUsoVocal {
-  bool trataDeHablarConUnTonoMasAgudoOGraveQueElSuyo;
-  bool trataDeHablarConUnVolumenMasDebilOAltoDeLoUsual;
-  bool cantaFueraDeSuRegistro;
-  bool cantaSinVocalizar;
+  bool? trataDeHablarConUnTonoMasAgudoOGraveQueElSuyo;
+  bool? trataDeHablarConUnVolumenMasDebilOAltoDeLoUsual;
+  bool? cantaFueraDeSuRegistro;
+  bool? cantaSinVocalizar;
 
   MalUsoVocal({
-    required this.trataDeHablarConUnTonoMasAgudoOGraveQueElSuyo,
-    required this.trataDeHablarConUnVolumenMasDebilOAltoDeLoUsual,
-    required this.cantaFueraDeSuRegistro,
-    required this.cantaSinVocalizar,
+    this.trataDeHablarConUnTonoMasAgudoOGraveQueElSuyo,
+    this.trataDeHablarConUnVolumenMasDebilOAltoDeLoUsual,
+    this.cantaFueraDeSuRegistro,
+    this.cantaSinVocalizar,
   });
 
   MalUsoVocal copyWith({

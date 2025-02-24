@@ -81,7 +81,14 @@ class _HcTrAnamAdultState extends ConsumerState<HcTrAnamAdult> {
     final hcState = ref.watch(hcAdultFormProvider);
     final hcNotifier = ref.read(hcAdultFormProvider.notifier);
 
-    fechaEntrevistaController.text = hcState.createHcAdult.fechaEvalucion!;
+    final fechaEvaluacion = hcState.createHcAdult.fechaEvalucion;
+    final fechaFormateada =
+        fechaEvaluacion != null && fechaEvaluacion.isNotEmpty
+            ? fechaEvaluacion.substring(0, 10) // Extraer solo la fecha
+            : '';
+
+    fechaEntrevistaController.text =
+        fechaFormateada; // Usar la fecha formateada
     nombreCompletoController.text = hcState.createHcAdult.nombreCompleto!;
     quePreparaController.text =
         hcState.createHcAdult.independenciaAutonomia.quePrepara;

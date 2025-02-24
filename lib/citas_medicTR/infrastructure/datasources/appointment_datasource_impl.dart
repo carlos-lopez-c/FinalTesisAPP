@@ -4,8 +4,6 @@ import 'package:h_c_1/auth/infrastructure/errors/auth_errors.dart';
 import 'package:h_c_1/citas_medicTR/domain/datasources/appointment_datasource.dart';
 import 'package:h_c_1/citas_medicTR/domain/entities/cita.entity.dart';
 import 'package:h_c_1/citas_medicTR/domain/entities/registerCita.entity.dart';
-import 'package:h_c_1/config/constants/enviroments.dart';
-import 'package:h_c_1/shared/infrastructure/services/key_value_storage_service_impl.dart';
 
 class AppointmentDatasourceImpl implements AppointmentDatasource {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -85,11 +83,15 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
           .where('doctorID', isEqualTo: medicID)
           .get();
 
-      // Mapea los documentos obtenidos a objetos Appointments
-      List<Appointments> appointments = querySnapshot.docs
-          .map((doc) =>
-              Appointments.fromJson(doc.data() as Map<String, dynamic>))
-          .toList();
+      // Mapea los documentos obtenidos a objetos Appointments y agrega el ID del documento
+      List<Appointments> appointments = querySnapshot.docs.map((doc) {
+        // Obtén los datos del documento
+        final data = doc.data() as Map<String, dynamic>;
+        // Crea un objeto Appointments a partir de los datos
+        final appointment = Appointments.fromJson(data);
+        // Asigna el ID del documento al objeto Appointments
+        return appointment.copyWith(id: doc.id);
+      }).toList();
 
       return appointments;
     } catch (e) {
@@ -127,6 +129,23 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
         'doctorID': medicID,
         // Puedes agregar más campos si es necesario
       });
+
+      print("Cita actualizada correctamente en Firestore");
+    } catch (e) {
+      print("Error al actualizar la cita: $e");
+      throw Exception('Error al actualizar la cita');
+    }
+  }
+
+  @override
+  Future<void> updateAppointmentDate(CreateAppointments appointment) async {
+    try {
+      // Actualizar la cita en Firestore
+
+      await _firestore
+          .collection('appointments') // Colección de citas
+          .doc(appointment.id) // ID de la cita
+          .update(appointment.toJson());
 
       print("Cita actualizada correctamente en Firestore");
     } catch (e) {

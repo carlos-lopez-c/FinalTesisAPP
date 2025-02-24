@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_c_1/auth/presentation/providers/auth_provider.dart';
 import 'package:h_c_1/citas_medicTR/domain/entities/cita.entity.dart';
@@ -13,8 +14,8 @@ import 'package:h_c_1/type_therapy/domain/repositories/type_therapy_repository.d
 import 'package:h_c_1/type_therapy/infrastructure/repositories/type_therapy_repository_impl.dart';
 
 // 🔹 Provider del formulario de citas
-final appointmentFormProvider = StateNotifierProvider.autoDispose<
-    AppointmentFormNotifier, AppointmentFormState>(
+final appointmentFormProvider =
+    StateNotifierProvider<AppointmentFormNotifier, AppointmentFormState>(
   (ref) {
     final appointmentRepo = AppointmentRepositoryImpl();
     final patientRepo = PatientRepositoryImpl();
@@ -22,6 +23,7 @@ final appointmentFormProvider = StateNotifierProvider.autoDispose<
     final authState = ref.watch(authProvider);
     final onCallbackAppointment =
         ref.read(appointmentProvider.notifier).crearCita;
+
     return AppointmentFormNotifier(
         onCallbackAppointment: onCallbackAppointment,
         appointmentRepository: appointmentRepo,
@@ -145,6 +147,49 @@ class AppointmentFormNotifier extends StateNotifier<AppointmentFormState> {
     } catch (e) {
       state =
           state.copyWith(loading: false, errorMessage: 'Error al guardar cita');
+    }
+  }
+
+  Future<void> updateAppointment(
+      Appointments cita, BuildContext context) async {
+    try {
+      state = state.copyWith(loading: true);
+
+      // Crear un objeto CreateAppointments con los datos actualizados
+      print(cita.toJson());
+      // Llamar al repositorio para actualizar la cita
+      await appointmentRepository.updateAppointmentDate(CreateAppointments(
+        id: cita.id,
+        patientId: cita.patientId,
+        date: DateTime.parse(cita.date),
+        appointmentTime: cita.appointmentTime,
+        medicalInsurance: cita.medicalInsurance,
+        doctorId: cita.doctorId,
+        patient: cita.patient,
+        status: cita.status,
+        specialtyTherapyId: cita.specialtyTherapyId!,
+        diagnosis: cita.diagnosis,
+      ));
+
+      // Actualizar el estado
+      state = state.copyWith(loading: false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Cita Medica actualizada con éxito'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      state = state.copyWith(
+          loading: false, errorMessage: 'Error al actualizar cita');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al actualizar la cita'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 }

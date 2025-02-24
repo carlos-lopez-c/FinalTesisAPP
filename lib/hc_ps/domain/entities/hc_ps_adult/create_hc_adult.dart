@@ -1,6 +1,3 @@
-import 'package:h_c_1/hc_tr/domain/entities/hc_general/antecedentes_perinatales.dart';
-import 'package:h_c_1/hc_tr/domain/entities/hc_general/antecedentes_personales.dart';
-
 class CreateHcPsAdult {
   String? id;
   String patientId;

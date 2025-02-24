@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_c_1/auth/infrastructure/errors/auth_errors.dart';
 import 'package:h_c_1/hc_ps/domain/entities/hc_ps_adult/create_hc_adult.dart';
-import 'package:h_c_1/hc_tr/domain/entities/hc_adult/hc_adult_entity.dart';
 import 'package:h_c_1/hc_tr/domain/repositories/hc_repository.dart';
 import 'package:h_c_1/hc_tr/infrastructure/repositories/hc_repository_impl.dart';
 

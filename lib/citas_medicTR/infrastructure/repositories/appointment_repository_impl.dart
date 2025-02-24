@@ -42,4 +42,9 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
       String status, String medicID) {
     return datasource.getAppointmentsByStatusAndMedicID(status, medicID);
   }
+
+  @override
+  Future<void> updateAppointmentDate(CreateAppointments appointment) {
+    return datasource.updateAppointmentDate(appointment);
+  }
 }

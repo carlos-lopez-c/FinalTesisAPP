@@ -1,0 +1,4 @@
+#Mon Feb 24 01:18:48 COT 2025
+base.0=C\:\\Users\\Patri\\OneDrive\\Documentos\\GitHub\\FinalTesisAPP\\build\\app\\intermediates\\dex\\release\\minifyReleaseWithR8\\classes.dex
+path.0=classes.dex
+renamed.0=classes.dex

@@ -9,9 +9,11 @@ class Appointments {
   final String diagnosis;
   final String doctorId;
   final String doctor;
+  final String patientId;
   final String patient;
   final String emailPatient;
   final String specialtyTherapy;
+  final String? specialtyTherapyId;
 
   Appointments({
     required this.id,
@@ -21,10 +23,12 @@ class Appointments {
     required this.status,
     required this.diagnosis,
     required this.doctorId,
+    required this.patientId,
     required this.doctor,
     required this.patient,
     required this.emailPatient,
     required this.specialtyTherapy,
+    this.specialtyTherapyId,
   });
 
   /// 🔹 Convierte un JSON en un objeto `Appointments`
@@ -32,6 +36,7 @@ class Appointments {
     return Appointments(
       id: json['id'] ?? '',
       date: json['date'] ?? '',
+      patientId: json['patientID'] ?? '',
       appointmentTime: json['appointmentTime'] ?? '',
       medicalInsurance: json['medicalInsurance'] ?? '',
       status: json['status'] ?? '',
@@ -41,6 +46,7 @@ class Appointments {
       patient: json['patient'] ?? '',
       emailPatient: json['emailPatient'] ?? 'No hay correo registrado',
       specialtyTherapy: json['specialtyTherapy'] ?? '',
+      specialtyTherapyId: json['specialtyTherapyId'],
     );
   }
 
@@ -55,9 +61,11 @@ class Appointments {
       "diagnosis": diagnosis,
       "doctorID": doctorId,
       "doctor": doctor,
+      "patientID": patientId,
       "patient": patient,
       "emailPatient": emailPatient,
       "specialtyTherapy": specialtyTherapy,
+      "specialtyTherapyId": specialtyTherapyId,
     };
   }
 
@@ -71,13 +79,16 @@ class Appointments {
     String? diagnosis,
     String? doctorId,
     String? doctor,
+    String? patientId,
     String? patient,
     String? emailPatient,
     String? specialtyTherapy,
+    String? specialtyTherapyId,
   }) {
     return Appointments(
       id: id ?? this.id,
       date: date ?? this.date,
+      patientId: patientId ?? this.patientId,
       appointmentTime: appointmentTime ?? this.appointmentTime,
       medicalInsurance: medicalInsurance ?? this.medicalInsurance,
       status: status ?? this.status,
@@ -87,6 +98,7 @@ class Appointments {
       patient: patient ?? this.patient,
       emailPatient: emailPatient ?? this.emailPatient,
       specialtyTherapy: specialtyTherapy ?? this.specialtyTherapy,
+      specialtyTherapyId: specialtyTherapyId ?? this.specialtyTherapyId,
     );
   }
 

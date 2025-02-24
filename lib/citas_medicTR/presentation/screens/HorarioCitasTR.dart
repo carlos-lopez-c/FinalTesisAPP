@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_c_1/citas_medicTR/domain/entities/cita.entity.dart';
+import 'package:h_c_1/citas_medicTR/presentation/providers/appointments_form_provider.dart';
 import 'package:h_c_1/citas_medicTR/presentation/providers/appointments_provider.dart';
 import 'package:h_c_1/citas_medicTR/presentation/screens/GenerarCitasTR.dart';
 import 'package:h_c_1/citas_medicTR/presentation/widgets/NavigationButtonCT_TR.dart';
@@ -25,12 +26,21 @@ class _HorarioCitasTrState extends ConsumerState<HorarioCitasTr> {
     });
   }
 
-  void _editarCita(BuildContext context, Appointments cita) {
-    TextEditingController areaController =
-        TextEditingController(text: cita.specialtyTherapy);
+  void _editarCita(
+      BuildContext context, Appointments cita, AppointmentNotifier notifier) {
     TextEditingController horaController =
         TextEditingController(text: cita.appointmentTime);
-    DateTime? selectedDate = DateFormat('MMMM d, y', 'en_US').parse(cita.date);
+    TextEditingController fechaController =
+        TextEditingController(text: cita.date);
+
+    // Analizar la fecha de la cita usando el formato correcto
+    DateTime? selectedDate;
+    try {
+      selectedDate = DateFormat('yyyy-MM-dd').parse(cita.date);
+    } catch (e) {
+      print("Error al analizar la fecha: $e");
+      selectedDate = DateTime.now(); // Usar la fecha actual como fallback
+    }
 
     showDialog(
       context: context,
@@ -41,12 +51,12 @@ class _HorarioCitasTrState extends ConsumerState<HorarioCitasTr> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                controller: areaController,
-                decoration: InputDecoration(labelText: 'Área'),
-              ),
-              TextField(
                 controller: horaController,
                 decoration: InputDecoration(labelText: 'Hora'),
+              ),
+              TextField(
+                controller: fechaController,
+                decoration: InputDecoration(labelText: 'Fecha'),
               ),
               ElevatedButton(
                 onPressed: () async {
@@ -58,6 +68,8 @@ class _HorarioCitasTrState extends ConsumerState<HorarioCitasTr> {
                   );
                   if (pickedDate != null) {
                     selectedDate = pickedDate;
+                    fechaController.text =
+                        DateFormat('yyyy-MM-dd').format(pickedDate);
                   }
                 },
                 child: Text('Seleccionar Fecha'),
@@ -72,10 +84,18 @@ class _HorarioCitasTrState extends ConsumerState<HorarioCitasTr> {
               child: Text('Cancelar'),
             ),
             TextButton(
-              onPressed: () {
-                // cita['area'] = areaController.text;
-                // cita['hora'] = horaController.text;
-                // cita['fecha'] = selectedDate ?? cita['fecha'];
+              onPressed: () async {
+                // Actualizar la cita con los nuevos valores
+                final updatedCita = cita.copyWith(
+                  appointmentTime: horaController.text,
+                  date: fechaController.text,
+                );
+
+                // Llamar al método para actualizar la cita
+                final notifierForm = ref.read(appointmentFormProvider.notifier);
+                await notifierForm.updateAppointment(updatedCita, context);
+
+                // Cerrar el diálogo
                 Navigator.pop(context);
               },
               child: Text('Guardar'),
@@ -208,24 +228,29 @@ class _HorarioCitasTrState extends ConsumerState<HorarioCitasTr> {
                             itemCount: appointmentState.citasDelDia.length,
                             itemBuilder: (context, index) {
                               final cita = appointmentState.citasDelDia[index];
-                              return Card(
-                                margin: EdgeInsets.all(10),
-                                elevation: 5,
-                                child: Padding(
-                                  padding: EdgeInsets.all(10),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "Especialidad: ${cita.specialtyTherapy}",
-                                        style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      Text("Fecha: ${cita.date}"),
-                                      Text("Hora: ${cita.appointmentTime}"),
-                                    ],
+                              return GestureDetector(
+                                onTap: () {
+                                  _editarCita(context, cita, notifier);
+                                },
+                                child: Card(
+                                  margin: EdgeInsets.all(10),
+                                  elevation: 5,
+                                  child: Padding(
+                                    padding: EdgeInsets.all(10),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Especialidad: ${cita.specialtyTherapy}",
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        Text("Fecha: ${cita.date}"),
+                                        Text("Hora: ${cita.appointmentTime}"),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               );

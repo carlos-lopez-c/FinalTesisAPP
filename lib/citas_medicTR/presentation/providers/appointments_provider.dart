@@ -27,7 +27,6 @@ class AppointmentNotifier extends StateNotifier<AppointmentState> {
   AppointmentNotifier(this.repository, this.patientRepository,
       {required this.medicID, required this.ref})
       : super(AppointmentState()) {
-    print('🔹 AppointmentNotifier initialized');
     listarCitas(estado: 'Pendiente'); // ✅ Cargar todas las citas al iniciar
   }
 

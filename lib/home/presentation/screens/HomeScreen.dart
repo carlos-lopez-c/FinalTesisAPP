@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_c_1/auth/presentation/providers/auth_provider.dart';
-import 'package:h_c_1/citas_medicPS/presentation/screens/ListaCitas.dart';
 import 'package:h_c_1/citas_medicTR/presentation/screens/ListaCitasTR.dart';
 import 'package:h_c_1/hc_ps/presentation/screens/PsicologiaTab.dart';
 import 'package:h_c_1/hc_tr/presentation/screens/TerapiaTab.dart';

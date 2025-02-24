@@ -458,7 +458,11 @@ class _HcTrAnamAdultState extends ConsumerState<HcTrAnamAdult> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          hcNotifier.onCreateHcGeneral();
+          if (hcState.tipo == 'Nuevo') {
+            hcNotifier.onCreateHcGeneral(context);
+          } else {
+            hcNotifier.onUpdateHcAdult(context);
+          }
         },
         child: const Icon(Icons.save),
       ),

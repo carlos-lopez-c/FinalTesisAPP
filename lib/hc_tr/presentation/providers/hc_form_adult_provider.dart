@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_c_1/auth/infrastructure/errors/auth_errors.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_adult/eficiencia.dart';
@@ -52,8 +53,10 @@ final hcAdultFormProvider =
   (ref) {
     final patientRepo = PatientRepositoryImpl();
     final createAdultHc = ref.read(hcProvider.notifier).createHcAdult;
+    final updateHcAdult = ref.read(hcProvider.notifier).updateHcAdult;
     final getHcAdult = ref.read(hcProvider.notifier).getHcAdult;
     return HcAdultFormNotifier(
+        updateHcAdult: updateHcAdult,
         patientRepository: patientRepo,
         createAdultHc: createAdultHc,
         getHcAdult: getHcAdult);
@@ -64,7 +67,9 @@ class HcAdultFormNotifier extends StateNotifier<HcAdultState> {
   final PatientRepository patientRepository;
   final Function(CreateHcAdultEntity) createAdultHc;
   final Function(String) getHcAdult;
+  final Function(CreateHcAdultEntity) updateHcAdult;
   HcAdultFormNotifier({
+    required this.updateHcAdult,
     required this.getHcAdult,
     required this.createAdultHc,
     required this.patientRepository,
@@ -122,7 +127,7 @@ class HcAdultFormNotifier extends StateNotifier<HcAdultState> {
     }
   }
 
-  Future<void> onCreateHcGeneral() async {
+  Future<void> onCreateHcGeneral(BuildContext context) async {
     try {
       state = state.copyWith(loading: true);
       // Asegúrate de que 'fechaEntrevista' esté en el formato correcto
@@ -139,23 +144,67 @@ class HcAdultFormNotifier extends StateNotifier<HcAdultState> {
           fechaEvalucion: fechaParsed.toIso8601String(),
         ),
       );
-      print(state.createHcAdult.fechaEvalucion);
-      print('🔹 Creando historia clínica general...');
-      print(state.createHcAdult.toJson());
-      print("Se creó la historia clínica general");
+
       await createAdultHc(state.createHcAdult);
 
       // Limpiar campos
-      state = initialAdult;
       state = state.copyWith(
-          successMessage: 'Historia clínica creada con éxito',
-          errorMessage: '');
+        cedula: '',
+        tipo: 'Nuevo',
+        createHcAdult: initialAdult.createHcAdult,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Historia clínica actualizada con éxito'),
+          backgroundColor: Colors.green,
+        ),
+      );
     } on CustomError catch (e) {
       state = state.copyWith(
         errorMessage: e.message ?? 'Error al crear historia clínica',
         successMessage: '',
       );
-      print('🔴 Error al crear historia clínica: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al crear historia clínica'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      state = state.copyWith(loading: false);
+    }
+  }
+
+  Future<void> onUpdateHcAdult(BuildContext context) async {
+    try {
+      state = state.copyWith(loading: true);
+      // Asegúrate de que 'fechaEntrevista' esté en el formato correcto
+      await updateHcAdult(state.createHcAdult);
+
+      // Limpiar campos
+
+      state = state.copyWith(
+        cedula: '',
+        createHcAdult: initialAdult.createHcAdult,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Historia clínica actualizada con éxito'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } on CustomError catch (e) {
+      state = state.copyWith(
+        errorMessage: e.toString() ?? 'Error al actualizar historia clínica',
+        successMessage: '',
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al actualizar historia clínica'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      print('🔴 Error al actualizar historia clínica: ${e.message}');
     } finally {
       state = state.copyWith(loading: false);
     }

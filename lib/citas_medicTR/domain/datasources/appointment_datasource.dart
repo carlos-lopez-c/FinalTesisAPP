@@ -11,4 +11,5 @@ abstract class AppointmentDatasource {
       String status, String medicID);
   Future<List<Appointments>> getAppointmentsByDate(
       DateTime date, String medicID);
+  Future<void> updateAppointmentDate(CreateAppointments appointment);
 }

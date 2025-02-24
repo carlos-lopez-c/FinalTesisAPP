@@ -72,7 +72,8 @@ class CreateHcAdultEntity {
     };
   }
 
-  factory CreateHcAdultEntity.fromJson(Map<String, dynamic> json) {
+  factory CreateHcAdultEntity.fromJson(Map<String, dynamic> json,
+      {String? id}) {
     try {
       // Verificar que los campos obligatorios no sean nulos
       if (json['independenciaAutonomia'] == null ||
@@ -84,7 +85,7 @@ class CreateHcAdultEntity {
       }
 
       return CreateHcAdultEntity(
-        id: json['id'],
+        id: id ?? json['id'], // Use the provided 'id' or fallback to json['id']
         patientId: json['patientId'],
         nombreCompleto: json['nombreCompleto'],
         fechaEvalucion: json['fechaEvalucion'],

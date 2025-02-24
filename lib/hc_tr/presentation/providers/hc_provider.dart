@@ -43,6 +43,20 @@ class HcNotifier extends StateNotifier<HCState> {
     }
   }
 
+  Future<void> updateHcAdult(CreateHcAdultEntity hc) async {
+    print('🟢 Actualizando historia clínica');
+    state = state.copyWith(loading: true);
+    try {
+      await _hcRepository.updateHcAdult(hc);
+    } on CustomError catch (e) {
+      print('🔴 Error al actualizar historia clínica: ${e.message}');
+      state = state.copyWith(
+          errorMessage: e.message ?? 'Error al actualizar historia clínica');
+    } finally {
+      state = state.copyWith(loading: false);
+    }
+  }
+
   Future<CreateHcGeneral?> getHcGeneral(String cedula) async {
     print('🟢 Obteniendo historia clínica');
     state = state.copyWith(loading: true);

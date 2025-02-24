@@ -1,4 +1,5 @@
 class CreateAppointments {
+  String? id;
   String patientId;
   DateTime date;
   String appointmentTime;
@@ -11,6 +12,7 @@ class CreateAppointments {
 
   CreateAppointments({
     required this.patientId,
+    this.id,
     required this.date,
     required this.appointmentTime,
     required this.medicalInsurance,
@@ -22,6 +24,7 @@ class CreateAppointments {
   });
 
   CreateAppointments copyWith({
+    String? id,
     String? patientId,
     DateTime? date,
     String? patient,
@@ -33,6 +36,7 @@ class CreateAppointments {
     String? diagnosis,
   }) {
     return CreateAppointments(
+      id: id ?? this.id,
       patientId: patientId ?? this.patientId,
       date: date ?? this.date,
       patient: patient ?? this.patient,
@@ -48,6 +52,7 @@ class CreateAppointments {
   //To Json
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'patientID': patientId,
       'date':
           "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",

@@ -174,6 +174,7 @@ class HcDatasourceImpl implements HcDatasource {
       // Obtener el ID del paciente
       final pacienteId = pacientesSnapshot.docs.first.id;
       print("ID: $pacienteId");
+
       // 2. Buscar la historia clínica por el ID del paciente
       final hcSnapshot = await firestore
           .collection('HcTrAdult') // Colección de historias clínicas
@@ -187,12 +188,17 @@ class HcDatasourceImpl implements HcDatasource {
         throw CustomError(
             'No se encontró una historia clínica para este paciente');
       }
-      print("Datos: ${hcSnapshot.docs.first.data()}");
+
       // Obtener los datos de la historia clínica
       final hcData = hcSnapshot.docs.first.data();
+      final hcId = hcSnapshot
+          .docs.first.id; // Obtener el ID del documento de la historia clínica
 
-      // Convertir los datos a un objeto CreateHcGeneral
-      return CreateHcAdultEntity.fromJson(hcData);
+      print("Datos: $hcData");
+      print("ID de la historia clínica: $hcId");
+
+      // Convertir los datos a un objeto CreateHcAdultEntity, incluyendo el ID
+      return CreateHcAdultEntity.fromJson(hcData, id: hcId);
     } catch (e) {
       print('Error al obtener la historia clínica: $e');
       throw CustomError('Error al obtener la historia clínica');
@@ -255,6 +261,7 @@ class HcDatasourceImpl implements HcDatasource {
           .collection('HcTrAdult') // Colección de historias clínicas
           .doc(hc.id) // Referencia al documento específico
           .update(hcData); // Actualizar con los nuevos datos
+      print('Holaaaaaaaaa');
       print('Historia clínica actualizada correctamente');
     } catch (e) {
       print('Error al actualizar la historia clínica: $e');

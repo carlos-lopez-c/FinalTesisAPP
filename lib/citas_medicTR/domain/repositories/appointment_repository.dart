@@ -10,5 +10,6 @@ abstract class AppointmentRepository {
   Future<void> createAppointment(
       CreateAppointments appointment, String medicID);
   Future<void> updateAppointment(Appointments appointment, String medicID);
+  Future<void> updateAppointmentDate(CreateAppointments appointment);
   Future<void> deleteAppointment(Appointments appointment);
 }

@@ -5,6 +5,7 @@ import 'package:h_c_1/hc_tr/domain/entities/hc_adult/salud_bocal.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_adult/seguridad.dart';
 
 class CreateHcAdultEntity {
+  final String? id;
   final String? patientId;
   final String? nombreCompleto;
   final String? fechaEvalucion;
@@ -16,6 +17,7 @@ class CreateHcAdultEntity {
   final SaludBocal saludBocal;
 
   CreateHcAdultEntity({
+    this.id,
     this.patientId,
     this.nombreCompleto,
     this.fechaEvalucion,
@@ -28,6 +30,7 @@ class CreateHcAdultEntity {
   });
 
   CreateHcAdultEntity copyWith({
+    String? id,
     String? patientId,
     String? nombreCompleto,
     String? fechaEvalucion,
@@ -39,6 +42,7 @@ class CreateHcAdultEntity {
     SaludBocal? saludBocal,
   }) {
     return CreateHcAdultEntity(
+      id: id ?? this.id,
       patientId: patientId ?? this.patientId,
       nombreCompleto: nombreCompleto ?? this.nombreCompleto,
       fechaEvalucion: fechaEvalucion ?? this.fechaEvalucion,
@@ -55,6 +59,7 @@ class CreateHcAdultEntity {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'patientId': patientId,
       'nombreCompleto': nombreCompleto,
       'fechaEvalucion': fechaEvalucion,
@@ -79,6 +84,7 @@ class CreateHcAdultEntity {
       }
 
       return CreateHcAdultEntity(
+        id: json['id'],
         patientId: json['patientId'],
         nombreCompleto: json['nombreCompleto'],
         fechaEvalucion: json['fechaEvalucion'],

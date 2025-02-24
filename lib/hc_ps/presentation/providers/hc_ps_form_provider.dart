@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_c_1/hc_ps/domain/entities/hc_ps_adult/create_hc_adult.dart';
 import 'package:h_c_1/hc_ps/presentation/providers/hc_provider.dart';
@@ -70,9 +71,12 @@ final hcPsAdultFormProvider =
   (ref) {
     final patientRepo = PatientRepositoryImpl();
     final onCallbackHcPsAdult = ref.read(hcProvider.notifier).createHcPsAdult;
+    final onCallbackHcPsAdultEdit =
+        ref.read(hcProvider.notifier).updateHcPsAdult;
     final onCallbackSearchHcPsAdult =
         ref.read(hcProvider.notifier).getHcPsAdult;
     return HcPsAdultFormNotifier(
+        onCallbackHcPsAdultEdit: onCallbackHcPsAdultEdit,
         patientRepository: patientRepo,
         onCallbackHcPsAdult: onCallbackHcPsAdult,
         onCallbackSearchHcPsAdult: onCallbackSearchHcPsAdult);
@@ -82,11 +86,14 @@ final hcPsAdultFormProvider =
 class HcPsAdultFormNotifier extends StateNotifier<HcFormAdultState> {
   final PatientRepository patientRepository;
   final Function(CreateHcPsAdult) onCallbackHcPsAdult;
+
   final Function(String) onCallbackSearchHcPsAdult;
+  final Function(CreateHcPsAdult) onCallbackHcPsAdultEdit;
 
   HcPsAdultFormNotifier(
       {required this.patientRepository,
       required this.onCallbackSearchHcPsAdult,
+      required this.onCallbackHcPsAdultEdit,
       required this.onCallbackHcPsAdult})
       : super(HcFormAdultState(createHcPsAdult: initialPsAdult));
 
@@ -104,7 +111,7 @@ class HcPsAdultFormNotifier extends StateNotifier<HcFormAdultState> {
     state = state.copyWith(tipo: value);
   }
 
-  Future<void> onCreateHcPsAdult() async {
+  Future<void> onCreateHcPsAdult(BuildContext context) async {
     try {
       state = state.copyWith(loading: true);
       // Asegúrate de que 'fechaEntrevista' esté en el formato correcto
@@ -114,15 +121,58 @@ class HcPsAdultFormNotifier extends StateNotifier<HcFormAdultState> {
       // Limpiar campos
       ;
       state = state.copyWith(
-          createHcPsAdult: initialPsAdult,
-          successMessage: 'Historia clínica creada con éxito',
-          errorMessage: '');
+        createHcPsAdult: initialPsAdult,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Historia clínica creada con éxito'),
+          backgroundColor: Colors.green,
+        ),
+      );
     } catch (e) {
-      state = state.copyWith(
-        errorMessage: e.toString() ?? 'Error al crear historia clínica',
-        successMessage: '',
+      state = state.copyWith();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al crear historia clínica'),
+          backgroundColor: Colors.red,
+        ),
       );
       print('🔴 Error al crear historia clínica: $e');
+    } finally {
+      state = state.copyWith(loading: false);
+    }
+  }
+
+  Future<void> onUpdateHcPsAdult(BuildContext context) async {
+    try {
+      state = state.copyWith(loading: true);
+      // Asegúrate de que 'fechaEntrevista' esté en el formato correcto
+      await onCallbackHcPsAdultEdit(state.createHcPsAdult);
+
+      // Limpiar campos
+
+      state = state.copyWith(
+        cedula: '',
+        createHcPsAdult: initialPsAdult,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Historia clínica actualizada con éxito'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: e.toString() ?? 'Error al actualizar historia clínica',
+        successMessage: '',
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al actualizar historia clínica'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      print('🔴 Error al actualizar historia clínica: $e');
     } finally {
       state = state.copyWith(loading: false);
     }
@@ -184,11 +234,6 @@ class HcPsAdultFormNotifier extends StateNotifier<HcFormAdultState> {
     state = state.copyWith(
         createHcPsAdult:
             state.createHcPsAdult.copyWith(estructuraFamiliar: value));
-  }
-
-  void setFechaCreacion(String value) {
-    state = state.copyWith(
-        createHcPsAdult: state.createHcPsAdult.copyWith(fechaCreacion: value));
   }
 
   void setFechaEvaluacion(String value) {

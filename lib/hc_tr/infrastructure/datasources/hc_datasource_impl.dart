@@ -143,9 +143,13 @@ class HcDatasourceImpl implements HcDatasource {
 
       // Obtener los datos de la historia clínica
       final hcData = hcSnapshot.docs.first.data();
+      final hcId = hcSnapshot.docs.first.id; // Obtener el ID del documento
+
       print("Datos: $hcData");
-      // Convertir los datos a un objeto CreateHcGeneral
-      return CreateHcPsAdult.fromJson(hcData);
+      print("ID del documento: $hcId");
+
+      // Convertir los datos a un objeto CreateHcPsAdult y asignar el ID
+      return CreateHcPsAdult.fromJson(hcData)..id = hcId;
     } catch (e) {
       print('Error al obtener la historia clínica: $e');
       throw CustomError('Error al obtener la historia clínica');
@@ -236,5 +240,61 @@ class HcDatasourceImpl implements HcDatasource {
       print('Error al obtener la historia clínica: $e');
       throw CustomError('Error al obtener la historia clínica');
     }
+  }
+
+  @override
+  Future<void> updateHcAdult(CreateHcAdultEntity hc) async {
+    try {
+      if (hc.id == null || hc.id!.isEmpty) {
+        throw CustomError('El ID del documento es necesario para actualizar');
+      }
+      final hcData = hc.toJson();
+
+      // Actualizar el documento en Firestore
+      await firestore
+          .collection('HcTrAdult') // Colección de historias clínicas
+          .doc(hc.id) // Referencia al documento específico
+          .update(hcData); // Actualizar con los nuevos datos
+      print('Historia clínica actualizada correctamente');
+    } catch (e) {
+      print('Error al actualizar la historia clínica: $e');
+      throw CustomError('Error al actualizar la historia clínica');
+    }
+  }
+
+  @override
+  Future<void> updateHcGeneral(CreateHcGeneral hc) {
+    // TODO: implement updateHcGeneral
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> updateHcPsAdult(CreateHcPsAdult hc) async {
+    try {
+      // Verificar que el ID del documento esté presente
+      if (hc.id == null || hc.id!.isEmpty) {
+        throw CustomError('El ID del documento es necesario para actualizar');
+      }
+
+      // Convertir el objeto CreateHcPsAdult a un mapa
+      final hcData = hc.toJson();
+
+      // Actualizar el documento en Firestore
+      await firestore
+          .collection('HcPsAdult') // Colección de historias clínicas
+          .doc(hc.id) // Referencia al documento específico
+          .update(hcData); // Actualizar con los nuevos datos
+
+      print('Historia clínica actualizada correctamente');
+    } catch (e) {
+      print('Error al actualizar la historia clínica: $e');
+      throw CustomError('Error al actualizar la historia clínica');
+    }
+  }
+
+  @override
+  Future<void> updateHcVoice(CreateHcVoice hc) {
+    // TODO: implement updateHcVoice
+    throw UnimplementedError();
   }
 }

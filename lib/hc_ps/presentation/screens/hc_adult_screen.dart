@@ -13,6 +13,7 @@ class _HistoriaClinicaAdultPSState
     extends ConsumerState<HistoriaClinicaAdultPS> {
   final _formKey = GlobalKey<FormState>();
 
+  late TextEditingController cedulaController;
   late TextEditingController nombreCompletoController;
   late TextEditingController fechaNacimientoController;
   late TextEditingController telefonoController;
@@ -33,6 +34,7 @@ class _HistoriaClinicaAdultPSState
   @override
   void initState() {
     super.initState();
+    cedulaController = TextEditingController();
     nombreCompletoController = TextEditingController();
     fechaNacimientoController = TextEditingController();
     telefonoController = TextEditingController();
@@ -53,6 +55,7 @@ class _HistoriaClinicaAdultPSState
 
   @override
   void dispose() {
+    cedulaController.dispose();
     nombreCompletoController.dispose();
     fechaNacimientoController.dispose();
     telefonoController.dispose();
@@ -78,15 +81,14 @@ class _HistoriaClinicaAdultPSState
     final hcNotifier = ref.read(hcPsAdultFormProvider.notifier);
 
     // Actualizar los controladores con los valores del estado
+    cedulaController.text = hcState.cedula;
     nombreCompletoController.text = hcState.createHcPsAdult.nombreCompleto;
-    fechaNacimientoController.text =
-        hcState.createHcPsAdult.fechaNacimiento.toString();
+    fechaNacimientoController.text = hcState.createHcPsAdult.fechaNacimiento;
     telefonoController.text = hcState.createHcPsAdult.telefono;
     institucionController.text = hcState.createHcPsAdult.institucion;
     direccionController.text = hcState.createHcPsAdult.direccion;
     remisionController.text = hcState.createHcPsAdult.remision;
-    fechaEvaluacionController.text =
-        hcState.createHcPsAdult.fechaEvalucion.toString();
+    fechaEvaluacionController.text = hcState.createHcPsAdult.fechaEvalucion;
     coberturaController.text = hcState.createHcPsAdult.cobertura;
     observacionesController.text = hcState.createHcPsAdult.observaciones;
     responsableController.text = hcState.createHcPsAdult.responsable;
@@ -128,6 +130,7 @@ class _HistoriaClinicaAdultPSState
                 children: [
                   Expanded(
                     child: TextField(
+                      controller: cedulaController,
                       onChanged: hcNotifier.onCedulaChanged,
                       decoration:
                           const InputDecoration(labelText: 'Buscar por cédula'),
@@ -271,7 +274,11 @@ class _HistoriaClinicaAdultPSState
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (_formKey.currentState!.validate()) {
-            hcNotifier.onCreateHcPsAdult();
+            if (hcState.tipo == 'Nuevo') {
+              hcNotifier.onCreateHcPsAdult(context);
+            } else if (hcState.tipo == 'Buscar') {
+              hcNotifier.onUpdateHcPsAdult(context);
+            }
           }
         },
         child: const Icon(Icons.save),

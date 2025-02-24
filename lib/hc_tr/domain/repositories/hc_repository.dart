@@ -12,4 +12,9 @@ abstract class HcRepository {
   Future<CreateHcVoice> getHcVoice(String cedula);
   Future<CreateHcPsAdult> getHcPsAdult(String cedula);
   Future<void> createHcPsAdult(CreateHcPsAdult hc);
+
+  Future<void> updateHcPsAdult(CreateHcPsAdult hc);
+  Future<void> updateHcGeneral(CreateHcGeneral hc);
+  Future<void> updateHcAdult(CreateHcAdultEntity hc);
+  Future<void> updateHcVoice(CreateHcVoice hc);
 }

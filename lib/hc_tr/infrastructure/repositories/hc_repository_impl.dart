@@ -50,4 +50,24 @@ class HcRepositoryImpl implements HcRepository {
   Future<void> createHcPsAdult(CreateHcPsAdult hc) {
     return datasource.createHcPsAdult(hc);
   }
+
+  @override
+  Future<void> updateHcPsAdult(CreateHcPsAdult hc) {
+    return datasource.updateHcPsAdult(hc);
+  }
+
+  @override
+  Future<void> updateHcGeneral(CreateHcGeneral hc) {
+    return datasource.updateHcGeneral(hc);
+  }
+
+  @override
+  Future<void> updateHcAdult(CreateHcAdultEntity hc) {
+    return datasource.updateHcAdult(hc);
+  }
+
+  @override
+  Future<void> updateHcVoice(CreateHcVoice hc) {
+    return datasource.updateHcVoice(hc);
+  }
 }

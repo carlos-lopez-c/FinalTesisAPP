@@ -28,6 +28,20 @@ class HcNotifier extends StateNotifier<HCState> {
     }
   }
 
+  Future<void> updateHcPsAdult(CreateHcPsAdult hc) async {
+    print('🟢 Actualizando historia clínica');
+    state = state.copyWith(loading: true);
+    try {
+      await _hcRepository.updateHcPsAdult(hc);
+    } on CustomError catch (e) {
+      print('🔴 Error al actualizar historia clínica: ${e.message}');
+      state = state.copyWith(
+          errorMessage: e.message ?? 'Error al actualizar historia clínica');
+    } finally {
+      state = state.copyWith(loading: false);
+    }
+  }
+
   Future<CreateHcPsAdult?> getHcPsAdult(String cedula) async {
     print('🟢 Obteniendo historia clínica');
     state = state.copyWith(loading: true);
@@ -36,10 +50,10 @@ class HcNotifier extends StateNotifier<HCState> {
       print("aQUI SI LLEGA");
       state = state.copyWith(errorMessage: '');
       return hc;
-    } catch (e) {
-      print('🔴 Error al obtener historia clínica: ${e.toString()}');
+    } on CustomError catch (e) {
+      print('🔴 Error al obtener historia clínica: ${e.message}');
       state = state.copyWith(
-          errorMessage: e.toString() ?? 'Error al obtener historia clínica');
+          errorMessage: e.message ?? 'Error al obtener historia clínica');
     } finally {
       state = state.copyWith(loading: false);
     }

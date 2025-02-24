@@ -19,26 +19,23 @@ class Header extends StatelessWidget {
     return Column(
       children: [
         Row(
-          crossAxisAlignment: CrossAxisAlignment.center, // Centra verticalmente
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Imagen
+             // Imagen
             Image.asset(
               imagePath, // Ruta de la imagen
               width: 70,
               height: 100,
             ),
-            const SizedBox(width: 10), // Espacio entre la imagen y los textos
+            const SizedBox(width: 10),
 
             // Textos
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    vertical: 20.0), // Ajusta el padding
+                padding: const EdgeInsets.symmetric(vertical: 20.0),
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.center, // Centra los textos
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Título principal
                     Text(
                       title,
                       style: const TextStyle(
@@ -47,8 +44,6 @@ class Header extends StatelessWidget {
                       ),
                       textAlign: TextAlign.center,
                     ),
-
-                    // Subtítulo (gris oscuro)
                     Text(
                       subtitle,
                       style: TextStyle(
@@ -58,8 +53,6 @@ class Header extends StatelessWidget {
                       ),
                       textAlign: TextAlign.center,
                     ),
-
-                    // Descripción adicional
                     Text(
                       item,
                       style: TextStyle(
@@ -75,7 +68,7 @@ class Header extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 5), // Espacio extra después del header
+        const SizedBox(height: 5),
       ],
     );
   }

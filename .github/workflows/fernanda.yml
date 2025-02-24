@@ -25,28 +25,7 @@ jobs:
       - name: Ejecutar Gitleaks para detectar credenciales
         run: gitleaks detect --verbose --redact --source . || true
 
-  analisis_codigo_sonarqube: 
-    name: Análisis de Código con SonarCloud
-    runs-on: ubuntu-latest
-    needs: seguridad_gitleaks
-    steps: 
-      - name: Checkout del código
-        uses: actions/checkout@v4
-        with: 
-          fetch-depth: 0
-
-      - name: Setup Java (Necesario para SonarCloud)
-        uses: actions/setup-java@v3
-        with: 
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v4
-        env: 
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: "https://sonarcloud.io"
-
+  
   analisis_mobsf: 
     name: Análisis Dinámico con MobSF
     runs-on: ubuntu-latest

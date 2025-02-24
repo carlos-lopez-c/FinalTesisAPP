@@ -1,0 +1,2 @@
+C:/Users/carlo/OneDrive/Escritorio/APPTSS/APPFINALTESIS/FinalTesisAPP/android/app/.cxx/Debug/2o10t33d/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/carlo/OneDrive/Escritorio/APPTSS/APPFINALTESIS/FinalTesisAPP/android/app/.cxx/Debug/2o10t33d/arm64-v8a/CMakeFiles/rebuild_cache.dir

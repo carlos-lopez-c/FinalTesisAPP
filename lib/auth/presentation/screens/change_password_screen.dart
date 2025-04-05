@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_c_1/auth/presentation/providers/password_reset_provider.dart';
-import '../Widgets/CustomCard.dart';
+import '../widgets/CustomCard.dart';
 import '/../shared/header.dart';
 
 class ChangePasswordScreen extends ConsumerWidget {

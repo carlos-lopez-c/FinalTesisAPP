@@ -38,4 +38,19 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> logout() {
     return authDatasource.logout();
   }
+
+  @override
+  Future<String> sendPhoneVerification(String phoneNumber) {
+    return authDatasource.sendPhoneVerification(phoneNumber);
+  }
+
+  @override
+  Future<bool> verifyPhoneCode(String verificationId, String code) {
+    return authDatasource.verifyPhoneCode(verificationId, code);
+  }
+
+  @override
+  Future<String> resendPhoneCode(String phoneNumber) {
+    return authDatasource.resendPhoneCode(phoneNumber);
+  }
 }

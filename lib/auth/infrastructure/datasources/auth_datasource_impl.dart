@@ -1,16 +1,31 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:flutter/services.dart';
 import 'package:h_c_1/auth/domain/datasources/auth_datasource.dart';
-import 'package:h_c_1/auth/domain/entities/role_entities.dart';
 import 'package:h_c_1/auth/domain/entities/user_entities.dart';
-import 'package:h_c_1/auth/infrastructure/errors/auth_errors.dart';
+import 'package:h_c_1/shared/infrastructure/errors/custom_error.dart';
+import 'package:h_c_1/shared/infrastructure/errors/handle_error.dart';
 import 'package:h_c_1/auth/domain/entities/user_information_entities.dart';
-import 'package:h_c_1/auth/domain/entities/user_role_entities.dart';
 
 class AuthDatasourceImpl implements AuthDatasource {
   final firebase_auth.FirebaseAuth _firebaseAuth =
       firebase_auth.FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  String _formatPhoneNumber(String phoneNumber) {
+    // Eliminar todos los caracteres no numéricos
+    String cleanedNumber = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
+
+    // Si el número no comienza con el código de país, agregarlo
+    if (!cleanedNumber.startsWith('593')) {
+      cleanedNumber = '593$cleanedNumber';
+    }
+
+    // Agregar el prefijo '+' requerido por E.164
+    return '+$cleanedNumber';
+  }
 
   @override
   Future<User> checkAuthStatus() async {
@@ -108,6 +123,92 @@ class AuthDatasourceImpl implements AuthDatasource {
       throw CustomError(e.message ?? 'Error de autenticación.');
     } catch (e) {
       throw CustomError('Error desconocido: $e');
+    }
+  }
+
+  @override
+  Future<String> sendPhoneVerification(String phoneNumber) async {
+    try {
+      final formattedPhoneNumber = _formatPhoneNumber(phoneNumber);
+      print('Enviando verificación a: $formattedPhoneNumber');
+
+      final completer = Completer<String>();
+
+      await _firebaseAuth.verifyPhoneNumber(
+        phoneNumber: formattedPhoneNumber,
+        verificationCompleted:
+            (firebase_auth.PhoneAuthCredential credential) async {
+          try {
+            await _firebaseAuth.signInWithCredential(credential);
+            if (!completer.isCompleted) completer.complete('');
+          } catch (e) {
+            if (!completer.isCompleted) completer.completeError(e);
+          }
+        },
+        verificationFailed: (firebase_auth.FirebaseAuthException e) {
+          print('Error de verificación: ${e.message}');
+          if (!completer.isCompleted) {
+            final customError =
+                FirebaseErrorHandler.handleFirebaseAuthException(e);
+            completer.completeError(customError);
+          }
+        },
+        codeSent: (String id, int? resendToken) {
+          print('Código enviado. ID: $id');
+          if (!completer.isCompleted) completer.complete(id);
+        },
+        codeAutoRetrievalTimeout: (String id) {
+          print('Timeout de recuperación automática. ID: $id');
+        },
+      );
+
+      final verificationId = await completer.future;
+      if (verificationId.isEmpty) {
+        throw FirebaseException(
+          plugin: 'auth',
+          code: 'verification-failed',
+          message: 'No se pudo obtener el ID de verificación',
+        );
+      }
+
+      return verificationId;
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      print('Error en sendPhoneVerification: $e');
+      throw FirebaseErrorHandler.handleFirebaseAuthException(e);
+    } catch (e) {
+      print('Error en sendPhoneVerification: $e');
+      if (e is CustomError) throw e;
+      throw FirebaseErrorHandler.handleGenericException(e);
+    }
+  }
+
+  @override
+  Future<bool> verifyPhoneCode(String verificationId, String code) async {
+    try {
+      final credential = firebase_auth.PhoneAuthProvider.credential(
+        verificationId: verificationId,
+        smsCode: code,
+      );
+
+      await _firebaseAuth.signInWithCredential(credential);
+      return true;
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      throw FirebaseErrorHandler.handleFirebaseAuthException(e);
+    } on FirebaseException catch (e) {
+      throw FirebaseErrorHandler.handleFirebaseException(e);
+    } on PlatformException catch (e) {
+      throw FirebaseErrorHandler.handlePlatformException(e);
+    } catch (e) {
+      throw FirebaseErrorHandler.handleGenericException(e);
+    }
+  }
+
+  @override
+  Future<String> resendPhoneCode(String phoneNumber) async {
+    try {
+      return await sendPhoneVerification(phoneNumber);
+    } catch (e) {
+      throw FirebaseErrorHandler.handleGenericException(e);
     }
   }
 

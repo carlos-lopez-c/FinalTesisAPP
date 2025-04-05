@@ -1,87 +1,135 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_c_1/auth/presentation/providers/password_reset_provider.dart';
-import '../Widgets/CustomCard.dart';
+import '../widgets/CustomCard.dart';
 import '/../shared/header.dart';
 
 class ForgotPasswordScreen extends ConsumerWidget {
-  const ForgotPasswordScreen({Key? key}) : super(key: key);
+  const ForgotPasswordScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final forgotPasswordNotifier = ref.watch(passwordResetProvider.notifier);
     final forgotPasswordState = ref.watch(passwordResetProvider);
-    return CustomCard(
-      child: Column(
-        children: [
-          Header(
-            imagePath: 'assets/imagenes/san-miguel.png',
-            title: 'Fundación de niños especiales',
-            subtitle: '"SAN MIGUEL" FUNESAMI',
-            item: 'Recuperar Contraseña',
-          ),
 
-          TextField(
-            keyboardType: TextInputType.emailAddress,
-            onChanged: forgotPasswordNotifier.onEmailChanged,
-            decoration: InputDecoration(
-              labelText: 'Correo Electrónico',
-              labelStyle:
-                  const TextStyle(color: Colors.lightBlue), // Etiqueta celeste
-              hintText: 'ejemplo@correo.com',
-              prefixIcon: const Icon(Icons.email,
-                  color: Colors.lightBlue), // Ícono celeste
-              enabledBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(
-                    color: Colors.lightBlue), // Línea inferior celeste
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F9FF),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Card(
+              elevation: 8.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0),
               ),
-              focusedBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(
-                    color: Colors.lightBlue,
-                    width: 2.0), // Línea más gruesa al enfocar
-              ),
-              border: InputBorder.none, // Elimina el borde predeterminado
-            ),
-            style: const TextStyle(
-                color: Colors.black), // Texto ingresado de color negro
-          ),
-
-          const SizedBox(height: 16),
-
-          // Botón para enviar correo
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Botón de recuperar contraseña con estilo personalizado
-              Material(
-                elevation: 2, // Controla la intensidad de la sombra
-                borderRadius: BorderRadius.circular(30), // Bordes redondeados
-                child: ElevatedButton(
-                  onPressed: () {
-                    forgotPasswordNotifier.sendCode();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: const Color.fromARGB(255, 4, 71, 103),
-                    backgroundColor: Colors.white, // Color del texto (morado)
-                    side: BorderSide(
-                      color: const Color.fromARGB(255, 141, 183, 203),
-                      width: 1.5, // Borde color azul
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(30), // Bordes redondeados
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 15, // Tamaño interno del botón
-                    ),
+              child: Container(
+                padding: const EdgeInsets.all(24.0),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white,
+                      const Color(0xFFE8F4FF),
+                    ],
                   ),
-                  child: const Text('Recuperar Contraseña'),
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Header(
+                      imagePath: 'assets/imagenes/san-miguel.png',
+                      title: 'Fundación de niños especiales',
+                      subtitle: '"SAN MIGUEL" FUNESAMI',
+                      item: 'Recuperar Contraseña',
+                    ),
+                    const SizedBox(height: 32),
+                    const Text(
+                      'Ingrese su correo electrónico para recibir las instrucciones de recuperación',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    TextField(
+                      keyboardType: TextInputType.emailAddress,
+                      onChanged: forgotPasswordNotifier.onEmailChanged,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        labelText: 'Correo Electrónico',
+                        labelStyle: const TextStyle(color: Color(0xFF1976D2)),
+                        hintText: 'ejemplo@correo.com',
+                        prefixIcon:
+                            const Icon(Icons.email, color: Color(0xFF1976D2)),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide:
+                              const BorderSide(color: Color(0xFF1976D2)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                              color: Color(0xFF1976D2), width: 2),
+                        ),
+                      ),
+                      style: const TextStyle(color: Colors.black87),
+                    ),
+                    const SizedBox(height: 32),
+                    ElevatedButton(
+                      onPressed: () {
+                        forgotPasswordNotifier.sendCode();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'Se han enviado las instrucciones a su correo electrónico'),
+                            backgroundColor: Color(0xFF1976D2),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1976D2),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 4,
+                      ),
+                      child: const Text(
+                        'Recuperar Contraseña',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      icon: const Icon(Icons.arrow_back,
+                          color: Color(0xFF1976D2)),
+                      label: const Text(
+                        'Volver al inicio de sesión',
+                        style: TextStyle(
+                          color: Color(0xFF1976D2),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          )
-        ],
+            ),
+          ),
+        ),
       ),
     );
   }

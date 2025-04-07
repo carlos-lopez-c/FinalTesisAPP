@@ -54,6 +54,12 @@ final goRouterProvider = Provider((ref) {
     redirect: (context, state) {
       final isGoingTo = state.uri.path;
       final authStatus = goRouterNotifier.authStatus;
+      if (authStatus == AuthStatus.requires2FA) {
+        if (isGoingTo == '/two-factor') {
+          return null;
+        }
+        return '/two-factor';
+      }
 
       if (authStatus == AuthStatus.notAuthenticated) {
         if (isGoingTo == '/login' ||
@@ -68,7 +74,12 @@ final goRouterProvider = Provider((ref) {
       }
 
       if (authStatus == AuthStatus.authenticated) {
-        if (isGoingTo == '/login' || isGoingTo == '/splash') {
+        if (isGoingTo == '/login' ||
+            isGoingTo == '/splash' ||
+            isGoingTo == '/forgot-password' ||
+            isGoingTo == '/reset-password/code' ||
+            isGoingTo == '/reset-password/new-password' ||
+            isGoingTo == '/two-factor') {
           return '/';
         }
       }

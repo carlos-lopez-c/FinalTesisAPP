@@ -110,20 +110,8 @@ class LoginForm extends ConsumerWidget {
               if (_formKey.currentState?.validate() ?? false) {
                 try {
                   await ref.read(formularioProvider.notifier).onFormSubmit();
-                  // Si el login es exitoso, navegar a la pantalla de verificación
-                  if (context.mounted) {
-                    context.push('/two-factor');
-                  }
                 } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                            'Credenciales inválidas. Por favor, intente nuevamente.'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
+                  print("Error: $e");
                 }
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(

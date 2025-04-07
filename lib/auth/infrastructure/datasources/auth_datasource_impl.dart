@@ -83,22 +83,37 @@ class AuthDatasourceImpl implements AuthDatasource {
 
       final user = userCredential.user;
       if (user == null) {
-        throw CustomError('Error al obtener los datos del usuario.');
+        throw FirebaseException(
+          plugin: 'auth',
+          code: 'user-null',
+          message: 'Error al obtener el usuario.',
+        );
       }
 
       final userDoc = await _firestore.collection('users').doc(user.uid).get();
       if (!userDoc.exists) {
-        throw CustomError('Usuario no encontrado en la base de datos.');
+        throw FirebaseException(
+            plugin: 'firestore',
+            code: 'user-not-found',
+            message: 'Usuario no encontrado en la base de datos.');
       }
 
       final userData = userDoc.data()!;
+      if (userData['role'] != 'Therapy' && userData['role'] != 'Psicology') {
+        throw FirebaseException(
+            plugin: 'auth',
+            code: 'user-not-authorized',
+            message: 'Esta cuenta de Medico no tiene acceso a esta app.');
+      }
       final userInformationDoc = await _firestore
           .collection('userInformation')
           .doc(userData['userInformationId'])
           .get();
-
       if (!userInformationDoc.exists) {
-        throw CustomError('Información del usuario no encontrada.');
+        throw FirebaseException(
+            plugin: 'firestore',
+            code: 'user-not-found',
+            message: 'Usuario no encontrado en la base de datos.');
       }
 
       final userInformationData = userInformationDoc.data()!;
@@ -109,7 +124,6 @@ class AuthDatasourceImpl implements AuthDatasource {
         address: userInformationData['address'],
         phone: userInformationData['phone'],
       );
-
       return User(
         id: user.uid,
         email: user.email!,
@@ -120,15 +134,21 @@ class AuthDatasourceImpl implements AuthDatasource {
         medicID: userData['medicID'],
       );
     } on firebase_auth.FirebaseAuthException catch (e) {
-      throw CustomError(e.message ?? 'Error de autenticación.');
+      throw FirebaseErrorHandler.handleFirebaseAuthException(e);
+    } on FirebaseException catch (e) {
+      throw FirebaseErrorHandler.handleFirebaseException(e);
+    } on PlatformException catch (e) {
+      throw FirebaseErrorHandler.handlePlatformException(e);
     } catch (e) {
-      throw CustomError('Error desconocido: $e');
+      print("Error: ${e}");
+      throw FirebaseErrorHandler.handleGenericException(e);
     }
   }
 
   @override
   Future<String> sendPhoneVerification(String phoneNumber) async {
     try {
+      print("Phone Number: $phoneNumber");
       final formattedPhoneNumber = _formatPhoneNumber(phoneNumber);
       print('Enviando verificación a: $formattedPhoneNumber');
 
@@ -185,20 +205,27 @@ class AuthDatasourceImpl implements AuthDatasource {
   @override
   Future<bool> verifyPhoneCode(String verificationId, String code) async {
     try {
+      print("Verification ID: $verificationId");
+      print("Code: $code");
       final credential = firebase_auth.PhoneAuthProvider.credential(
         verificationId: verificationId,
         smsCode: code,
       );
+      print("Credential: ${credential}");
 
       await _firebaseAuth.signInWithCredential(credential);
+      print("Sign In With Credential: ${_firebaseAuth.currentUser}");
       return true;
     } on firebase_auth.FirebaseAuthException catch (e) {
+      print("Error: ${e}");
       throw FirebaseErrorHandler.handleFirebaseAuthException(e);
     } on FirebaseException catch (e) {
+      print("Error: ${e}");
       throw FirebaseErrorHandler.handleFirebaseException(e);
     } on PlatformException catch (e) {
       throw FirebaseErrorHandler.handlePlatformException(e);
     } catch (e) {
+      print("Error: ${e}");
       throw FirebaseErrorHandler.handleGenericException(e);
     }
   }

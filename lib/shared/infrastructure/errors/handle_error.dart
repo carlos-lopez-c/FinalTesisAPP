@@ -6,6 +6,10 @@ import 'custom_error.dart';
 class FirebaseErrorHandler {
   static CustomError handleFirebaseAuthException(FirebaseAuthException e) {
     switch (e.code) {
+      case 'invalid-verification-code':
+        return CustomError(
+            'El código de verificación es incorrecto. Por favor, revisa e intenta nuevamente.',
+            code: e.code);
       case 'invalid-credential':
         return CustomError(
             'El correo electrónico o la contraseña son incorrectos',
@@ -59,6 +63,9 @@ class FirebaseErrorHandler {
 
   static CustomError handleFirebaseException(FirebaseException e) {
     switch (e.code) {
+      case 'user-not-authorized':
+        return CustomError('Esta cuenta de Medico no tiene acceso a esta app.',
+            code: e.code);
       case 'permission-denied':
         return CustomError('No tienes permisos para realizar esta acción.',
             code: e.code);

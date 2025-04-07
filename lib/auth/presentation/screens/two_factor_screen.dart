@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:h_c_1/auth/presentation/providers/auth_provider.dart';
 import 'package:h_c_1/auth/presentation/providers/two_factor_provider.dart';
 import '/shared/header.dart';
+import 'package:go_router/go_router.dart';
 
 class TwoFactorScreen extends ConsumerWidget {
   const TwoFactorScreen({super.key});
@@ -9,8 +11,25 @@ class TwoFactorScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final twoFactorState = ref.watch(twoFactorProvider);
-    final twoFactorNotifier = ref.watch(twoFactorProvider.notifier);
-
+    final twoFactorNotifier = ref.read(twoFactorProvider.notifier);
+    ref.listen<AuthState>(authProvider, (previous, next) {
+      if (next.errorMessage.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.errorMessage),
+            backgroundColor: Colors.red.shade300,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+      if (next.authStatus == AuthStatus.authenticated) {
+        context.go('/');
+      }
+    });
     return Scaffold(
       backgroundColor: const Color(0xFFF5F9FF),
       body: SafeArea(
@@ -124,8 +143,8 @@ class TwoFactorScreen extends ConsumerWidget {
                     ElevatedButton(
                       onPressed: twoFactorState.isLoading
                           ? null
-                          : () {
-                              twoFactorNotifier.verifyCode();
+                          : () async {
+                              await twoFactorNotifier.verifyCode();
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF1976D2),

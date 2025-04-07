@@ -3,11 +3,14 @@ import 'package:h_c_1/auth/presentation/providers/auth_provider.dart';
 
 final twoFactorProvider =
     StateNotifierProvider.autoDispose<TwoFactorNotifier, TwoFactorState>((ref) {
-  return TwoFactorNotifier();
+  final verifyCodeCallback = ref.watch(authProvider.notifier).verifyPhoneCode;
+  return TwoFactorNotifier(verifyCodeCallback: verifyCodeCallback);
 });
 
 class TwoFactorNotifier extends StateNotifier<TwoFactorState> {
-  TwoFactorNotifier() : super(const TwoFactorState());
+  final Function(String) verifyCodeCallback;
+  TwoFactorNotifier({required this.verifyCodeCallback})
+      : super(const TwoFactorState());
 
   void onCodeChanged(String value) {
     state = state.copyWith(
@@ -22,9 +25,7 @@ class TwoFactorNotifier extends StateNotifier<TwoFactorState> {
     state = state.copyWith(isLoading: true);
 
     try {
-      // Aquí iría la lógica para verificar el código
-      // Por ahora simulamos una verificación exitosa
-      await Future.delayed(const Duration(seconds: 2));
+      await verifyCodeCallback(state.code);
 
       // Si la verificación es exitosa, navegamos al home
       state = state.copyWith(

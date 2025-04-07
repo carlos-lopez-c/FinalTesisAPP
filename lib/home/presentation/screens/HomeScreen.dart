@@ -26,7 +26,7 @@ class HomeScreen extends ConsumerWidget {
     List<Tab> tabs = [];
     List<Widget> tabViews = [];
 
-    if (role == ('TERAPIA')) {
+    if (role == ('Therapy')) {
       tabs = [
         const Tab(icon: Icon(Icons.home), text: "Inicio"),
         const Tab(icon: Icon(Icons.folder), text: "Historias Clínicas"),
@@ -38,7 +38,7 @@ class HomeScreen extends ConsumerWidget {
         Terapiatab(),
         ListaCitasTR(),
       ];
-    } else if (role == ('PSICOLOGIA')) {
+    } else if (role == ('Psicology')) {
       tabs = [
         const Tab(icon: Icon(Icons.home), text: "Inicio"),
         const Tab(icon: Icon(Icons.folder), text: "Historias Clínicas"),

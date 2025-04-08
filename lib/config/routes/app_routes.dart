@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:h_c_1/auth/presentation/providers/auth_provider.dart';
-import 'package:h_c_1/auth/presentation/screens/change_password_screen.dart';
 import 'package:h_c_1/auth/presentation/screens/check_auth_status_screen.dart';
 import 'package:h_c_1/auth/presentation/screens/forward_password.dart';
 import 'package:h_c_1/auth/presentation/screens/login_screen.dart';
@@ -41,14 +40,6 @@ final goRouterProvider = Provider((ref) {
       GoRoute(
         path: '/two-factor',
         builder: (context, state) => const TwoFactorScreen(),
-      ),
-      GoRoute(
-        path: '/reset-password/code',
-        builder: (context, state) => const VerifyCodeScreen(),
-      ),
-      GoRoute(
-        path: '/reset-password/new-password',
-        builder: (context, state) => const ChangePasswordScreen(),
       ),
     ],
     redirect: (context, state) {

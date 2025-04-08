@@ -242,12 +242,34 @@ class AuthDatasourceImpl implements AuthDatasource {
   @override
   Future<void> sendCode(String email) async {
     try {
+      print("Verificando email: $email");
+
+      // Realizar la consulta con limit(1) y usando el parámetro correcto
+      final querySnapshot = await _firestore
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        throw FirebaseException(
+          plugin: 'firestore',
+          code: 'user-not-found',
+          message: 'No existe una cuenta asociada a este correo electrónico.',
+        );
+      }
+
+      // Si el correo existe, enviar el email de reset
       await _firebaseAuth.sendPasswordResetEmail(email: email);
     } on firebase_auth.FirebaseAuthException catch (e) {
-      throw CustomError(
-          e.message ?? 'Error al enviar el correo de restablecimiento.');
+      print("Firebase Auth Error: ${e.message}");
+      throw FirebaseErrorHandler.handleFirebaseAuthException(e);
+    } on FirebaseException catch (e) {
+      print("Firestore Error: ${e.message}");
+      throw FirebaseErrorHandler.handleFirebaseException(e);
     } catch (e) {
-      throw CustomError('Error desconocido: $e');
+      print("Error general: $e");
+      throw FirebaseErrorHandler.handleGenericException(e);
     }
   }
 

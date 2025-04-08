@@ -55,15 +55,27 @@ class ForgotPasswordScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    TextField(
+                    TextFormField(
                       keyboardType: TextInputType.emailAddress,
                       onChanged: forgotPasswordNotifier.onEmailChanged,
                       decoration: InputDecoration(
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Colors.red),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Colors.red),
+                        ),
                         filled: true,
                         fillColor: Colors.white,
                         labelText: 'Correo Electrónico',
                         labelStyle: const TextStyle(color: Color(0xFF1976D2)),
                         hintText: 'ejemplo@correo.com',
+                        errorText: forgotPasswordState.isFormPosted
+                            ? forgotPasswordState.email.errorMessage
+                            : null,
+                        errorStyle: const TextStyle(color: Colors.red),
                         prefixIcon:
                             const Icon(Icons.email, color: Color(0xFF1976D2)),
                         enabledBorder: OutlineInputBorder(
@@ -82,14 +94,8 @@ class ForgotPasswordScreen extends ConsumerWidget {
                     const SizedBox(height: 32),
                     ElevatedButton(
                       onPressed: () {
+                        if (forgotPasswordState.isSubmitting) return;
                         forgotPasswordNotifier.sendCode();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                                'Se han enviado las instrucciones a su correo electrónico'),
-                            backgroundColor: Color(0xFF1976D2),
-                          ),
-                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF1976D2),
@@ -101,13 +107,22 @@ class ForgotPasswordScreen extends ConsumerWidget {
                         ),
                         elevation: 4,
                       ),
-                      child: const Text(
-                        'Recuperar Contraseña',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      child: forgotPasswordState.isSubmitting
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              'Recuperar Contraseña',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                     ),
                     const SizedBox(height: 16),
                     TextButton.icon(

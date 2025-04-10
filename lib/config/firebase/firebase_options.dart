@@ -41,46 +41,48 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAckV13rjrS14o9hC1QDIEXTUrdZLu4z_o',
-    appId: '1:319158977737:web:6678f24d862fbba7257918',
-    messagingSenderId: '319158977737',
-    projectId: 'hctssapp',
-    authDomain: 'hctssapp.firebaseapp.com',
-    storageBucket: 'hctssapp.firebasestorage.app',
+    apiKey: 'AIzaSyC8m_LmwrnRKoPGVfKiZfIiVKbMBRxTF4E',
+    appId: '1:363946695455:web:187df1edcb3818b6e2ae2a',
+    messagingSenderId: '363946695455',
+    projectId: 'funesamiapphc',
+    authDomain: 'funesamiapphc.firebaseapp.com',
+    storageBucket: 'funesamiapphc.firebasestorage.app',
+    measurementId: 'G-JJQM11JYSS',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDGDZ831MxEmK-Wn7PuCCNnUtErQexmccg',
-    appId: '1:319158977737:android:214dbd113fc72de4257918',
-    messagingSenderId: '319158977737',
-    projectId: 'hctssapp',
-    storageBucket: 'hctssapp.firebasestorage.app',
+    apiKey: 'AIzaSyCpoI4msW4oc3sMlApU0S-GLjXI8YedBWE',
+    appId: '1:363946695455:android:7c270cc1f4a01431e2ae2a',
+    messagingSenderId: '363946695455',
+    projectId: 'funesamiapphc',
+    storageBucket: 'funesamiapphc.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBwDsRq4IG25Mf_t91QPlkMcHOT6FyRgg4',
-    appId: '1:319158977737:ios:c192077a6b393afe257918',
-    messagingSenderId: '319158977737',
-    projectId: 'hctssapp',
-    storageBucket: 'hctssapp.firebasestorage.app',
+    apiKey: 'AIzaSyD2CBcfAED7PddR0J--qPRTIfl7VAHnObk',
+    appId: '1:363946695455:ios:f349bb9a71abb4d7e2ae2a',
+    messagingSenderId: '363946695455',
+    projectId: 'funesamiapphc',
+    storageBucket: 'funesamiapphc.firebasestorage.app',
     iosBundleId: 'com.example.hC1',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBwDsRq4IG25Mf_t91QPlkMcHOT6FyRgg4',
-    appId: '1:319158977737:ios:c192077a6b393afe257918',
-    messagingSenderId: '319158977737',
-    projectId: 'hctssapp',
-    storageBucket: 'hctssapp.firebasestorage.app',
+    apiKey: 'AIzaSyD2CBcfAED7PddR0J--qPRTIfl7VAHnObk',
+    appId: '1:363946695455:ios:f349bb9a71abb4d7e2ae2a',
+    messagingSenderId: '363946695455',
+    projectId: 'funesamiapphc',
+    storageBucket: 'funesamiapphc.firebasestorage.app',
     iosBundleId: 'com.example.hC1',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyAckV13rjrS14o9hC1QDIEXTUrdZLu4z_o',
-    appId: '1:319158977737:web:65599e0e835ed25f257918',
-    messagingSenderId: '319158977737',
-    projectId: 'hctssapp',
-    authDomain: 'hctssapp.firebaseapp.com',
-    storageBucket: 'hctssapp.firebasestorage.app',
+    apiKey: 'AIzaSyC8m_LmwrnRKoPGVfKiZfIiVKbMBRxTF4E',
+    appId: '1:363946695455:web:380f28834ff70f3ce2ae2a',
+    messagingSenderId: '363946695455',
+    projectId: 'funesamiapphc',
+    authDomain: 'funesamiapphc.firebaseapp.com',
+    storageBucket: 'funesamiapphc.firebasestorage.app',
+    measurementId: 'G-FDH59EMGW1',
   );
 }

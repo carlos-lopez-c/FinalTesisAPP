@@ -62,6 +62,7 @@ class FirebaseErrorHandler {
   }
 
   static CustomError handleFirebaseException(FirebaseException e) {
+    print(e);
     switch (e.code) {
       case 'user-not-authorized':
         return CustomError('Esta cuenta de Medico no tiene acceso a esta app.',

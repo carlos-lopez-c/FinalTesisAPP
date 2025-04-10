@@ -100,6 +100,7 @@ class AuthDatasourceImpl implements AuthDatasource {
 
       final userData = userDoc.data()!;
       if (userData['role'] != 'Therapy' && userData['role'] != 'Psicology') {
+        print("Role: ${userData['role']}");
         throw FirebaseException(
             plugin: 'auth',
             code: 'user-not-authorized',

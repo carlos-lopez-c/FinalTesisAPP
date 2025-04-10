@@ -1,11 +1,11 @@
-#Tue Apr 08 06:19:42 ECT 2025
-base.0=C\:\\Users\\reybe\\Documents\\FinalTesisAPP\\build\\app\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
-base.1=C\:\\Users\\reybe\\Documents\\FinalTesisAPP\\build\\app\\intermediates\\dex\\debug\\mergeLibDexDebug\\0\\classes.dex
-base.2=C\:\\Users\\reybe\\Documents\\FinalTesisAPP\\build\\app\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
-base.3=C\:\\Users\\reybe\\Documents\\FinalTesisAPP\\build\\app\\intermediates\\dex\\debug\\mergeProjectDexDebug\\1\\classes.dex
-base.4=C\:\\Users\\reybe\\Documents\\FinalTesisAPP\\build\\app\\intermediates\\dex\\debug\\mergeProjectDexDebug\\5\\classes.dex
-base.5=C\:\\Users\\reybe\\Documents\\FinalTesisAPP\\build\\app\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes2.dex
-base.6=C\:\\Users\\reybe\\Documents\\FinalTesisAPP\\build\\app\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes3.dex
+#Thu Apr 10 09:48:33 ECT 2025
+base.0=C\:\\Users\\CARLOS\\Desktop\\FN\\FinalTesisAPP\\build\\app\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
+base.1=C\:\\Users\\CARLOS\\Desktop\\FN\\FinalTesisAPP\\build\\app\\intermediates\\dex\\debug\\mergeLibDexDebug\\0\\classes.dex
+base.2=C\:\\Users\\CARLOS\\Desktop\\FN\\FinalTesisAPP\\build\\app\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
+base.3=C\:\\Users\\CARLOS\\Desktop\\FN\\FinalTesisAPP\\build\\app\\intermediates\\dex\\debug\\mergeProjectDexDebug\\1\\classes.dex
+base.4=C\:\\Users\\CARLOS\\Desktop\\FN\\FinalTesisAPP\\build\\app\\intermediates\\dex\\debug\\mergeProjectDexDebug\\5\\classes.dex
+base.5=C\:\\Users\\CARLOS\\Desktop\\FN\\FinalTesisAPP\\build\\app\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes2.dex
+base.6=C\:\\Users\\CARLOS\\Desktop\\FN\\FinalTesisAPP\\build\\app\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes3.dex
 path.0=classes.dex
 path.1=0/classes.dex
 path.2=0/classes.dex

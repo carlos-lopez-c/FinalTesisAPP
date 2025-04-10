@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_c_1/auth/presentation/providers/password_reset_provider.dart';
-import '../widgets/CustomCard.dart';
 import '/../shared/header.dart';
 
 class ForgotPasswordScreen extends ConsumerWidget {
@@ -91,11 +90,26 @@ class ForgotPasswordScreen extends ConsumerWidget {
                       ),
                       style: const TextStyle(color: Colors.black87),
                     ),
+
+                    // 🔴 Aquí se muestra el mensaje de error si existe
+                    if (forgotPasswordState.errorMessage.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          forgotPasswordState.errorMessage,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+
                     const SizedBox(height: 32),
                     ElevatedButton(
                       onPressed: () {
                         if (forgotPasswordState.isSubmitting) return;
-                        forgotPasswordNotifier.sendCode();
+                        forgotPasswordNotifier.sendCode(context);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF1976D2),

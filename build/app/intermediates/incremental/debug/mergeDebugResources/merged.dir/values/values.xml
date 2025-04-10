@@ -428,17 +428,16 @@
     <string name="fallback_menu_item_copy_link">Copy link</string>
     <string name="fallback_menu_item_open_in_browser">Open in browser</string>
     <string name="fallback_menu_item_share_link">Share link</string>
-    <string name="firebase_database_url" translatable="false">https://hctssapp-default-rtdb.firebaseio.com</string>
-    <string name="gcm_defaultSenderId" translatable="false">319158977737</string>
-    <string name="google_api_key" translatable="false">AIzaSyDGDZ831MxEmK-Wn7PuCCNnUtErQexmccg</string>
-    <string name="google_app_id" translatable="false">1:319158977737:android:214dbd113fc72de4257918</string>
-    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyDGDZ831MxEmK-Wn7PuCCNnUtErQexmccg</string>
-    <string name="google_storage_bucket" translatable="false">hctssapp.firebasestorage.app</string>
+    <string name="gcm_defaultSenderId" translatable="false">363946695455</string>
+    <string name="google_api_key" translatable="false">AIzaSyCpoI4msW4oc3sMlApU0S-GLjXI8YedBWE</string>
+    <string name="google_app_id" translatable="false">1:363946695455:android:7c270cc1f4a01431e2ae2a</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyCpoI4msW4oc3sMlApU0S-GLjXI8YedBWE</string>
+    <string name="google_storage_bucket" translatable="false">funesamiapphc.firebasestorage.app</string>
     <string name="not_set">Not set</string>
     <string name="preference_copied">
         \"<ns1:g example="Version 1.1" id="summary">%1$s</ns1:g>\" copied to clipboard.
     </string>
-    <string name="project_id" translatable="false">hctssapp</string>
+    <string name="project_id" translatable="false">funesamiapphc</string>
     <string name="search_menu_title">Search</string>
     <string name="status_bar_notification_info_overflow">999+</string>
     <string name="summary_collapsed_preference_list"><ns1:g id="current_items">%1$s</ns1:g>, <ns1:g id="added_items">%2$s</ns1:g></string>

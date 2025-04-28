@@ -3,7 +3,7 @@ import 'package:h_c_1/hc_tr/domain/entities/hc_general/hc_general_entity.dart';
 class HcGeneralFormState {
   final bool loading;
   final String errorMessage;
-  final successMessage;
+  final String successMessage;
   final CreateHcGeneral createHcGeneral;
   final String tipo;
   final String cedula;

@@ -107,6 +107,14 @@ class HcNotifier extends StateNotifier<HCState> {
     }
   }
 
+  void clearError() {
+    state = state.copyWith(errorMessage: '');
+  }
+
+  void clearSuccess() {
+    state = state.copyWith(successMessage: '');
+  }
+
   Future<void> createHcVoice(CreateHcVoice hc) async {
     print('🟢 Creando historia clínica');
     state = state.copyWith(loading: true);
@@ -125,17 +133,21 @@ class HcNotifier extends StateNotifier<HCState> {
 class HCState {
   final bool loading;
   final String errorMessage;
+  final String successMessage;
 
   const HCState({
+    this.successMessage = '',
     this.loading = false,
     this.errorMessage = '',
   });
 
   HCState copyWith({
+    String? successMessage,
     bool? loading,
     String? errorMessage,
   }) {
     return HCState(
+      successMessage: successMessage ?? this.successMessage,
       loading: loading ?? this.loading,
       errorMessage: errorMessage ?? this.errorMessage,
     );

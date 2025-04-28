@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:h_c_1/auth/infrastructure/errors/auth_errors.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_general/al_nacer_necesito.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_general/al_nacer_presento.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_general/alimentacion.dart';
@@ -20,6 +19,7 @@ import 'package:h_c_1/hc_tr/presentation/providers/hc_provider.dart';
 import 'package:h_c_1/hc_tr/presentation/providers/state/hc_general_state.dart';
 import 'package:h_c_1/patient/domain/repositories/patient_repository.dart';
 import 'package:h_c_1/patient/infrastructure/repositories/patient_repository_impl.dart';
+import 'package:h_c_1/shared/infrastructure/errors/custom_error.dart';
 import 'package:intl/intl.dart';
 // 🔹 Provider del formulario de historia clínica general
 
@@ -267,9 +267,15 @@ class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
 
   Future<void> getPacienteByDni(String dni) async {
     try {
+      if (dni.isEmpty) {
+        state = state.copyWith(
+          errorMessage: 'Error, debe ingresar un número de cédula',
+        );
+        return;
+      }
       state = state.copyWith(loading: true);
+      print('DNI: $dni');
       final paciente = await patientRepository.getPatientByDni(dni);
-      print("Aqui llega ${paciente.toJson()}");
       // Formatear la fecha de nacimiento a 'yyyy-MM-dd'
       final fechaNacimiento =
           DateFormat('yyyy-MM-dd').format(paciente.birthdate);
@@ -287,6 +293,7 @@ class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
 
       // Actualizar el estado con la información del paciente
       state = state.copyWith(
+        successMessage: 'Paciente encontrado',
         loading: false,
         edad: edad,
         createHcGeneral: state.createHcGeneral.copyWith(
@@ -298,9 +305,17 @@ class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
         ),
       );
     } on CustomError catch (e) {
+      print('Error CustomError capturado: ${e.message}, código: ${e.message}');
       state = state.copyWith(
         loading: false,
-        errorMessage: e.message ?? 'Error al obtener paciente',
+        errorMessage: e.message,
+      );
+    } catch (e) {
+      // Añade este bloque para capturar cualquier otro tipo de error
+      print('Error genérico capturado en provider: $e');
+      state = state.copyWith(
+        loading: false,
+        errorMessage: e.toString(),
       );
     }
   }
@@ -2959,6 +2974,14 @@ class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
         ),
       ),
     );
+  }
+
+  void clearErrorMessage() {
+    state = state.copyWith(errorMessage: '');
+  }
+
+  void clearSuccessMessage() {
+    state = state.copyWith(successMessage: '');
   }
 
   int calcularEdad(String fechaNacimiento) {

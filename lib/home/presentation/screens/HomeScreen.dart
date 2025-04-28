@@ -34,7 +34,10 @@ class HomeScreen extends ConsumerWidget {
       ];
 
       tabViews = [
-        HomeContent(),
+        HomeContent(
+            name: authState.user!.userInformation!.firstName +
+                ' ' +
+                authState.user!.userInformation!.lastName),
         Terapiatab(),
         ListaCitasTR(),
       ];
@@ -85,6 +88,8 @@ class HomeScreen extends ConsumerWidget {
 
 // Pantalla de contenido principal (Home)
 class HomeContent extends StatelessWidget {
+  final String name;
+  const HomeContent({Key? key, this.name = ''}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -117,8 +122,8 @@ class HomeContent extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                'Bienvenido/a ',
+              Text(
+                'Bienvenido/a  ' '$name',
                 style: TextStyle(
                     fontSize: 20,
                     color: Colors.blueAccent,

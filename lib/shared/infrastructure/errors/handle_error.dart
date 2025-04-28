@@ -71,7 +71,8 @@ class FirebaseErrorHandler {
         return CustomError('No tienes permisos para realizar esta acción.',
             code: e.code);
       case 'not-found':
-        return CustomError('No se encontró la información solicitada.',
+        return CustomError(
+            e.message ?? 'No se encontró la información solicitada.',
             code: e.code);
       case 'unavailable':
         return CustomError(

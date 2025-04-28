@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:h_c_1/hc_tr/presentation/providers/hc_form_general_provider.dart';
 import 'package:h_c_1/hc_tr/presentation/providers/state/hc_general_state.dart';
 import 'package:h_c_1/hc_tr/presentation/widgets/hc_general/antecedentes_perinatales.dart';
@@ -22,16 +23,35 @@ class HcTrGeneral extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.successMessage),
+            backgroundColor: Colors.green.shade300,
+            behavior: SnackBarBehavior.fixed,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
             duration: const Duration(seconds: 2),
           ),
         );
+        Future.delayed(const Duration(seconds: 2), () {
+          ref.read(hcGeneralProvider.notifier).clearSuccessMessage();
+          context.go('/login');
+        });
       } else if (next.errorMessage.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.errorMessage),
+            backgroundColor: Colors.red.shade300,
+            behavior: SnackBarBehavior.fixed,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
             duration: const Duration(seconds: 2),
           ),
         );
+
+        Future.delayed(const Duration(seconds: 2), () {
+          ref.read(hcGeneralProvider.notifier).clearErrorMessage();
+          context.go('/login');
+        });
       }
     });
 

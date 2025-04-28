@@ -53,4 +53,10 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<String> resendPhoneCode(String phoneNumber) {
     return authDatasource.resendPhoneCode(phoneNumber);
   }
+
+  @override
+  Future<void> changePassword(
+      String email, String oldPassword, String newPassword) {
+    return authDatasource.changePassword(email, oldPassword, newPassword);
+  }
 }

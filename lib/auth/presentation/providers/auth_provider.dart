@@ -95,6 +95,35 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  Future<void> changePassword(String password, String newPassword) async {
+    try {
+      state = state.copyWith(
+        isLoading: true,
+        errorMessage: '',
+      );
+
+      await authRepository.changePassword(
+          state.user!.email, password, newPassword);
+      state = state.copyWith(
+        isLoading: false,
+        successMessage: 'Contraseña cambiada con éxito',
+      );
+    } on CustomError catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.message,
+      );
+    }
+  }
+
+  void clearError() {
+    state = state.copyWith(errorMessage: '');
+  }
+
+  void clearSuccess() {
+    state = state.copyWith(successMessage: '');
+  }
+
   Future<void> loginUser(String email, String password) async {
     try {
       final user = await authRepository.login(email, password);
@@ -160,6 +189,7 @@ class AuthState {
   final User? user;
   final String? phoneNumber;
   final String? verificationId;
+  final String successMessage;
   final String errorMessage;
   final bool isLoading;
 
@@ -169,12 +199,14 @@ class AuthState {
       this.phoneNumber,
       this.verificationId,
       this.errorMessage = '',
+      this.successMessage = '',
       this.isLoading = false});
 
   AuthState copyWith({
     AuthStatus? authStatus,
     User? user,
     String? phoneNumber,
+    String? successMessage,
     String? errorMessage,
     String? verificationId,
     bool? isLoading,
@@ -182,6 +214,7 @@ class AuthState {
       AuthState(
           authStatus: authStatus ?? this.authStatus,
           user: user ?? this.user,
+          successMessage: successMessage ?? this.successMessage,
           phoneNumber: phoneNumber ?? this.phoneNumber,
           errorMessage: errorMessage ?? this.errorMessage,
           verificationId: verificationId ?? this.verificationId,

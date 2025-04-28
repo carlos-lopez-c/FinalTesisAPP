@@ -33,7 +33,6 @@ class HcTrGeneral extends ConsumerWidget {
         );
         Future.delayed(const Duration(seconds: 2), () {
           ref.read(hcGeneralProvider.notifier).clearSuccessMessage();
-          context.go('/login');
         });
       } else if (next.errorMessage.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -50,7 +49,6 @@ class HcTrGeneral extends ConsumerWidget {
 
         Future.delayed(const Duration(seconds: 2), () {
           ref.read(hcGeneralProvider.notifier).clearErrorMessage();
-          context.go('/login');
         });
       }
     });

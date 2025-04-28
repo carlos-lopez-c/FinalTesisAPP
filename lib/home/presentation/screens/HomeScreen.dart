@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:h_c_1/auth/presentation/providers/auth_provider.dart';
 import 'package:h_c_1/citas_medicTR/presentation/screens/ListaCitasTR.dart';
 import 'package:h_c_1/hc_ps/presentation/screens/PsicologiaTab.dart';
@@ -97,10 +98,23 @@ class HomeContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(height: 110),
+          SizedBox(height: 30),
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
-            children: const [
+            children: [
+              ElevatedButton(
+                  onPressed: () {
+                    context.push('/change-password');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: Text('Cambiar Contraseña',
+                      style: TextStyle(fontSize: 20))),
+              const SizedBox(height: 20),
               Text(
                 'Fundación de niños especiales',
                 style: TextStyle(

@@ -15,6 +15,7 @@ import 'package:h_c_1/hc_tr/domain/entities/hc_general/habitos_personale.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_general/hc_general_entity.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_general/integracion_sensorial.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_general/reflejos_primitivos.dart';
+import 'package:h_c_1/hc_tr/infrastructure/repositories/hc_repository_impl.dart';
 import 'package:h_c_1/hc_tr/presentation/providers/hc_provider.dart';
 import 'package:h_c_1/hc_tr/presentation/providers/state/hc_general_state.dart';
 import 'package:h_c_1/patient/domain/repositories/patient_repository.dart';
@@ -27,6 +28,7 @@ final initialHcGeneral = HcGeneralFormState(
   edad: 0,
   tipo: 'Nuevo',
   cedula: '',
+  status: 'Nuevo',
   successMessage: '',
   errorMessage: '',
   createHcGeneral: CreateHcGeneral(
@@ -223,11 +225,16 @@ final hcGeneralProvider =
     AutoDisposeStateNotifierProvider<HcGeneralFormNotifier, HcGeneralFormState>(
   (ref) {
     final getHcGeneral = ref.read(hcProvider.notifier).getHcGeneral;
+    final hcRepository = HcRepositoryImpl();
+    final exitsHcGeneral = hcRepository.existHcGeneral;
     PatientRepository patientRepository = PatientRepositoryImpl();
     final createHcGeneral = ref.read(hcProvider.notifier).createHcGeneral;
+    final updateHcGeneral = ref.read(hcProvider.notifier).updateHcGeneral;
     return HcGeneralFormNotifier(
         patientRepository: patientRepository,
         createHcGeneral: createHcGeneral,
+        updateHcGeneral: updateHcGeneral,
+        exitsHcGeneral: exitsHcGeneral,
         getHcGeneral: getHcGeneral);
   },
 );
@@ -235,11 +242,15 @@ final hcGeneralProvider =
 class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
   final PatientRepository patientRepository;
   final Function(CreateHcGeneral) createHcGeneral;
+  final Function(CreateHcGeneral) updateHcGeneral;
+  final Function(String) exitsHcGeneral;
   final Function(String) getHcGeneral;
   HcGeneralFormNotifier({
     required this.getHcGeneral,
     required this.createHcGeneral,
     required this.patientRepository,
+    required this.updateHcGeneral,
+    required this.exitsHcGeneral,
   }) : super(
           initialHcGeneral,
         );
@@ -270,6 +281,13 @@ class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
       if (dni.isEmpty) {
         state = state.copyWith(
           errorMessage: 'Error, debe ingresar un número de cédula',
+        );
+        return;
+      }
+      final existHcGeneral = await exitsHcGeneral(dni);
+      if (existHcGeneral) {
+        state = state.copyWith(
+          errorMessage: 'Historia clínica ya existe para este paciente',
         );
         return;
       }
@@ -363,16 +381,28 @@ class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
           state.copyWith(successMessage: 'Historia clínica creada con éxito');
     } on CustomError catch (e) {
       state = state.copyWith(
-        errorMessage: e.message ?? 'Error al crear historia clínica',
-        successMessage: '',
+        errorMessage: e.message,
       );
-      print('🔴 Error al crear historia clínica: $e');
     } catch (e) {
       state = state.copyWith(
         errorMessage: 'Error inesperado al crear historia clínica',
-        successMessage: '',
       );
-      print('🔴 Error inesperado: $e');
+    } finally {
+      state = state.copyWith(loading: false);
+    }
+  }
+
+  Future<void> onUpdateHcGeneral() async {
+    try {
+      state = state.copyWith(loading: true);
+      await updateHcGeneral(state.createHcGeneral);
+      state = state.copyWith(
+        successMessage: 'Historia clínica actualizada con éxito',
+      );
+    } on CustomError catch (e) {
+      state = state.copyWith(
+        errorMessage: e.message,
+      );
     } finally {
       state = state.copyWith(loading: false);
     }
@@ -382,13 +412,14 @@ class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
     try {
       state = state.copyWith(loading: true);
       final hcGeneral = await getHcGeneral(cedula);
-      print("Aqui tambien llega ${hcGeneral?.toJson()}");
+      print(hcGeneral.toString());
       state = state.copyWith(
+        status: 'Editado',
         createHcGeneral: hcGeneral,
       );
     } on CustomError catch (e) {
       state = state.copyWith(
-        errorMessage: e.message ?? 'Error al obtener historia clínica',
+        errorMessage: e.message,
       );
     } finally {
       state = state.copyWith(loading: false);

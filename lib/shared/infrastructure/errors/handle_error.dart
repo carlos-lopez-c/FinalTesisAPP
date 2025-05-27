@@ -6,6 +6,10 @@ import 'custom_error.dart';
 class FirebaseErrorHandler {
   static CustomError handleFirebaseAuthException(FirebaseAuthException e) {
     switch (e.code) {
+      case 'provider-already-linked':
+        return CustomError(
+            'El proveedor ya está vinculado a la cuenta. Por favor, intenta con otro.',
+            code: e.code);
       case 'invalid-verification-code':
         return CustomError(
             'El código de verificación es incorrecto. Por favor, revisa e intenta nuevamente.',
@@ -39,10 +43,6 @@ class FirebaseErrorHandler {
         return CustomError(
             'Demasiados intentos. Por favor, espera unos minutos antes de intentar nuevamente.',
             code: e.code);
-      case 'invalid-verification-code':
-        return CustomError(
-            'El código de verificación es incorrecto. Por favor, revisa e intenta nuevamente.',
-            code: e.code);
       case 'invalid-verification-id':
         return CustomError(
             'La sesión de verificación ha expirado. Por favor, solicita un nuevo código.',
@@ -62,8 +62,13 @@ class FirebaseErrorHandler {
   }
 
   static CustomError handleFirebaseException(FirebaseException e) {
-    print(e);
     switch (e.code) {
+      case 'id-hc-empty':
+        return CustomError('El ID de la historia clínica no puede estar vacío.',
+            code: e.code);
+      case 'hc-not-found':
+        return CustomError('No se encontró la historia clínica asociada al DNI',
+            code: e.code);
       case 'user-not-authorized':
         return CustomError('Esta cuenta de Medico no tiene acceso a esta app.',
             code: e.code);

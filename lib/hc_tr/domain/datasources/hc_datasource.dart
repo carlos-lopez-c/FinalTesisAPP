@@ -17,4 +17,5 @@ abstract class HcDatasource {
   Future<void> updateHcGeneral(CreateHcGeneral hc);
   Future<void> updateHcAdult(CreateHcAdultEntity hc);
   Future<void> updateHcVoice(CreateHcVoice hc);
+  Future<bool> existHcGeneral(String cedula);
 }

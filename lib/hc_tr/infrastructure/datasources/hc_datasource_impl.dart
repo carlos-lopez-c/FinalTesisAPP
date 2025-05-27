@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart'; // Importamos el paquete Firestore
+import 'package:flutter/services.dart';
 import 'package:h_c_1/auth/infrastructure/errors/auth_errors.dart';
 import 'package:h_c_1/hc_ps/domain/entities/hc_ps_adult/create_hc_adult.dart';
 import 'package:h_c_1/hc_tr/domain/datasources/hc_datasource.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_adult/hc_adult_entity.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_general/hc_general_entity.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_voice/create_hc_voice_entity.dart';
+import 'package:h_c_1/shared/infrastructure/errors/handle_error.dart';
 
 class HcDatasourceImpl implements HcDatasource {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -52,6 +54,41 @@ class HcDatasourceImpl implements HcDatasource {
   }
 
   @override
+  Future<bool> existHcGeneral(String cedula) async {
+    try {
+      // 1. Buscar al paciente por su DNI
+      final pacientesSnapshot = await firestore
+          .collection('patients') // Colección de pacientes
+          .where('dni', isEqualTo: cedula) // Filtra por DNI
+          .limit(1) // Limita a 1 resultado (asumimos que el DNI es único)
+          .get();
+
+      if (pacientesSnapshot.docs.isEmpty) {
+        return false; // No se encontró el paciente
+      }
+
+      // Obtener el ID del paciente
+      final pacienteId = pacientesSnapshot.docs.first.id;
+
+      // 2. Buscar la historia clínica por el ID del paciente
+      final hcSnapshot = await firestore
+          .collection('HcTrGeneral') // Colección de historias clínicas
+          .where('patientId',
+              isEqualTo: pacienteId) // Filtra por ID del paciente
+          .limit(1) // Limita a 1 resultado (asumimos que hay una sola HC por paciente)
+          .get();
+
+      return hcSnapshot.docs.isNotEmpty; // Retorna true si se encontró la HC
+    } on FirebaseException catch (e) {
+      throw FirebaseErrorHandler.handleFirebaseException(e);
+    } on PlatformException catch (e) {
+      throw FirebaseErrorHandler.handlePlatformException(e);
+    } catch (e) {
+      throw FirebaseErrorHandler.handleGenericException(e);
+    }
+  }
+
+  @override
   Future<CreateHcGeneral> getHcGeneral(String cedula) async {
     try {
       // 1. Buscar al paciente por su DNI
@@ -62,8 +99,10 @@ class HcDatasourceImpl implements HcDatasource {
           .get();
 
       if (pacientesSnapshot.docs.isEmpty) {
-        throw CustomError(
-            'No se encontró un paciente con el DNI proporcionado');
+        throw FirebaseException(
+            plugin: 'firestore',
+            code: 'hc-not-found',
+            message: 'No se encontró una historia clínica para este paciente');
       }
 
       // Obtener el ID del paciente
@@ -79,18 +118,25 @@ class HcDatasourceImpl implements HcDatasource {
           .get();
 
       if (hcSnapshot.docs.isEmpty) {
-        throw CustomError(
-            'No se encontró una historia clínica para este paciente');
+        throw FirebaseException(
+            plugin: 'firestore',
+            code: 'hc-not-found',
+            message: 'No se encontró una historia clínica para este paciente');
       }
 
       // Obtener los datos de la historia clínica
       final hcData = hcSnapshot.docs.first.data();
-      print("Datos: $hcData");
+
+      // Agregar el ID del documento a los datos de la historia clínica
+      hcData['id'] = hcSnapshot.docs.first.id; // Obtener el ID del documento
       // Convertir los datos a un objeto CreateHcGeneral
       return CreateHcGeneral.fromJson(hcData);
+    } on FirebaseException catch (e) {
+      throw FirebaseErrorHandler.handleFirebaseException(e);
+    } on PlatformException catch (e) {
+      throw FirebaseErrorHandler.handlePlatformException(e);
     } catch (e) {
-      print('Error al obtener la historia clínica: $e');
-      throw CustomError('Error al obtener la historia clínica');
+      throw FirebaseErrorHandler.handleGenericException(e);
     }
   }
 
@@ -252,7 +298,10 @@ class HcDatasourceImpl implements HcDatasource {
   Future<void> updateHcAdult(CreateHcAdultEntity hc) async {
     try {
       if (hc.id == null || hc.id!.isEmpty) {
-        throw CustomError('El ID del documento es necesario para actualizar');
+        throw FirebaseException(
+            plugin: 'firestore',
+            code: 'id-hc-empty',
+            message: 'El ID del documento es necesario para actualizar');
       }
       final hcData = hc.toJson();
 
@@ -261,18 +310,37 @@ class HcDatasourceImpl implements HcDatasource {
           .collection('HcTrAdult') // Colección de historias clínicas
           .doc(hc.id) // Referencia al documento específico
           .update(hcData); // Actualizar con los nuevos datos
-      print('Holaaaaaaaaa');
       print('Historia clínica actualizada correctamente');
     } catch (e) {
       print('Error al actualizar la historia clínica: $e');
-      throw CustomError('Error al actualizar la historia clínica');
     }
   }
 
   @override
-  Future<void> updateHcGeneral(CreateHcGeneral hc) {
-    // TODO: implement updateHcGeneral
-    throw UnimplementedError();
+  Future<void> updateHcGeneral(CreateHcGeneral hc) async {
+    try {
+      if (hc.id == null || hc.id!.isEmpty) {
+        throw FirebaseException(
+            plugin: 'firestore',
+            code: 'id-hc-empty',
+            message: 'El ID del documento es necesario para actualizar');
+      }
+      final hcData = hc.toJson();
+
+      // Actualizar el documento en Firestore
+      await firestore
+          .collection('HcTrGeneral') // Colección de historias clínicas
+          .doc(hc.id) // Referencia al documento específico
+          .update(hcData); // Actualizar con los nuevos datos
+
+      print('Historia clínica actualizada correctamente');
+    } on FirebaseException catch (e) {
+      throw FirebaseErrorHandler.handleFirebaseException(e);
+    } on PlatformException catch (e) {
+      throw FirebaseErrorHandler.handlePlatformException(e);
+    } catch (e) {
+      throw FirebaseErrorHandler.handleGenericException(e);
+    }
   }
 
   @override

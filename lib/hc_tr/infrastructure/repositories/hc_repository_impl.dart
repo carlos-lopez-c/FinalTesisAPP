@@ -70,4 +70,9 @@ class HcRepositoryImpl implements HcRepository {
   Future<void> updateHcVoice(CreateHcVoice hc) {
     return datasource.updateHcVoice(hc);
   }
+
+  @override
+  Future<bool> existHcGeneral(String cedula) {
+    return datasource.existHcGeneral(cedula);
+  }
 }

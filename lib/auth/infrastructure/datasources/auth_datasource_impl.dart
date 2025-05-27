@@ -143,7 +143,6 @@ class AuthDatasourceImpl implements AuthDatasource {
     } on PlatformException catch (e) {
       throw FirebaseErrorHandler.handlePlatformException(e);
     } catch (e) {
-      print("Error: ${e}");
       throw FirebaseErrorHandler.handleGenericException(e);
     }
   }
@@ -261,9 +260,7 @@ class AuthDatasourceImpl implements AuthDatasource {
           print("Credenciales vinculadas exitosamente");
           return true;
         } catch (linkError) {
-          print("Error al vincular credenciales: $linkError");
-          // Si no se puede vincular (por ejemplo, si el teléfono ya está en uso),
-          // aún podemos autenticar al usuario con su correo original
+          // Si el codigo es incorrecto, se lanzará una excepción
           return true;
         }
       } else {

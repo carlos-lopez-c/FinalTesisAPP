@@ -15,12 +15,14 @@ class AntecedentesPrenatalesWidget extends ConsumerWidget {
       children: [
         _buildSection('4.1.- ANTECEDENTES PRENATALES'),
         _buildCheckboxList(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: 'Deseado / Planificado',
           value:
               hcState.createHcGeneral.antecedentesPersonales.deseado ?? false,
           onChanged: hcNotifier.onDeseadoChanged,
         ),
         _buildCheckboxList(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: 'Automedicación',
           value:
               hcState.createHcGeneral.antecedentesPersonales.automedicacion ??
@@ -28,41 +30,48 @@ class AntecedentesPrenatalesWidget extends ConsumerWidget {
           onChanged: hcNotifier.onAutomedicacionChanged,
         ),
         _buildCheckboxList(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: 'Depresión',
           value:
               hcState.createHcGeneral.antecedentesPersonales.depresion ?? false,
           onChanged: hcNotifier.onDepresionChanged,
         ),
         _buildCheckboxList(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: 'Estrés',
           value: hcState.createHcGeneral.antecedentesPersonales.estres ?? false,
           onChanged: hcNotifier.onEstresChanged,
         ),
         _buildCheckboxList(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: 'Ansiedad',
           value:
               hcState.createHcGeneral.antecedentesPersonales.ansiedad ?? false,
           onChanged: hcNotifier.onAnsiedadChanged,
         ),
         _buildCheckboxList(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: 'Traumatismo',
           value: hcState.createHcGeneral.antecedentesPersonales.traumatismo ??
               false,
           onChanged: hcNotifier.onTraumatismoChanged,
         ),
         _buildCheckboxList(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: 'Radiaciones',
           value: hcState.createHcGeneral.antecedentesPersonales.radiaciones ??
               false,
           onChanged: hcNotifier.onRadiacionesChanged,
         ),
         _buildCheckboxList(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: 'Medicina',
           value:
               hcState.createHcGeneral.antecedentesPersonales.medicina ?? false,
           onChanged: hcNotifier.onMedicinaChanged,
         ),
         _buildCheckboxList(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: 'Riesgos de aborto',
           value:
               hcState.createHcGeneral.antecedentesPersonales.riesgoDeAborto ??
@@ -70,6 +79,7 @@ class AntecedentesPrenatalesWidget extends ConsumerWidget {
           onChanged: hcNotifier.onRiesgoDeAbortoChanged,
         ),
         _buildCheckboxList(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: 'Maltrato físico',
           value:
               hcState.createHcGeneral.antecedentesPersonales.maltratoFisico ??
@@ -77,6 +87,7 @@ class AntecedentesPrenatalesWidget extends ConsumerWidget {
           onChanged: hcNotifier.onMaltratoFisicoChanged,
         ),
         _buildCheckboxList(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: 'Consumo de drogas',
           value:
               hcState.createHcGeneral.antecedentesPersonales.consumoDeDrogas ??
@@ -84,6 +95,7 @@ class AntecedentesPrenatalesWidget extends ConsumerWidget {
           onChanged: hcNotifier.onConsumoDeDrogasChanged,
         ),
         _buildCheckboxList(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: 'Consumo de alcohol',
           value:
               hcState.createHcGeneral.antecedentesPersonales.consumoDeAlcohol ??
@@ -91,6 +103,7 @@ class AntecedentesPrenatalesWidget extends ConsumerWidget {
           onChanged: hcNotifier.onConsumoDeAlcoholChanged,
         ),
         _buildCheckboxList(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: 'Consumo de tabaco',
           value:
               hcState.createHcGeneral.antecedentesPersonales.consumoDeTabaco ??
@@ -98,12 +111,14 @@ class AntecedentesPrenatalesWidget extends ConsumerWidget {
           onChanged: hcNotifier.onConsumoDeTabacoChanged,
         ),
         _buildCheckboxList(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: 'Hipertensión',
           value: hcState.createHcGeneral.antecedentesPersonales.hipertension ??
               false,
           onChanged: hcNotifier.onHipertensionChanged,
         ),
         _buildCheckboxList(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: 'Dieta balanceada',
           value:
               hcState.createHcGeneral.antecedentesPersonales.dietaBalanceada ??
@@ -128,6 +143,7 @@ class AntecedentesPrenatalesWidget extends ConsumerWidget {
 
   // 🔹 Función para generar una lista de checkboxes conectada al estado
   Widget _buildCheckboxList({
+    bool disabled = false,
     required String title,
     required bool value,
     required Function(bool) onChanged,
@@ -135,6 +151,7 @@ class AntecedentesPrenatalesWidget extends ConsumerWidget {
     return CheckboxListTile(
       title: Text(title),
       value: value,
+      enabled: disabled ? false : true,
       onChanged: (newValue) => onChanged(newValue ?? false),
     );
   }

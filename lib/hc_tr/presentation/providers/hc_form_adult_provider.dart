@@ -195,7 +195,7 @@ class HcAdultFormNotifier extends StateNotifier<HcAdultState> {
       );
     } on CustomError catch (e) {
       state = state.copyWith(
-        errorMessage: e.toString() ?? 'Error al actualizar historia clínica',
+        errorMessage: e.toString(),
         successMessage: '',
       );
       ScaffoldMessenger.of(context).showSnackBar(

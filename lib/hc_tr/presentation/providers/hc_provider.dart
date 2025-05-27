@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:h_c_1/auth/infrastructure/errors/auth_errors.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_adult/hc_adult_entity.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_general/hc_general_entity.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_voice/create_hc_voice_entity.dart';
 import 'package:h_c_1/hc_tr/domain/repositories/hc_repository.dart';
 import 'package:h_c_1/hc_tr/infrastructure/repositories/hc_repository_impl.dart';
+import 'package:h_c_1/shared/infrastructure/errors/custom_error.dart';
 
 final hcProvider = StateNotifierProvider<HcNotifier, HCState>((ref) {
   final hcRepository = HcRepositoryImpl();
@@ -24,6 +24,20 @@ class HcNotifier extends StateNotifier<HCState> {
       print('🔴 Error al crear historia clínica: ${e.message}');
       state = state.copyWith(
           errorMessage: e.message ?? 'Error al crear historia clínica');
+    } finally {
+      state = state.copyWith(loading: false);
+    }
+  }
+
+  Future<void> updateHcGeneral(CreateHcGeneral hc) async {
+    print('🟢 Actualizando historia clínica');
+    state = state.copyWith(loading: true);
+    try {
+      await _hcRepository.updateHcGeneral(hc);
+    } on CustomError catch (e) {
+      print('🔴 Error al actualizar historia clínica: ${e.message}');
+      state = state.copyWith(
+          errorMessage: e.message ?? 'Error al actualizar historia clínica');
     } finally {
       state = state.copyWith(loading: false);
     }
@@ -58,15 +72,13 @@ class HcNotifier extends StateNotifier<HCState> {
   }
 
   Future<CreateHcGeneral?> getHcGeneral(String cedula) async {
-    print('🟢 Obteniendo historia clínica');
+    print('🟢 Obteniendo historia clínica general');
     state = state.copyWith(loading: true);
     try {
       final hc = await _hcRepository.getHcGeneral(cedula);
-      print("aQUI SI LLEGA");
       state = state.copyWith(errorMessage: '');
       return hc;
     } on CustomError catch (e) {
-      print('🔴 Error al obtener historia clínica: ${e.message}');
       state = state.copyWith(
           errorMessage: e.message ?? 'Error al obtener historia clínica');
     } finally {
@@ -99,9 +111,8 @@ class HcNotifier extends StateNotifier<HCState> {
       state = state.copyWith(errorMessage: '');
       return hc;
     } catch (e) {
-      print('🔴 Error al obtener historia clínica: ${e.toString()}');
       state = state.copyWith(
-          errorMessage: e.toString() ?? 'Error al obtener historia clínica');
+          errorMessage: e.toString());
     } finally {
       state = state.copyWith(loading: false);
     }
@@ -116,14 +127,12 @@ class HcNotifier extends StateNotifier<HCState> {
   }
 
   Future<void> createHcVoice(CreateHcVoice hc) async {
-    print('🟢 Creando historia clínica');
     state = state.copyWith(loading: true);
     try {
       await _hcRepository.createHcVoice(hc);
     } on CustomError catch (e) {
-      print('🔴 Error al crear historia clínica: ${e.message}');
       state = state.copyWith(
-          errorMessage: e.message ?? 'Error al crear historia clínica');
+          errorMessage: e.message);
     } finally {
       state = state.copyWith(loading: false);
     }

@@ -107,7 +107,7 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
       // Obtener el nombre del médico desde Firestore
       print('Actualizando cita: ${medicID}');
       DocumentSnapshot medicSnapshot = await _firestore
-          .collection('medics') // Colección de médicos
+          .collection('medic') // Colección de médicos
           .doc(medicID) // ID del médico
           .get();
 
@@ -116,9 +116,10 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
       }
 
       // Obtener el nombre del médico
-      String firstName = medicSnapshot['firsname'] ?? 'Nombre no disponible';
+      String firstName = medicSnapshot['firstname'] ?? 'Nombre no disponible';
       String lastName = medicSnapshot['lastname'] ?? 'Apellido no disponible';
-
+      print(
+          'Nombre del médico: $firstName $lastName'); // Imprimir el nombre del médico
       // Actualizar la cita en Firestore
       await _firestore
           .collection('appointments') // Colección de citas

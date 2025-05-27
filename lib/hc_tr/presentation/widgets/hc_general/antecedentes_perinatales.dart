@@ -69,6 +69,7 @@ class _AntecedentesPerinatalesWidgetState
       children: [
         _buildSection('4.2. ANTECEDENTES PERINATALES'),
         _buildRadioButtonGroup(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Duración de la gestación:",
           options: ["Pre terminó", "A terminó", "Pos terminó"],
           selectedValue: hcState
@@ -77,11 +78,13 @@ class _AntecedentesPerinatalesWidgetState
         ),
         _buildFormField(
           label: 'Lugar de atención',
+          disabled: hcState.status == 'Editado' ? true : false,
           controller: lugarDeAtencionController,
           onChanged: hcNotifier.onLugarDeAtencionChanged,
         ),
         _buildRadioButtonGroup(
           title: "Tipo de parto:",
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["Normal", "Fórceps", "Cesárea"],
           selectedValue:
               hcState.createHcGeneral.antecedentesPerinatales.tipoDeParto,
@@ -89,6 +92,7 @@ class _AntecedentesPerinatalesWidgetState
         ),
         const Divider(),
         _buildRadioButtonGroup(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Duración del parto:",
           options: ["Breve", "Normal", "Prolongado"],
           selectedValue:
@@ -97,6 +101,7 @@ class _AntecedentesPerinatalesWidgetState
         ),
         const Divider(),
         _buildRadioButtonGroup(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Presentación:",
           options: ["Cefálico", "Podálico", "Transverso"],
           selectedValue:
@@ -105,6 +110,7 @@ class _AntecedentesPerinatalesWidgetState
         ),
         const Divider(),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: 'Lloro al nacer',
           options: ['SI', 'NO'],
           selectedValue:
@@ -113,6 +119,7 @@ class _AntecedentesPerinatalesWidgetState
         ),
         const Divider(),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: 'Sufrimiento fetal',
           options: ['SI', 'NO'],
           selectedValue:
@@ -121,6 +128,7 @@ class _AntecedentesPerinatalesWidgetState
         ),
         const Divider(),
         _buildMultipleCheckboxGroup(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Al nacer necesito:",
           options: {
             "Oxígeno": hcState.createHcGeneral.antecedentesPerinatales
@@ -136,12 +144,14 @@ class _AntecedentesPerinatalesWidgetState
           },
         ),
         _buildFormField(
+          disabled: hcState.status == 'Editado' ? true : false,
           label: 'Tiempo en incubadora u oxígeno',
           controller: tiempoController,
           onChanged: hcNotifier.onAlNacerNecesitoTiempoChanged,
         ),
         const Divider(),
         _buildMultipleCheckboxGroup(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Al nacer presentó:",
           options: {
             "Cianosis": hcState.createHcGeneral.antecedentesPerinatales
@@ -174,21 +184,25 @@ class _AntecedentesPerinatalesWidgetState
           },
         ),
         _buildFormField(
+          disabled: hcState.status == 'Editado' ? true : false,
           label: 'Peso al nacer',
           controller: pesoController,
           onChanged: hcNotifier.onAlNacerPresentoPesoChanged,
         ),
         _buildFormField(
+          disabled: hcState.status == 'Editado' ? true : false,
           label: 'Talla al nacer',
           controller: tallaController,
           onChanged: hcNotifier.onAlNacerPresentoTallaChanged,
         ),
         _buildFormField(
+          disabled: hcState.status == 'Editado' ? true : false,
           label: 'Perímetro cefálico',
           controller: perimetroCefalicoController,
           onChanged: hcNotifier.onAlNacerPresentoPerimetroCefalicoChanged,
         ),
         _buildFormField(
+          disabled: hcState.status == 'Editado' ? true : false,
           label: 'Apgar',
           controller: apgarController,
           onChanged: hcNotifier.onAlNacerPresentoApgarChanged,
@@ -226,7 +240,7 @@ class _AntecedentesPerinatalesWidgetState
       child: TextFormField(
         enabled: !disabled!,
         controller: controller,
-        onChanged: onChanged,
+        onChanged: disabled ? null : onChanged,
         decoration: InputDecoration(
           labelText: label,
           filled: true,
@@ -268,6 +282,7 @@ class _AntecedentesPerinatalesWidgetState
   // 🔹 Grupo de opciones de radio conectado al estado
   Widget _buildRadioButtonGroup({
     required String title,
+    bool disabled = false,
     required List<String> options,
     required String selectedValue, // ✅ Se cambia a String
     required Function(String) onChanged, // ✅ Se cambia a String
@@ -293,11 +308,14 @@ class _AntecedentesPerinatalesWidgetState
                 Radio<String>(
                   value: option, // ✅ Ahora usa String
                   groupValue: selectedValue, // ✅ Compara con el valor actual
-                  onChanged: (value) {
-                    if (value != null) {
-                      onChanged(value); // ✅ Devuelve el nuevo valor String
-                    }
-                  },
+                  onChanged: disabled
+                      ? null // Deshabilita el Radio si está en modo edición
+                      : (String? value) {
+                          if (value != null) {
+                            onChanged(
+                                value); // Llama al onChanged con el valor seleccionado
+                          }
+                        },
                 ),
                 Text(option),
               ],
@@ -310,6 +328,7 @@ class _AntecedentesPerinatalesWidgetState
 
   Widget _buildRadioButtonGroupBool({
     required String title,
+    bool disabled = false,
     required List<String> options,
     required bool? selectedValue, // Cambiar a bool?
     required Function(bool?) onChanged, // Cambiar a bool?
@@ -335,10 +354,12 @@ class _AntecedentesPerinatalesWidgetState
                 Radio<bool?>(
                   value: option == "SI" ? true : false, // Convertir a bool
                   groupValue: selectedValue, // Puede ser null
-                  onChanged: (bool? value) {
-                    onChanged(
-                        value); // Pasar el valor seleccionado (puede ser null)
-                  },
+                  onChanged: disabled
+                      ? null // Deshabilita el Radio si está en modo edición
+                      : (bool? value) {
+                          onChanged(
+                              value); // Llama al onChanged con el valor seleccionado
+                        },
                 ),
                 Text(option),
               ],
@@ -352,6 +373,7 @@ class _AntecedentesPerinatalesWidgetState
   // 🔹 Grupo de selección en línea
   Widget _buildMultipleCheckboxGroup({
     required String title,
+    bool disabled = false,
     required Map<String, bool> options, // ✅ Cada opción tiene su propio valor
     required Map<String, Function(bool)>
         onChanged, // ✅ Cada opción tiene su propio onChanged
@@ -365,6 +387,7 @@ class _AntecedentesPerinatalesWidgetState
         Column(
           children: options.entries.map((entry) {
             return CheckboxListTile(
+              enabled: disabled ? false : true,
               title: Text(entry.key),
               value: entry.value,
               onChanged: (bool? newValue) {

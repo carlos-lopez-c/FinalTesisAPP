@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:h_c_1/hc_tr/presentation/providers/hc_form_general_provider.dart';
+import 'package:h_c_1/hc_tr/presentation/providers/hc_provider.dart';
 import 'package:h_c_1/hc_tr/presentation/providers/state/hc_general_state.dart';
+import 'package:h_c_1/hc_tr/presentation/widgets/hc_general/GenerarPdfButton.dart';
 import 'package:h_c_1/hc_tr/presentation/widgets/hc_general/antecedentes_perinatales.dart';
 import 'package:h_c_1/hc_tr/presentation/widgets/hc_general/antecedentes_postnatales.dart';
 import 'package:h_c_1/hc_tr/presentation/widgets/hc_general/antecedentes_prenatales.dart';
@@ -53,6 +55,41 @@ class HcTrGeneral extends ConsumerWidget {
       }
     });
 
+    ref.listen<HCState?>(hcProvider, (previous, next) {
+      if (next!.successMessage.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.successMessage),
+            backgroundColor: Colors.green.shade300,
+            behavior: SnackBarBehavior.fixed,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+        Future.delayed(const Duration(seconds: 2), () {
+          ref.read(hcProvider.notifier).clearSuccess();
+        });
+      } else if (next.errorMessage.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.errorMessage),
+            backgroundColor: Colors.red.shade300,
+            behavior: SnackBarBehavior.fixed,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+
+        Future.delayed(const Duration(seconds: 2), () {
+          ref.read(hcProvider.notifier).clearError();
+        });
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -63,6 +100,7 @@ class HcTrGeneral extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
+          GenerarPdfButton(),
           headerTRWidget(
             textoDinamico: 'HISTORIA CLÍNICA GENERAL',
           ),
@@ -70,7 +108,7 @@ class HcTrGeneral extends ConsumerWidget {
           Center(
               child: _buildRadioButtonGroup(
             title: '',
-            options: ['Nuevo', 'Buscar'],
+            options: ['Nuevo', 'Buscar/Editar'],
             selectedValue: hcState.tipo,
             onChanged: hcNotifier.onTipoChanged,
           )),
@@ -98,6 +136,9 @@ class HcTrGeneral extends ConsumerWidget {
           if (hcState.tipo == 'Nuevo') {
             print("Creando historia clinica");
             hcNotifier.onCreateHcGeneral();
+          } else {
+            print("Actualizando historia clinica");
+            hcNotifier.onUpdateHcGeneral();
           }
         },
         child: const Icon(Icons.save),

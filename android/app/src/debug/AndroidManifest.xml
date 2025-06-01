@@ -3,5 +3,19 @@
          the Flutter tool needs it to communicate with the running application
          to allow setting breakpoints, to provide hot reload, etc.
     -->
+
+
+
+    <!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
+                     android:maxSdkVersion="29" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
+                     android:maxSdkVersion="32" />
+     -->
+    <!-- Para Android 11+ se usa MediaStore API que no requiere permisos explícitos -->
+
+    <!-- <application
+        android:label="Historia Clínica"
+        android:icon="@mipmap/ic_launcher"
+        android:requestLegacyExternalStorage="true"> -->
     <uses-permission android:name="android.permission.INTERNET"/>
 </manifest>

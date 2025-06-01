@@ -22,6 +22,11 @@ dependencies:
   flutter_riverpod: ^2.6.1
   formz: ^0.8.0
   go_router: ^15.1.1
+  path_provider: ^2.1.5
+  pdf: ^3.11.3
+  permission_handler: ^12.0.0+1
+  printing: ^5.14.2
+  share_plus: ^11.0.0
   shared_preferences: ^2.3.5
   table_calendar: ^3.1.3
 
@@ -46,6 +51,6 @@ flutter:
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/iconoApp/iconApp.png"  # Ruta del ícono
+  image_path: "assets/iconoApp/iconApp.png" # Ruta del ícono
   adaptive_icon_foreground: "assets/iconoApp/iconApp.png"
   adaptive_icon_background: "#ffffff"

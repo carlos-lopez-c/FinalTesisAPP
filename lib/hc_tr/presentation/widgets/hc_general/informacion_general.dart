@@ -107,9 +107,9 @@ class _DatosInformativosWidgetState
         ),
         const SizedBox(height: 20),
         _buildFormField(
+          disabled: true,
           label: 'Fecha de la entrevista (dd/mm/aaaa)',
           controller: fechaEntrevistaController,
-         
         ),
         _buildFormField(
           label: 'Nombre completo',

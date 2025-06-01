@@ -33,7 +33,7 @@ final initialHcGeneral = HcGeneralFormState(
   errorMessage: '',
   createHcGeneral: CreateHcGeneral(
     patientId: '',
-    fechaEntrevista: '',
+    fechaEntrevista: DateFormat('yyyy-MM-dd').format(DateTime.now()),
     nombreCompleto: '',
     fechaNacimiento: '',
     sexo: '',

@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_c_1/hc_tr/presentation/providers/hc_form_general_provider.dart';
 import 'package:h_c_1/hc_tr/presentation/utils/HistoriaClinicaPdfTemplate.dart';
-import 'package:intl/intl.dart';
-import 'package:printing/printing.dart';
+
 
 class GenerarPdfButton extends ConsumerWidget {
   const GenerarPdfButton({super.key});

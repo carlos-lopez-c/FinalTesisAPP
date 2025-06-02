@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Importación necesaria para rootBundle
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -49,6 +50,11 @@ class HistoriaClinicaPdfTemplate {
       bold: pw.Font.helveticaBold(),
     );
 
+    // Cargar la imagen
+    final ByteData imageData = await rootBundle.load('assets/imagenes/san-miguel.png');
+    final Uint8List imageBytes = imageData.buffer.asUint8List();
+    final pdfImage = pw.MemoryImage(imageBytes);
+
     // Calcular edad si no viene
     final edad = datos['edad'] ?? _calcularEdad(datos['fechaNacimiento']);
 
@@ -59,8 +65,10 @@ class HistoriaClinicaPdfTemplate {
         theme: theme,
         margin: const pw.EdgeInsets.all(20),
         build: (context) => [
+          _headerG("", logoImage: pdfImage),
+          pw.SizedBox(height: 15),
           _header("HISTORIA CLÍNICA GENERAL"),
-          pw.SizedBox(height: 10),
+          pw.SizedBox(height: 15),
           _section("DATOS DE IDENTIFICACIÓN", [
             "Fecha de entrevista: ${_formatDate(datos['fechaEntrevista'])}",
             "Nombre completo: ${datos['nombreCompleto'] ?? ''}",
@@ -79,8 +87,6 @@ class HistoriaClinicaPdfTemplate {
               [datos['motivoDeConsulta'] ?? 'No especificado']),
           _section("CARACTERIZACIÓN DEL PROBLEMA",
               [datos['caracterizacionDelProblema'] ?? 'No especificado']),
-          _section("HISTORIA ESCOLAR",
-              [datos['historiaEscolar'] ?? 'No especificado']),
         ],
       ),
     );
@@ -328,27 +334,7 @@ class HistoriaClinicaPdfTemplate {
               'empatia|Empatía',
               'interesesPeculiares|Intereses peculiares',
               'interesPorInteraccion|Interés por interacción',
-            ]),
-            _sectionWithBooleans("Aspectos de socialización", socializacion, [
-              'mayores|Se relaciona con mayores',
-              'menores|Se relaciona con menores',
-              'todos|Se relaciona con todos',
-              'socializacionConFamilia|Socialización con familia',
-              'reaccionConPersonasExtranas|Reacción con personas extrañas',
-              'lograConcentrarse5Min|Logra concentrarse 5 min',
-              'reconocePartesDelCuerpo|Reconoce partes del cuerpo',
-              'asociaObjetos|Asocia objetos',
-              'reconoceASusFamiliares|Reconoce a sus familiares',
-              'reconoceColoresBasicos|Reconoce colores básicos',
-            ]),
-            _sectionWithBooleans("Tipo de familia", datosFamiliares, [
-              'nuclear|Nuclear',
-              'monoParental|Monoparental',
-              'funcional|Funcional',
-              'reconstituida|Reconstituida',
-              'disfuncional|Disfuncional',
-              'extensa|Extensa',
-            ]),
+            ]),           
             _section("Quién vive en casa",
                 [habitosPersonales['quienViveEnCasa'] ?? 'No especificado']),
             _sectionWithBooleans(
@@ -366,17 +352,75 @@ class HistoriaClinicaPdfTemplate {
     return pdf.save();
   }
 
-  static pw.Widget _header(String title) {
-    return pw.Center(
-      child: pw.Text(
-        title,
-        style: pw.TextStyle(
-          fontSize: 18,
-          fontWeight: pw.FontWeight.bold,
-        ),
+  // ENCABEZADO CON IMAGEN CENTRADA
+ static pw.Widget _headerG(String title, {pw.MemoryImage? logoImage}) {
+  return pw.Center(
+    child: pw.Container(
+      constraints: pw.BoxConstraints(maxWidth: PdfPageFormat.a4.width - 40),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.center,
+        crossAxisAlignment: pw.CrossAxisAlignment.center,
+        children: [
+          if (logoImage != null)
+            pw.Container(
+              width: 180,
+              height: 150,
+              child: pw.Image(logoImage, fit: pw.BoxFit.contain),
+            ),
+          if (logoImage != null) pw.SizedBox(width: 15),
+          pw.Column(
+            mainAxisSize: pw.MainAxisSize.min,
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                'FUNDACION DE NIÑOS ESPECIALES',
+                style: pw.TextStyle(
+                  fontSize: 20,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              pw.Text(
+                '"SAN MIGUEL" FUNESAMI',
+                style: pw.TextStyle(
+                  fontSize: 16,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              pw.SizedBox(height: 5),
+              pw.Text(
+                'HISTORIA CLÍNICA DE TERAPIAS',
+                style: pw.TextStyle(
+                  fontSize: 16,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              pw.Text(
+                title,
+                style: pw.TextStyle(
+                  fontSize: 15,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+  // SECCIÓN CON TÍTULO Y LÍNEAS
+  static pw.Widget _header(String title) {
+  return pw.Center(
+    child: pw.Text(
+      title,
+      style: pw.TextStyle(
+        fontSize: 18,
+        fontWeight: pw.FontWeight.bold,
+        color: PdfColors.red, // Color rojo
+      ),
+    ),
+  );
+}
 
   static pw.Widget _section(String title, List<String> lines) {
     return pw.Column(
@@ -386,7 +430,7 @@ class HistoriaClinicaPdfTemplate {
         pw.Container(
           padding: const pw.EdgeInsets.symmetric(vertical: 4, horizontal: 8),
           decoration: pw.BoxDecoration(
-            color: PdfColors.grey300,
+            color: PdfColors.lightBlueAccent,
             borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
           ),
           child: pw.Text(

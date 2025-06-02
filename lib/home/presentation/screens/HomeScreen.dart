@@ -98,7 +98,7 @@ class HomeContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(height: 30),
+          SizedBox(height: 10),
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -114,7 +114,7 @@ class HomeContent extends StatelessWidget {
                   ),
                   child: Text('Cambiar Contraseña',
                       style: TextStyle(fontSize: 20))),
-              const SizedBox(height: 20),
+              const SizedBox(height: 2),
               Text(
                 'Fundación de niños especiales',
                 style: TextStyle(
@@ -162,7 +162,7 @@ class HomeContent extends StatelessWidget {
           Image.asset(
             'assets/imagenes/san-miguel.png', // Ruta de la imagen
             width: 250,
-            height: 450,
+            height: 400,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -177,7 +177,7 @@ class HomeContent extends StatelessWidget {
               Text(
                 'Carlos Eduardo López Candelejo',
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: 12,
                   color: Colors.blueAccent,
                   fontWeight: FontWeight.bold,
                 ),

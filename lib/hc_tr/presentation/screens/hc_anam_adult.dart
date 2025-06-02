@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_c_1/hc_tr/presentation/providers/hc_form_adult_provider.dart';
-import '/hc_tr/presentation/screens/search_hc_TR_AA.dart';
-import '/hc_tr/presentation/widgets/NavigationButton.dart';
+import 'package:h_c_1/hc_tr/presentation/providers/state/hc_adult_state.dart';
 import '/hc_tr/presentation/widgets/headerTR.dart';
+import 'package:h_c_1/hc_tr/presentation/providers/hc_provider.dart';
 
 class HcTrAnamAdult extends ConsumerStatefulWidget {
   const HcTrAnamAdult({Key? key}) : super(key: key);
@@ -13,6 +13,7 @@ class HcTrAnamAdult extends ConsumerStatefulWidget {
 }
 
 class _HcTrAnamAdultState extends ConsumerState<HcTrAnamAdult> {
+  late TextEditingController cedulaController;
   late TextEditingController fechaEntrevistaController;
   late TextEditingController nombreCompletoController;
   late TextEditingController quePreparaController;
@@ -34,6 +35,7 @@ class _HcTrAnamAdultState extends ConsumerState<HcTrAnamAdult> {
   @override
   void initState() {
     super.initState();
+    cedulaController = TextEditingController();
     fechaEntrevistaController = TextEditingController();
     nombreCompletoController = TextEditingController();
     quePreparaController = TextEditingController();
@@ -56,6 +58,7 @@ class _HcTrAnamAdultState extends ConsumerState<HcTrAnamAdult> {
 
   @override
   void dispose() {
+    cedulaController.dispose();
     fechaEntrevistaController.dispose();
     nombreCompletoController.dispose();
     quePreparaController.dispose();
@@ -81,12 +84,40 @@ class _HcTrAnamAdultState extends ConsumerState<HcTrAnamAdult> {
     final hcState = ref.watch(hcAdultFormProvider);
     final hcNotifier = ref.read(hcAdultFormProvider.notifier);
 
+    ref.listen<HcAdultState?>(hcAdultFormProvider, (previous, next) {
+      if (next!.successMessage.isNotEmpty) {
+        _showSnackBar(context, next.successMessage, true);
+        Future.delayed(const Duration(seconds: 2), () {
+          ref.read(hcAdultFormProvider.notifier).clearSuccessMessage();
+        });
+      } else if (next.errorMessage.isNotEmpty) {
+        _showSnackBar(context, next.errorMessage, false);
+        Future.delayed(const Duration(seconds: 2), () {
+          ref.read(hcAdultFormProvider.notifier).clearErrorMessage();
+        });
+      }
+    });
+
+    ref.listen<HCState?>(hcProvider, (previous, next) {
+      if (next!.successMessage.isNotEmpty) {
+        _showSnackBar(context, next.successMessage, true);
+        Future.delayed(const Duration(seconds: 2), () {
+          ref.read(hcProvider.notifier).clearSuccess();
+        });
+      } else if (next.errorMessage.isNotEmpty) {
+        _showSnackBar(context, next.errorMessage, false);
+        Future.delayed(const Duration(seconds: 2), () {
+          ref.read(hcProvider.notifier).clearError();
+        });
+      }
+    });
+
     final fechaEvaluacion = hcState.createHcAdult.fechaEvalucion;
     final fechaFormateada =
         fechaEvaluacion != null && fechaEvaluacion.isNotEmpty
             ? fechaEvaluacion.substring(0, 10) // Extraer solo la fecha
             : '';
-
+    cedulaController.text = hcState.cedula;
     fechaEntrevistaController.text =
         fechaFormateada; // Usar la fecha formateada
     nombreCompletoController.text = hcState.createHcAdult.nombreCompleto!;
@@ -121,390 +152,643 @@ class _HcTrAnamAdultState extends ConsumerState<HcTrAnamAdult> {
     porQueNoCuentaConTodasSusPiezasDentalesController.text = hcState
         .createHcAdult.saludBocal.porQueNoCuentaConTodasSusPiezasDentales;
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F8FA),
       appBar: AppBar(
+        backgroundColor: const Color(0xFF1976D2),
+        elevation: 0,
         title: const Text(
-          'Área de Terapias - Anamnesis Adultos',
-          style: TextStyle(color: Colors.black),
+          'Anamnesis Alimentaria Adultos',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Form(
         child: ListView(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           children: [
             headerTRWidget(textoDinamico: 'ANAMNESIS ALIMENTARIA ADULTOS'),
             const SizedBox(height: 20),
-            Center(
-                child: _buildRadioButtonGroup(
-              title: '',
-              options: ['Nuevo', 'Buscar'],
-              selectedValue: hcState.tipo,
-              onChanged: hcNotifier.onTipoChanged,
-            )),
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Center(
+                      child: _buildRadioButtonGroup(
+                        title: '',
+                        options: ['Nuevo', 'Buscar'],
+                        selectedValue: hcState.tipo,
+                        onChanged: hcNotifier.onTipoChanged,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: cedulaController,
+                            onChanged: hcNotifier.onCedulaChanged,
+                            decoration: InputDecoration(
+                              labelText: 'Buscar por cédula',
+                              labelStyle:
+                                  const TextStyle(color: Color(0xFF1976D2)),
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide:
+                                    const BorderSide(color: Color(0xFF1976D2)),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide:
+                                    const BorderSide(color: Color(0xFF1976D2)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                    color: Color(0xFF1976D2), width: 2),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        ElevatedButton(
+                          onPressed: () {
+                            if (hcState.tipo == 'Nuevo') {
+                              hcNotifier.getPacienteByDni(hcState.cedula);
+                            } else {
+                              hcNotifier.onSearchHcAdult(hcState.cedula);
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF1976D2),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text('Buscar'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    onChanged: hcNotifier.onCedulaChanged,
-                    decoration:
-                        const InputDecoration(labelText: 'Buscar por cédula'),
-                  ),
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '1.- Antecedentes personales',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1976D2),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildFormField(
+                      disabled: false,
+                      controller: nombreCompletoController,
+                      label: 'Nombre completo',
+                      onChanged: hcNotifier.setNombreCompleto,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      disabled: true,
+                      label: 'Fecha de evaluación (dd/mm/aaaa)',
+                      controller: fechaEntrevistaController,
+                      onChanged: hcNotifier.setFechaEvaluacion,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRadioButtonGroup(
+                      disabled: hcState.status == 'Editado' ? true : false,
+                      title: "Lateralidad:",
+                      options: ["Diestro", "Zurdo", "Ambidiestro"],
+                      selectedValue: hcState.createHcAdult.lateralidad ?? '',
+                      onChanged: hcNotifier.setLateralidad,
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: () {
-                    if (hcState.tipo == 'Nuevo') {
-                      hcNotifier.getPacienteByDni(hcState.cedula);
-                    } else {
-                      hcNotifier.onSearchHcAdult(hcState.cedula);
-                    }
-                  },
-                  child: const Text('Buscar'),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '2.- Independencia y autonomía',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1976D2),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRadioButtonGroup(
+                      title: "¿Se alimenta solo(a) o necesita ayuda?",
+                      options: [
+                        "Solo(a)",
+                        "Con ayuda parcial",
+                        "Con ayuda total"
+                      ],
+                      selectedValue: hcState.createHcAdult
+                          .independenciaAutonomia.seAlimentaSoloOConAyuda,
+                      onChanged: hcNotifier.setIndepSeAlimentaSoloOConAyuda,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildRadioButtonGroup(
+                      title: "¿Qué tipo de ayuda necesita?",
+                      options: [
+                        "Para identificar qué está comiendo",
+                        "Para llevarse la comida a la boca/evitar derrames",
+                        "Ninguna"
+                      ],
+                      selectedValue: hcState.createHcAdult
+                          .independenciaAutonomia.queTipoDeAyudaNecesita,
+                      onChanged: hcNotifier.setIndepQueTipoDeAyudaNecesita,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildRadioButtonGroupBool(
+                      title: "¿Prepara sus propios alimentos?",
+                      options: ["SI", "NO"],
+                      selectedValue: hcState.createHcAdult
+                          .independenciaAutonomia.preparaSusAlimentos,
+                      onChanged: hcNotifier.setIndepPreparaSusAlimentos,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      label: "¿Por Qué?",
+                      controller: quePreparaController,
+                      onChanged: hcNotifier.setIndepQuePrepara,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildRadioButtonGroupBool(
+                      title:
+                          "¿Decide qué alimentos desea consumir o participar en estas decisiones en el hogar?",
+                      options: ["SI", "NO"],
+                      selectedValue: hcState
+                          .createHcAdult.independenciaAutonomia.decideQueComer,
+                      onChanged: hcNotifier.setIndepDecideQueComer,
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-            _buildSection('1.- Antecedentes personales'),
-            _buildFormField(
-              controller: nombreCompletoController,
-              label: 'Nombre completo',
-              onChanged: hcNotifier.setNombreCompleto,
+            const SizedBox(height: 20),
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '3.- Eficiencia',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1976D2),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRadioButtonGroupBool(
+                      title: "¿Consume la totalidad del alimento?",
+                      options: ["SI", "NO"],
+                      selectedValue: hcState.createHcAdult.eficiencia
+                          .consumeLaTotalidadDeLosAlimentos,
+                      onChanged: hcNotifier
+                          .setEficienciaConsumeLaTotalidadDeLosAlimentos,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      label: "¿Qué porción consume?",
+                      controller: quePorcionConsumeController,
+                      onChanged: hcNotifier.setEficienciaQuePorcionConsume,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRadioButtonGroupBool(
+                      title: "¿Ha presentado pérdidas de peso?",
+                      options: ["SI", "NO"],
+                      selectedValue: hcState.createHcAdult.eficiencia
+                          .haPresentadoPerdidasImportantesDePesoEnElUltimoTiempo,
+                      onChanged: hcNotifier
+                          .setEficienciaHaPresentadoPerdidasImportantesDePesoEnElUltimoTiempo,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      label: "¿Cuántos kilos?",
+                      controller: cuantoPesoHaPerdidoController,
+                      onChanged: (value) =>
+                          hcNotifier.setEficienciaCuantoPesoHaPerdido(
+                              double.tryParse(value) ?? 0),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRadioButtonGroupBool(
+                      title: "¿Manifiesta interés por alimentarse?",
+                      options: ["SI", "NO"],
+                      selectedValue: hcState.createHcAdult.eficiencia
+                          .manifiestaInteresPorAlimentarse,
+                      onChanged: hcNotifier
+                          .setEficienciaManifiestaInteresPorAlimentarse,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRadioButtonGroupBool(
+                      title:
+                          "¿Manifiesta rechazo o preferencia por algún tipo de alimento?",
+                      options: ["SI", "NO"],
+                      selectedValue: hcState.createHcAdult.eficiencia
+                          .manifiestaRechazoOPreferenciasPorAlgunTipoDeAlimento,
+                      onChanged: hcNotifier
+                          .setEficienciaManifiestaRechazoOPreferenciasPorAlgunTipoDeAlimento,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      label: "¿Cuál?",
+                      controller: queTipoDeAlimentoController,
+                      onChanged: hcNotifier.setEficienciaQueTipoDeAlimento,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      label: "¿Qué tipo de líquido consume habitualmente?",
+                      controller:
+                          queTipoDeLiquidoConsumeHabitualmenteController,
+                      onChanged: hcNotifier
+                          .setEficienciaQueTipoDeLiquidoConsumeHabitualmente,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      label: "¿Cuánto líquido consume al día?",
+                      controller: cuantoLiquidoConsumeAlDiaController,
+                      onChanged:
+                          hcNotifier.setEficienciaCuantoLiquidoConsumeAlDia,
+                    ),
+                  ],
+                ),
+              ),
             ),
-            _buildFormField(
-              label: 'Fecha de evaluación (dd/mm/aaaa)',
-              controller: fechaEntrevistaController,
-              onChanged: hcNotifier.setFechaEvaluacion,
+            const SizedBox(height: 20),
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '4.- Seguridad',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1976D2),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRadioButtonGroupBool(
+                      title: "¿Se atora con su saliva?",
+                      options: ["SI", "NO"],
+                      selectedValue:
+                          hcState.createHcAdult.seguridad.seAtoraConSuSaliva,
+                      onChanged: hcNotifier.setSeguridadSeAtoraConSuSaliva,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      label: "¿Con qué frecuencia?",
+                      controller: conQueFrecuenciaController,
+                      onChanged: hcNotifier.setSeguridadConQueFrecuencia,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRadioButtonGroupBool(
+                      title:
+                          "¿Tiene tos o ahogos cuando se alimenta o consume sus medicamentos?",
+                      options: ["SI", "NO"],
+                      selectedValue: hcState.createHcAdult.seguridad
+                          .tieneTosOAhogosCuandoSeAlimentaOConsumeMedicamentos,
+                      onChanged: hcNotifier
+                          .setSeguridadTieneTosOAhogosCuandoSeAlimentaOConsumeMedicamentos,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      label: "¿Con qué alimento/liquido/medicamento?",
+                      controller: conQueAlimentosLiquidosMedicamentosController,
+                      onChanged: hcNotifier
+                          .setSeguridadConQueAlimentosLiquidosMedicamentos,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRadioButtonGroupBool(
+                      title:
+                          "¿Presenta alguna dificultad para tomar líquidos de un vaso?",
+                      options: ["SI", "NO"],
+                      selectedValue: hcState.createHcAdult.seguridad
+                          .presentaAlgunaDificultadParaTomarLiquidosDeUnVaso,
+                      onChanged: hcNotifier
+                          .setSeguridadPresentaAlgunaDificultadParaTomarLiquidosDeUnVaso,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRadioButtonGroupBool(
+                      title:
+                          "¿Presenta dificultad con las sopas o los granos pequeños como el arroz?",
+                      options: ["SI", "NO"],
+                      selectedValue: hcState.createHcAdult.seguridad
+                          .presentaDificultadConSopasOLosGranosPequenosComoArroz,
+                      onChanged: hcNotifier
+                          .setSeguridadPresentaDificultadConSopasOLosGranosPequenosComoArroz,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRadioButtonGroupBool(
+                      title: "¿Ha presentado neumonías?",
+                      options: ["SI", "NO"],
+                      selectedValue:
+                          hcState.createHcAdult.seguridad.haPresentadoNeumonias,
+                      onChanged: hcNotifier.setSeguridadHaPresentadoNeumonias,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      label: "¿Con qué frecuencia?",
+                      controller: conQueFrecuenciaPresentoNeumoniaController,
+                      onChanged: hcNotifier.setSeguridadConQueFrecuencia,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRadioButtonGroupBool(
+                      title:
+                          "¿Se queda con restos de alimento en la boca luego de alimentarse?",
+                      options: ["SI", "NO"],
+                      selectedValue: hcState.createHcAdult.seguridad
+                          .seQuedaConRestosDeAlimentosEnLaBocaLuegoDeAlimentarse,
+                      onChanged: hcNotifier
+                          .setSeguridadSeQuedaConRestosDeAlimentosEnLaBocaLuegoDeAlimentarse,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRadioButtonGroupBool(
+                      title: "¿Siente que el alimento se va hacia su nariz?",
+                      options: ["SI", "NO"],
+                      selectedValue: hcState.createHcAdult.seguridad
+                          .sienteQueElAlimentoSeVaHaciaSuNariz,
+                      onChanged: hcNotifier
+                          .setSeguridadSienteQueElAlimentoSeVaHaciaSuNariz,
+                    ),
+                  ],
+                ),
+              ),
             ),
-            Divider(),
-            _buildRadioButtonGroup(
-              title: "Lateralidad:",
-              options: ["Diestro", "Zurdo", "Ambidiestro"],
-              selectedValue: hcState.createHcAdult.lateralidad ?? '',
-              onChanged: hcNotifier.setLateralidad,
+            const SizedBox(height: 20),
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '5.- Proceso de Alimentación',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1976D2),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRadioButtonGroupBool(
+                      title:
+                          "¿Se demora más tiempo que el resto de la familia?",
+                      options: ["SI", "NO"],
+                      selectedValue: hcState.createHcAdult.procesoDeAlimentacion
+                          .seDemoraMasTiempoQueElRestoDeLaFamiliaEnComer,
+                      onChanged: hcNotifier
+                          .setProcesoDeAlimentacionSeDemoraMasTiempoQueElRestoDeLaFamiliaEnComer,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      label: "¿Cuánto?",
+                      controller: cuantoTiempoController,
+                      onChanged:
+                          hcNotifier.setProcesoDeAlimentacionCuantoTiempo,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRadioButtonGroupBool(
+                      title: "¿Cree usted que come muy rápido?",
+                      options: ["SI", "NO"],
+                      selectedValue: hcState.createHcAdult.procesoDeAlimentacion
+                          .creeUstedQueComeMuyRapido,
+                      onChanged: hcNotifier
+                          .setProcesoDeAlimentacionCreeUstedQueComeMuyRapido,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRadioButtonGroupBool(
+                      title:
+                          "¿Suele realizar alguna otra actividad mientras come?",
+                      options: ["SI", "NO"],
+                      selectedValue: hcState.createHcAdult.procesoDeAlimentacion
+                          .sueleRealizarAlgunaOtraActividadMientrasCome,
+                      onChanged: hcNotifier
+                          .setProcesoDeAlimentacionSueleRealizarAlgunaOtraActividadMientrasCome,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      label: "¿Cuál(es)?",
+                      controller: queOtraActividadController,
+                      onChanged:
+                          hcNotifier.setProcesoDeAlimentacionQueOtraActividad,
+                    ),
+                  ],
+                ),
+              ),
             ),
-            Divider(),
-            _buildSection('2 .- Independencia y autonomía'),
-            _buildRadioButtonGroup(
-              title: "¿Se alimenta solo(a) o necesita ayuda?",
-              options: ["Solo(a)", "Con ayuda parcial", "Con ayuda total"],
-              selectedValue: hcState
-                  .createHcAdult.independenciaAutonomia.seAlimentaSoloOConAyuda,
-              onChanged: hcNotifier.setIndepSeAlimentaSoloOConAyuda,
+            const SizedBox(height: 20),
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '6.- Salud Bucal',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1976D2),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRadioButtonGroupBool(
+                      title: "¿Cuenta con todas sus piezas dentarias/dientes?",
+                      options: ["SI", "NO"],
+                      selectedValue: hcState.createHcAdult.saludBocal
+                          .cuentaConTodasSusPiezasDentales,
+                      onChanged: hcNotifier
+                          .setSaludBocalCuentaConTodasSusPiezasDentales,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      label: "¿Por qué?",
+                      controller:
+                          porQueNoCuentaConTodasSusPiezasDentalesController,
+                      onChanged: hcNotifier
+                          .setSaludBocalPorQueNoCuentaConTodasSusPiezasDentales,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRadioButtonGroupBool(
+                      title: "¿Utiliza placa dental?",
+                      options: ["SI", "NO"],
+                      selectedValue:
+                          hcState.createHcAdult.saludBocal.utilizaPlacaDental,
+                      onChanged: hcNotifier.setSaludBocalUtilizaPlacaDental,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRadioButtonGroupBool(
+                      title: "¿Se realiza aseo bucal después de cada comida?",
+                      options: ["SI", "NO"],
+                      selectedValue: hcState.createHcAdult.saludBocal
+                          .seRealizaAseoBucalDespuesDeCadaComida,
+                      onChanged: hcNotifier
+                          .setSaludBocalSeRealizaAseoBucalDespuesDeCadaComida,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      label:
+                          "¿Con qué frecuencia se lava los dientes/lava su prótesis?",
+                      controller: conQueFrecuenciaSeLavaLosDientesController,
+                      onChanged: hcNotifier
+                          .setSaludBocalConQueFrecuenciaSeLavaLosDientes,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRadioButtonGroupBool(
+                      title: "¿Asiste regularmente a controles dentales?",
+                      options: ["SI", "NO"],
+                      selectedValue: hcState.createHcAdult.saludBocal
+                          .asisteRegularmenteAControlesDentales,
+                      onChanged: hcNotifier
+                          .setSaludBocalAsisteRegularmenteAControlesDentales,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      label: "¿Con qué frecuencia?",
+                      controller:
+                          conQueFrecuenciaAsisteAControlesDentalesController,
+                      onChanged: hcNotifier
+                          .setSaludBocalConQueFrecuenciaAsisteAControlesDentales,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRadioButtonGroupBool(
+                      title:
+                          "¿Tiene alguna molestia o dolor dentro de su boca (dientes, encias, paladar, lengua)?",
+                      options: ["SI", "NO"],
+                      selectedValue: hcState.createHcAdult.saludBocal
+                          .tieneAlgunaMolestiaODolorDentroDeSuBoca,
+                      onChanged: hcNotifier
+                          .setSaludBocalTieneAlgunaMolestiaODolorDentroDeSuBoca,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      label: "¿Cuál?",
+                      controller: queMolestiaODolorController,
+                      onChanged: hcNotifier.setSaludBocalQueMolestiaODolor,
+                    ),
+                  ],
+                ),
+              ),
             ),
-            _buildRadioButtonGroup(
-              title: "¿Qué tipo de ayuda necesita?",
-              options: [
-                "Para identificar qué está comiendo",
-                "Para llevarse la comida a la boca/evitar derrames",
-                "Ninguna"
-              ],
-              selectedValue: hcState
-                  .createHcAdult.independenciaAutonomia.queTipoDeAyudaNecesita,
-              onChanged: hcNotifier.setIndepQueTipoDeAyudaNecesita,
-            ),
-            _buildRadioButtonGroupBool(
-              title: "¿Prepara sus propios alimentos?",
-              options: ["SI", "NO"],
-              selectedValue: hcState
-                  .createHcAdult.independenciaAutonomia.preparaSusAlimentos,
-              onChanged: hcNotifier.setIndepPreparaSusAlimentos,
-            ),
-            _buildFormField(
-              label: "¿Por Qué?",
-              controller: quePreparaController,
-              onChanged: hcNotifier.setIndepQuePrepara,
-            ),
-            _buildRadioButtonGroupBool(
-              title:
-                  "¿Decide qué alimentos desea consumir o participar en estas decisiones en el hogar?",
-              options: ["SI", "NO"],
-              selectedValue:
-                  hcState.createHcAdult.independenciaAutonomia.decideQueComer,
-              onChanged: hcNotifier.setIndepDecideQueComer,
-            ),
-            Divider(),
-            _buildSection('3 .- Eficiencia'),
-            _buildRadioButtonGroupBool(
-              title: "¿Consume la totalidad del alimento?",
-              options: ["SI", "NO"],
-              selectedValue: hcState
-                  .createHcAdult.eficiencia.consumeLaTotalidadDeLosAlimentos,
-              onChanged:
-                  hcNotifier.setEficienciaConsumeLaTotalidadDeLosAlimentos,
-            ),
-            _buildFormField(
-              label: "¿Qué porción consume?",
-              controller: quePorcionConsumeController,
-              onChanged: hcNotifier.setEficienciaQuePorcionConsume,
-            ),
-            _buildRadioButtonGroupBool(
-              title: "¿Ha presentado pérdidas de peso?",
-              options: ["SI", "NO"],
-              selectedValue: hcState.createHcAdult.eficiencia
-                  .haPresentadoPerdidasImportantesDePesoEnElUltimoTiempo,
-              onChanged: hcNotifier
-                  .setEficienciaHaPresentadoPerdidasImportantesDePesoEnElUltimoTiempo,
-            ),
-            _buildFormField(
-              label: "¿Cuántos kilos?",
-              controller: cuantoPesoHaPerdidoController,
-              onChanged: (value) => hcNotifier.setEficienciaCuantoPesoHaPerdido(
-                  double.tryParse(value) ?? 0),
-            ),
-            _buildRadioButtonGroupBool(
-              title: "¿Manifiesta interés por alimentarse?",
-              options: ["SI", "NO"],
-              selectedValue: hcState
-                  .createHcAdult.eficiencia.manifiestaInteresPorAlimentarse,
-              onChanged:
-                  hcNotifier.setEficienciaManifiestaInteresPorAlimentarse,
-            ),
-            _buildRadioButtonGroupBool(
-              title:
-                  "¿Manifiesta rechazo o preferencia por algún tipo de alimento?",
-              options: ["SI", "NO"],
-              selectedValue: hcState.createHcAdult.eficiencia
-                  .manifiestaRechazoOPreferenciasPorAlgunTipoDeAlimento,
-              onChanged: hcNotifier
-                  .setEficienciaManifiestaRechazoOPreferenciasPorAlgunTipoDeAlimento,
-            ),
-            _buildFormField(
-              label: "¿Cuál?",
-              controller: queTipoDeAlimentoController,
-              onChanged: hcNotifier.setEficienciaQueTipoDeAlimento,
-            ),
-            _buildFormField(
-              label: "¿Qué tipo de líquido consume habitualmente?",
-              controller: queTipoDeLiquidoConsumeHabitualmenteController,
-              onChanged:
-                  hcNotifier.setEficienciaQueTipoDeLiquidoConsumeHabitualmente,
-            ),
-            _buildFormField(
-              label: "¿Cuánto líquido consume al día?",
-              controller: cuantoLiquidoConsumeAlDiaController,
-              onChanged: hcNotifier.setEficienciaCuantoLiquidoConsumeAlDia,
-            ),
-            Divider(),
-            _buildSection('4 .- Seguridad'),
-            _buildRadioButtonGroupBool(
-              title: "¿Se atora con su saliva?",
-              options: ["SI", "NO"],
-              selectedValue: hcState.createHcAdult.seguridad.seAtoraConSuSaliva,
-              onChanged: hcNotifier.setSeguridadSeAtoraConSuSaliva,
-            ),
-            _buildFormField(
-              label: "¿Con qué frecuencia?",
-              controller: conQueFrecuenciaController,
-              onChanged: hcNotifier.setSeguridadConQueFrecuencia,
-            ),
-            _buildRadioButtonGroupBool(
-              title:
-                  "¿Tiene tos o ahogos cuando se alimenta o consume sus medicamentos?",
-              options: ["SI", "NO"],
-              selectedValue: hcState.createHcAdult.seguridad
-                  .tieneTosOAhogosCuandoSeAlimentaOConsumeMedicamentos,
-              onChanged: hcNotifier
-                  .setSeguridadTieneTosOAhogosCuandoSeAlimentaOConsumeMedicamentos,
-            ),
-            _buildFormField(
-              label: "¿Con qué alimento/liquido/medicamento?",
-              controller: conQueAlimentosLiquidosMedicamentosController,
-              onChanged:
-                  hcNotifier.setSeguridadConQueAlimentosLiquidosMedicamentos,
-            ),
-            _buildRadioButtonGroupBool(
-                title:
-                    "¿Presenta alguna dificultad para tomar líquidos de un vaso?",
-                options: ["SI", "NO"],
-                selectedValue: hcState.createHcAdult.seguridad
-                    .presentaAlgunaDificultadParaTomarLiquidosDeUnVaso,
-                onChanged: hcNotifier
-                    .setSeguridadPresentaAlgunaDificultadParaTomarLiquidosDeUnVaso),
-            _buildRadioButtonGroupBool(
-                title:
-                    "¿Presenta dificultad con las sopas o los granos pequeños como el arroz?",
-                options: ["SI", "NO"],
-                selectedValue: hcState.createHcAdult.seguridad
-                    .presentaDificultadConSopasOLosGranosPequenosComoArroz,
-                onChanged: hcNotifier
-                    .setSeguridadPresentaDificultadConSopasOLosGranosPequenosComoArroz),
-            _buildRadioButtonGroupBool(
-                title: "¿Ha presentado neumonías?",
-                options: ["SI", "NO"],
-                selectedValue:
-                    hcState.createHcAdult.seguridad.haPresentadoNeumonias,
-                onChanged: hcNotifier.setSeguridadHaPresentadoNeumonias),
-            _buildFormField(
-              label: "¿Con qué frecuencia?",
-              controller: conQueFrecuenciaPresentoNeumoniaController,
-              onChanged: hcNotifier.setSeguridadConQueFrecuencia,
-            ),
-            _buildRadioButtonGroupBool(
-                title:
-                    "¿Se queda con restos de alimento en la boca luego de alimentarse?",
-                options: ["SI", "NO"],
-                selectedValue: hcState.createHcAdult.seguridad
-                    .seQuedaConRestosDeAlimentosEnLaBocaLuegoDeAlimentarse,
-                onChanged: hcNotifier
-                    .setSeguridadSeQuedaConRestosDeAlimentosEnLaBocaLuegoDeAlimentarse),
-            _buildRadioButtonGroupBool(
-                title: "¿Siente que el alimento se va hacia su nariz?",
-                options: ["SI", "NO"],
-                selectedValue: hcState.createHcAdult.seguridad
-                    .sienteQueElAlimentoSeVaHaciaSuNariz,
-                onChanged:
-                    hcNotifier.setSeguridadSienteQueElAlimentoSeVaHaciaSuNariz),
-            Divider(),
-            _buildSection('5 .- Proceso de Alimentación'),
-            _buildRadioButtonGroupBool(
-                title: "¿Se demora más tiempo que el resto de la familia?",
-                options: ["SI", "NO"],
-                selectedValue: hcState.createHcAdult.procesoDeAlimentacion
-                    .seDemoraMasTiempoQueElRestoDeLaFamiliaEnComer,
-                onChanged: hcNotifier
-                    .setProcesoDeAlimentacionSeDemoraMasTiempoQueElRestoDeLaFamiliaEnComer),
-            _buildFormField(
-                label: "¿Cuánto?",
-                controller: cuantoTiempoController,
-                onChanged: hcNotifier.setProcesoDeAlimentacionCuantoTiempo),
-            _buildRadioButtonGroupBool(
-              title: "¿Cree usted que come muy rápido?",
-              options: ["SI", "NO"],
-              selectedValue: hcState.createHcAdult.procesoDeAlimentacion
-                  .creeUstedQueComeMuyRapido,
-              onChanged:
-                  hcNotifier.setProcesoDeAlimentacionCreeUstedQueComeMuyRapido,
-            ),
-            _buildRadioButtonGroupBool(
-                title: "¿Suele realizar alguna otra actividad mientras come?",
-                options: ["SI", "NO"],
-                selectedValue: hcState.createHcAdult.procesoDeAlimentacion
-                    .sueleRealizarAlgunaOtraActividadMientrasCome,
-                onChanged: hcNotifier
-                    .setProcesoDeAlimentacionSueleRealizarAlgunaOtraActividadMientrasCome),
-            _buildFormField(
-              label: "¿Cuál(es)?",
-              controller: queOtraActividadController,
-              onChanged: hcNotifier.setProcesoDeAlimentacionQueOtraActividad,
-            ),
-            Divider(),
-            _buildSection('6 .- Salud Bucal'),
-            _buildRadioButtonGroupBool(
-              title: "¿Cuenta con todas sus piezas dentarias/dientes?",
-              options: ["SI", "NO"],
-              selectedValue: hcState
-                  .createHcAdult.saludBocal.cuentaConTodasSusPiezasDentales,
-              onChanged:
-                  hcNotifier.setSaludBocalCuentaConTodasSusPiezasDentales,
-            ),
-            _buildFormField(
-              label: "¿Por qué?",
-              controller: porQueNoCuentaConTodasSusPiezasDentalesController,
-              onChanged: hcNotifier
-                  .setSaludBocalPorQueNoCuentaConTodasSusPiezasDentales,
-            ),
-            _buildRadioButtonGroupBool(
-              title: "¿Utiliza placa dental?",
-              options: ["SI", "NO"],
-              selectedValue:
-                  hcState.createHcAdult.saludBocal.utilizaPlacaDental,
-              onChanged: hcNotifier.setSaludBocalUtilizaPlacaDental,
-            ),
-            _buildRadioButtonGroupBool(
-              title: "¿Se realiza aseo bucal después de cada comida?",
-              options: ["SI", "NO"],
-              selectedValue: hcState.createHcAdult.saludBocal
-                  .seRealizaAseoBucalDespuesDeCadaComida,
-              onChanged:
-                  hcNotifier.setSaludBocalSeRealizaAseoBucalDespuesDeCadaComida,
-            ),
-            _buildFormField(
-              label:
-                  "¿Con qué frecuencia se lava los dientes/lava su prótesis?",
-              controller: conQueFrecuenciaSeLavaLosDientesController,
-              onChanged:
-                  hcNotifier.setSaludBocalConQueFrecuenciaSeLavaLosDientes,
-            ),
-            _buildRadioButtonGroupBool(
-              title: "¿Asiste regularmente a controles dentales?",
-              options: ["SI", "NO"],
-              selectedValue: hcState.createHcAdult.saludBocal
-                  .asisteRegularmenteAControlesDentales,
-              onChanged:
-                  hcNotifier.setSaludBocalAsisteRegularmenteAControlesDentales,
-            ),
-            _buildFormField(
-              label: "¿Con qué frecuencia?",
-              controller: conQueFrecuenciaAsisteAControlesDentalesController,
-              onChanged: hcNotifier
-                  .setSaludBocalConQueFrecuenciaAsisteAControlesDentales,
-            ),
-            _buildRadioButtonGroupBool(
-              title:
-                  "¿Tiene alguna molestia o dolor dentro de su boca (dientes, encias, paladar, lengua)?",
-              options: ["SI", "NO"],
-              selectedValue: hcState.createHcAdult.saludBocal
-                  .tieneAlgunaMolestiaODolorDentroDeSuBoca,
-              onChanged: hcNotifier
-                  .setSaludBocalTieneAlgunaMolestiaODolorDentroDeSuBoca,
-            ),
-            _buildFormField(
-              label: "¿Cuál?",
-              controller: queMolestiaODolorController,
-              onChanged: hcNotifier.setSaludBocalQueMolestiaODolor,
-            ),
-            Divider(),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (hcState.tipo == 'Nuevo') {
-            hcNotifier.onCreateHcGeneral(context);
+            hcNotifier.onCreateHcGeneral();
           } else {
-            hcNotifier.onUpdateHcAdult(context);
+            hcNotifier.onUpdateHcAdult();
           }
         },
+        backgroundColor: const Color(0xFF1976D2),
         child: const Icon(Icons.save),
       ),
     );
   }
 
-  // 🔹 Función para construir una sección con título
-  Widget _buildSection(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
-      child: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
-  // 🔹 Función para construir campos de formulario con `onChanged`
   Widget _buildFormField({
     required String label,
     required TextEditingController controller,
     required Function(String) onChanged,
+    bool disabled = false,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        controller: controller,
-        onChanged: onChanged,
-        decoration: InputDecoration(
-          labelText: label,
-          filled: true,
-          fillColor: Colors.grey[200],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          errorStyle: const TextStyle(color: Colors.red),
+    return TextFormField(
+      controller: controller,
+      enabled: !disabled,
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Color(0xFF1976D2)),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF1976D2)),
         ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF1976D2)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 2),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+      style: const TextStyle(
+        fontSize: 16,
+        color: Colors.black87,
       ),
     );
   }
 
-  // 🔹 Función para construir grupos de botones de radio
   Widget _buildRadioButtonGroupBool({
     required String title,
     required List<String> options,
@@ -518,7 +802,11 @@ class _HcTrAnamAdultState extends ConsumerState<HcTrAnamAdult> {
           padding: const EdgeInsets.only(bottom: 8.0),
           child: Text(
             title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16.0,
+              color: Color(0xFF1976D2),
+            ),
           ),
         ),
         Wrap(
@@ -529,12 +817,19 @@ class _HcTrAnamAdultState extends ConsumerState<HcTrAnamAdult> {
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Radio(
+                Radio<bool?>(
                   value: option == "SI",
                   groupValue: selectedValue,
                   onChanged: (value) => onChanged(value as bool),
+                  activeColor: const Color(0xFF1976D2),
                 ),
-                Text(option),
+                Text(
+                  option,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ),
+                ),
               ],
             );
           }).toList(),
@@ -547,6 +842,7 @@ class _HcTrAnamAdultState extends ConsumerState<HcTrAnamAdult> {
     required String title,
     required List<String> options,
     required String selectedValue,
+    bool disabled = false,
     required Function(String) onChanged,
   }) {
     return Column(
@@ -556,28 +852,61 @@ class _HcTrAnamAdultState extends ConsumerState<HcTrAnamAdult> {
           padding: const EdgeInsets.only(bottom: 8.0),
           child: Text(
             title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16.0,
+              color: Color(0xFF1976D2),
+            ),
           ),
         ),
-        Wrap(
-          spacing: 20.0,
-          runSpacing: 10.0,
-          alignment: WrapAlignment.start,
+        Column(
           children: options.map((option) {
             return Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Radio(
+                Radio<String>(
                   value: option,
                   groupValue: selectedValue,
-                  onChanged: (value) => onChanged(value as String),
+                  onChanged: disabled
+                      ? null
+                      : (String? value) {
+                          if (value != null) {
+                            onChanged(value);
+                          }
+                        },
+                  activeColor: const Color(0xFF1976D2),
                 ),
-                Text(option),
+                Expanded(
+                  child: Text(
+                    option,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
+                    softWrap: true,
+                  ),
+                ),
               ],
             );
           }).toList(),
         ),
       ],
+    );
+  }
+
+  void _showSnackBar(BuildContext context, String message, bool isSuccess) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor:
+            isSuccess ? Colors.green.shade300 : Colors.red.shade300,
+        behavior: SnackBarBehavior.fixed,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 2),
+      ),
     );
   }
 }

@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dio/dio.dart';
-import 'package:h_c_1/auth/infrastructure/errors/auth_errors.dart';
 import 'package:h_c_1/citas_medicTR/domain/datasources/appointment_datasource.dart';
 import 'package:h_c_1/citas_medicTR/domain/entities/cita.entity.dart';
 import 'package:h_c_1/citas_medicTR/domain/entities/registerCita.entity.dart';
+import 'package:h_c_1/shared/infrastructure/errors/custom_error.dart';
 
 class AppointmentDatasourceImpl implements AppointmentDatasource {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

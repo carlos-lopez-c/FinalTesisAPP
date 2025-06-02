@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:h_c_1/auth/presentation/providers/login_provider.dart';
 
 class LoginForm extends ConsumerWidget {
@@ -52,7 +51,8 @@ class LoginForm extends ConsumerWidget {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                  borderSide:
+                      const BorderSide(color: Color(0xFF1976D2), width: 2),
                 ),
               ),
               style: const TextStyle(color: Colors.black87),
@@ -106,7 +106,8 @@ class LoginForm extends ConsumerWidget {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                  borderSide:
+                      const BorderSide(color: Color(0xFF1976D2), width: 2),
                 ),
               ),
               style: const TextStyle(color: Colors.black87),
@@ -121,7 +122,8 @@ class LoginForm extends ConsumerWidget {
                   return 'La contraseña debe contener al menos una letra minúscula.';
                 } else if (!RegExp(r'\d').hasMatch(value)) {
                   return 'La contraseña debe contener al menos un número.';
-                } else if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(value)) {
+                } else if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>]')
+                    .hasMatch(value)) {
                   return 'La contraseña debe contener al menos un carácter especial.';
                 }
                 return null;
@@ -152,8 +154,7 @@ class LoginForm extends ConsumerWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF1976D2),
               foregroundColor: Colors.white,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),

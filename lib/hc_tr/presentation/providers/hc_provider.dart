@@ -71,6 +71,18 @@ class HcNotifier extends StateNotifier<HCState> {
     }
   }
 
+  Future<void> updateHcVoice(CreateHcVoice hc) async {
+    print('🟢 Actualizando historia clínica de voz');
+    state = state.copyWith(loading: true);
+    try {
+      await _hcRepository.updateHcVoice(hc);
+    } on CustomError catch (e) {
+      state = state.copyWith(errorMessage: e.message);
+    } finally {
+      state = state.copyWith(loading: false);
+    }
+  }
+
   Future<CreateHcGeneral?> getHcGeneral(String cedula) async {
     print('🟢 Obteniendo historia clínica general');
     state = state.copyWith(loading: true);
@@ -79,25 +91,20 @@ class HcNotifier extends StateNotifier<HCState> {
       state = state.copyWith(errorMessage: '');
       return hc;
     } on CustomError catch (e) {
-      state = state.copyWith(
-          errorMessage: e.message ?? 'Error al obtener historia clínica');
+      state = state.copyWith(errorMessage: e.message);
     } finally {
       state = state.copyWith(loading: false);
     }
   }
 
   Future<CreateHcAdultEntity?> getHcAdult(String cedula) async {
-    print('🟢 Obteniendo historia clínica');
     state = state.copyWith(loading: true);
     try {
       final hc = await _hcRepository.getHcAdult(cedula);
-      print("aQUI SI LLEGA");
       state = state.copyWith(errorMessage: '');
       return hc;
-    } catch (e) {
-      print('🔴 Error al obtener historia clínica: ${e.toString()}');
-      state = state.copyWith(
-          errorMessage: e.toString() ?? 'Error al obtener historia clínica');
+    } on CustomError catch (e) {
+      state = state.copyWith(errorMessage: e.message);
     } finally {
       state = state.copyWith(loading: false);
     }
@@ -111,8 +118,7 @@ class HcNotifier extends StateNotifier<HCState> {
       state = state.copyWith(errorMessage: '');
       return hc;
     } catch (e) {
-      state = state.copyWith(
-          errorMessage: e.toString());
+      state = state.copyWith(errorMessage: e.toString());
     } finally {
       state = state.copyWith(loading: false);
     }
@@ -131,8 +137,7 @@ class HcNotifier extends StateNotifier<HCState> {
     try {
       await _hcRepository.createHcVoice(hc);
     } on CustomError catch (e) {
-      state = state.copyWith(
-          errorMessage: e.message);
+      state = state.copyWith(errorMessage: e.message);
     } finally {
       state = state.copyWith(loading: false);
     }

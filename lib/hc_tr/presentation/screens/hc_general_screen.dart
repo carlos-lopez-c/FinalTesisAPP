@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_c_1/hc_tr/presentation/providers/hc_form_general_provider.dart';
 import 'package:h_c_1/hc_tr/presentation/providers/hc_provider.dart';
 import 'package:h_c_1/hc_tr/presentation/providers/state/hc_general_state.dart';
-import 'package:h_c_1/hc_tr/presentation/widgets/hc_general/GenerarPdfButton.dart';
 import 'package:h_c_1/hc_tr/presentation/widgets/hc_general/antecedentes_perinatales.dart';
 import 'package:h_c_1/hc_tr/presentation/widgets/hc_general/antecedentes_postnatales.dart';
 import 'package:h_c_1/hc_tr/presentation/widgets/hc_general/antecedentes_prenatales.dart';
@@ -19,35 +18,16 @@ class HcTrGeneral extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final hcNotifier = ref.watch(hcGeneralProvider.notifier);
     final hcState = ref.watch(hcGeneralProvider);
+
+    // Listeners para mensajes de éxito y error
     ref.listen<HcGeneralFormState?>(hcGeneralProvider, (previous, next) {
       if (next!.successMessage.isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.successMessage),
-            backgroundColor: Colors.green.shade300,
-            behavior: SnackBarBehavior.fixed,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        _showSnackBar(context, next.successMessage, true);
         Future.delayed(const Duration(seconds: 2), () {
           ref.read(hcGeneralProvider.notifier).clearSuccessMessage();
         });
       } else if (next.errorMessage.isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.errorMessage),
-            backgroundColor: Colors.red.shade300,
-            behavior: SnackBarBehavior.fixed,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-
+        _showSnackBar(context, next.errorMessage, false);
         Future.delayed(const Duration(seconds: 2), () {
           ref.read(hcGeneralProvider.notifier).clearErrorMessage();
         });
@@ -56,33 +36,12 @@ class HcTrGeneral extends ConsumerWidget {
 
     ref.listen<HCState?>(hcProvider, (previous, next) {
       if (next!.successMessage.isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.successMessage),
-            backgroundColor: Colors.green.shade300,
-            behavior: SnackBarBehavior.fixed,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        _showSnackBar(context, next.successMessage, true);
         Future.delayed(const Duration(seconds: 2), () {
           ref.read(hcProvider.notifier).clearSuccess();
         });
       } else if (next.errorMessage.isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.errorMessage),
-            backgroundColor: Colors.red.shade300,
-            behavior: SnackBarBehavior.fixed,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-
+        _showSnackBar(context, next.errorMessage, false);
         Future.delayed(const Duration(seconds: 2), () {
           ref.read(hcProvider.notifier).clearError();
         });
@@ -90,95 +49,143 @@ class HcTrGeneral extends ConsumerWidget {
     });
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F8FA),
       appBar: AppBar(
+        backgroundColor: const Color(0xFF1976D2),
+        elevation: 0,
         title: const Text(
-          'Area de Terapias',
-          style: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+          'Historia Clínica General',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          GenerarPdfButton(),
           headerTRWidget(
             textoDinamico: 'HISTORIA CLÍNICA GENERAL',
           ),
           const SizedBox(height: 20),
-          Center(
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
               child: _buildRadioButtonGroup(
-            title: '',
-            options: ['Nuevo', 'Buscar/Editar'],
-            selectedValue: hcState.tipo,
-            onChanged: hcNotifier.onTipoChanged,
-          )),
+                title: 'Tipo de Registro',
+                options: ['Nuevo', 'Buscar/Editar'],
+                selectedValue: hcState.tipo,
+                onChanged: hcNotifier.onTipoChanged,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
           DatosInformativosWidget(),
-          Divider(),
+          _buildDivider(),
           MotivoConsultaWidget(),
-          Divider(),
+          _buildDivider(),
           _buildSection('4.- ANTECEDENTES PERSONALES'),
-          AntecedentesPrenatalesWidget(),
-          AntecedentesPerinatalesWidget(),
-          MaxlineSection('Obersevaciones.................................'),
-          Divider(),
-          AntecedentesPostnatalesWidget(),
-          Divider(),
-          DesarrolloMotorFino(),
-          Divider(),
-          EspecificacionesWidget(),
-          Divider(),
-          HabitosPersonalesWidget()
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AntecedentesPrenatalesWidget(),
+                  _buildDivider(),
+                  AntecedentesPerinatalesWidget(),
+                  _buildDivider(),
+                  MaxlineSection('Observaciones'),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AntecedentesPostnatalesWidget(),
+                  _buildDivider(),
+                  DesarrolloMotorFino(),
+                  _buildDivider(),
+                  EspecificacionesWidget(),
+                  _buildDivider(),
+                  HabitosPersonalesWidget(),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // Enviar datos al servidor
           if (hcState.tipo == 'Nuevo') {
-            print("Creando historia clinica");
-            hcNotifier.onCreateHcGeneral();
+            hcNotifier.onCreateHcGeneral(context);
           } else {
-            print("Actualizando historia clinica");
-            hcNotifier.onUpdateHcGeneral();
+            hcNotifier.onUpdateHcGeneral(context);
           }
         },
-        child: const Icon(Icons.save),
+        backgroundColor: const Color(0xFF1976D2),
+        icon: const Icon(Icons.save, color: Colors.white),
+        label: const Text(
+          'Guardar',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
     );
   }
 
-  //WIDGETS DE LA PAGINA
+  void _showSnackBar(BuildContext context, String message, bool isSuccess) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor:
+            isSuccess ? Colors.green.shade300 : Colors.red.shade300,
+        behavior: SnackBarBehavior.fixed,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
 
   Widget _buildSection(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: Text(
         title,
-        style: const TextStyle(fontWeight: FontWeight.bold),
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+          color: Color(0xFF1976D2),
+        ),
       ),
     );
   }
 
-  Widget MaxlineSection(String label) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        maxLines: 5, // Aumenta el tamaño de la caja de texto
-        decoration: InputDecoration(
-          labelText: label,
-          filled: true,
-          fillColor: Colors.grey[200],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          errorStyle: const TextStyle(
-            color: Colors.red, // Mensaje de error en rojo
-          ),
-        ),
-        validator: (MaxLinevalue) {
-          return (MaxLinevalue == null || MaxLinevalue.isEmpty)
-              ? 'Llenar el campo'
-              : null;
-        },
-      ),
+  Widget _buildDivider() {
+    return const Divider(
+      color: Color(0xFF1976D2),
+      thickness: 0.5,
+      height: 32,
     );
   }
 }
@@ -193,10 +200,14 @@ Widget _buildRadioButtonGroup({
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Padding(
-        padding: const EdgeInsets.only(bottom: 8.0),
+        padding: const EdgeInsets.only(bottom: 16.0),
         child: Text(
           title,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16.0,
+            color: Color(0xFF1976D2),
+          ),
         ),
       ),
       Wrap(
@@ -211,13 +222,48 @@ Widget _buildRadioButtonGroup({
                 value: option,
                 groupValue: selectedValue,
                 onChanged: (value) => onChanged(value as String),
+                activeColor: const Color(0xFF1976D2),
               ),
-              Text(option),
+              Text(
+                option,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
+              ),
             ],
           );
         }).toList(),
       ),
     ],
+  );
+}
+
+Widget MaxlineSection(String label) {
+  return TextFormField(
+    maxLines: 5,
+    decoration: InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Color(0xFF1976D2)),
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12.0),
+        borderSide: const BorderSide(color: Color(0xFF1976D2)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12.0),
+        borderSide: const BorderSide(color: Color(0xFF1976D2)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12.0),
+        borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+      ),
+      errorStyle: const TextStyle(color: Colors.red),
+    ),
+    validator: (value) {
+      return (value == null || value.isEmpty) ? 'Llenar el campo' : null;
+    },
   );
 }
 
@@ -228,8 +274,15 @@ Widget InlineCheckbox(String title, bool value, ValueChanged<bool?> onChanged) {
       Checkbox(
         value: value,
         onChanged: onChanged,
+        activeColor: const Color(0xFF1976D2),
       ),
-      Text(title),
+      Text(
+        title,
+        style: const TextStyle(
+          fontSize: 16,
+          color: Colors.black87,
+        ),
+      ),
     ],
   );
 }

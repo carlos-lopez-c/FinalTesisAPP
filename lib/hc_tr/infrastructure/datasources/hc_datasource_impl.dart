@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart'; // Importamos el paquete Firestore
 import 'package:flutter/services.dart';
-import 'package:h_c_1/auth/infrastructure/errors/auth_errors.dart';
 import 'package:h_c_1/hc_ps/domain/entities/hc_ps_adult/create_hc_adult.dart';
 import 'package:h_c_1/hc_tr/domain/datasources/hc_datasource.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_adult/hc_adult_entity.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_general/hc_general_entity.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_voice/create_hc_voice_entity.dart';
+import 'package:h_c_1/shared/infrastructure/errors/custom_error.dart';
 import 'package:h_c_1/shared/infrastructure/errors/handle_error.dart';
 
 class HcDatasourceImpl implements HcDatasource {
@@ -75,7 +75,8 @@ class HcDatasourceImpl implements HcDatasource {
           .collection('HcTrGeneral') // Colección de historias clínicas
           .where('patientId',
               isEqualTo: pacienteId) // Filtra por ID del paciente
-          .limit(1) // Limita a 1 resultado (asumimos que hay una sola HC por paciente)
+          .limit(
+              1) // Limita a 1 resultado (asumimos que hay una sola HC por paciente)
           .get();
 
       return hcSnapshot.docs.isNotEmpty; // Retorna true si se encontró la HC
@@ -213,13 +214,14 @@ class HcDatasourceImpl implements HcDatasource {
           .get();
 
       if (pacientesSnapshot.docs.isEmpty) {
-        throw CustomError(
-            'No se encontró un paciente con el DNI proporcionado');
+        throw FirebaseException(
+            plugin: 'firestore',
+            code: 'patient-not-found',
+            message: 'No se encontró un paciente con el DNI proporcionado');
       }
 
       // Obtener el ID del paciente
       final pacienteId = pacientesSnapshot.docs.first.id;
-      print("ID: $pacienteId");
 
       // 2. Buscar la historia clínica por el ID del paciente
       final hcSnapshot = await firestore
@@ -231,23 +233,27 @@ class HcDatasourceImpl implements HcDatasource {
           .get();
 
       if (hcSnapshot.docs.isEmpty) {
-        throw CustomError(
-            'No se encontró una historia clínica para este paciente');
+        throw FirebaseException(
+            plugin: 'firestore',
+            code: 'hc-not-found',
+            message: 'No se encontró una historia clínica para este paciente');
       }
 
       // Obtener los datos de la historia clínica
       final hcData = hcSnapshot.docs.first.data();
-      final hcId = hcSnapshot
-          .docs.first.id; // Obtener el ID del documento de la historia clínica
+      final hcId = hcSnapshot.docs.first.id; // Obtener el ID del documento
 
-      print("Datos: $hcData");
-      print("ID de la historia clínica: $hcId");
+      // Agregar el ID del documento a los datos de la historia clínica
+      hcData['id'] = hcId;
 
-      // Convertir los datos a un objeto CreateHcAdultEntity, incluyendo el ID
+      // Convertir los datos a un objeto CreateHcAdultEntity
       return CreateHcAdultEntity.fromJson(hcData, id: hcId);
+    } on FirebaseException catch (e) {
+      throw FirebaseErrorHandler.handleFirebaseException(e);
+    } on PlatformException catch (e) {
+      throw FirebaseErrorHandler.handlePlatformException(e);
     } catch (e) {
-      print('Error al obtener la historia clínica: $e');
-      throw CustomError('Error al obtener la historia clínica');
+      throw FirebaseErrorHandler.handleGenericException(e);
     }
   }
 
@@ -262,13 +268,15 @@ class HcDatasourceImpl implements HcDatasource {
           .get();
 
       if (pacientesSnapshot.docs.isEmpty) {
-        throw CustomError(
-            'No se encontró un paciente con el DNI proporcionado');
+        throw FirebaseException(
+            plugin: 'firestore',
+            code: 'patient-not-found',
+            message: 'No se encontró un paciente con el DNI proporcionado');
       }
 
       // Obtener el ID del paciente
       final pacienteId = pacientesSnapshot.docs.first.id;
-      print("ID: $pacienteId");
+
       // 2. Buscar la historia clínica por el ID del paciente
       final hcSnapshot = await firestore
           .collection('HcTrVoice') // Colección de historias clínicas
@@ -279,18 +287,27 @@ class HcDatasourceImpl implements HcDatasource {
           .get();
 
       if (hcSnapshot.docs.isEmpty) {
-        throw CustomError(
-            'No se encontró una historia clínica para este paciente');
+        throw FirebaseException(
+            plugin: 'firestore',
+            code: 'hc-not-found',
+            message: 'No se encontró una historia clínica para este paciente');
       }
-      print("Datos: ${hcSnapshot.docs.first.data()}");
+
       // Obtener los datos de la historia clínica
       final hcData = hcSnapshot.docs.first.data();
+      final hcId = hcSnapshot.docs.first.id; // Obtener el ID del documento
 
-      // Convertir los datos a un objeto CreateHcGeneral
+      // Agregar el ID del documento a los datos de la historia clínica
+      hcData['id'] = hcId;
+
+      // Convertir los datos a un objeto CreateHcVoice
       return CreateHcVoice.fromJson(hcData);
+    } on FirebaseException catch (e) {
+      throw FirebaseErrorHandler.handleFirebaseException(e);
+    } on PlatformException catch (e) {
+      throw FirebaseErrorHandler.handlePlatformException(e);
     } catch (e) {
-      print('Error al obtener la historia clínica: $e');
-      throw CustomError('Error al obtener la historia clínica');
+      throw FirebaseErrorHandler.handleGenericException(e);
     }
   }
 
@@ -369,7 +386,29 @@ class HcDatasourceImpl implements HcDatasource {
 
   @override
   Future<void> updateHcVoice(CreateHcVoice hc) {
-    // TODO: implement updateHcVoice
-    throw UnimplementedError();
+    try {
+      // Verificar que el ID del documento esté presente
+      if (hc.id == null || hc.id!.isEmpty) {
+        throw CustomError('El ID del documento es necesario para actualizar');
+      }
+
+      // Convertir el objeto CreateHcVoice a un mapa
+      final hcData = hc.toJson();
+
+      // Actualizar el documento en Firestore
+      return firestore
+          .collection('HcTrVoice') // Colección de historias clínicas
+          .doc(hc.id) // Referencia al documento específico
+          .update(hcData) // Actualizar con los nuevos datos
+          .then(
+              (_) => print('Historia clínica de voz actualizada correctamente'))
+          .catchError((e) {
+        print('Error al actualizar la historia clínica de voz: $e');
+        throw CustomError('Error al actualizar la historia clínica de voz');
+      });
+    } catch (e) {
+      print('Error al actualizar la historia clínica de voz: $e');
+      throw CustomError('Error al actualizar la historia clínica de voz');
+    }
   }
 }

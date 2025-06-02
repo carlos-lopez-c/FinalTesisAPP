@@ -21,7 +21,9 @@ class FormChangePasswordNotifier
     final newOldPassword = Password.dirty(value);
     state = state.copyWith(
       oldPassword: newOldPassword,
-      isValid: Formz.validate([newOldPassword, state.newPassword]),
+      isValid: Formz.validate(
+              [newOldPassword, state.newPassword, state.confirmPassword]) &&
+          state.newPassword.value == state.confirmPassword.value,
     );
   }
 
@@ -29,7 +31,39 @@ class FormChangePasswordNotifier
     final newNewPassword = Password.dirty(value);
     state = state.copyWith(
       newPassword: newNewPassword,
-      isValid: Formz.validate([state.oldPassword, newNewPassword]),
+      isValid: Formz.validate(
+              [state.oldPassword, newNewPassword, state.confirmPassword]) &&
+          newNewPassword.value == state.confirmPassword.value,
+    );
+  }
+
+  void onConfirmPasswordChanged(String value) {
+    final newConfirmPassword = Password.dirty(value);
+    state = state.copyWith(
+      confirmPassword: newConfirmPassword,
+      isValid: Formz.validate(
+              [state.oldPassword, state.newPassword, newConfirmPassword]) &&
+          state.newPassword.value == newConfirmPassword.value,
+    );
+  }
+
+  void onOldPasswordVisibilityChanged() {
+    print('Old password visibility changed');
+
+    state = state.copyWith(
+      oldPasswordVisible: !state.oldPasswordVisible,
+    );
+  }
+
+  void onNewPasswordVisibilityChanged() {
+    state = state.copyWith(
+      newPasswordVisible: !state.newPasswordVisible,
+    );
+  }
+
+  void onConfirmPasswordVisibilityChanged() {
+    state = state.copyWith(
+      confirmPasswordVisible: !state.confirmPasswordVisible,
     );
   }
 
@@ -38,14 +72,20 @@ class FormChangePasswordNotifier
 
     if (!state.isValid) return;
 
+    if (state.newPassword.value != state.confirmPassword.value) {
+      print('Passwords do not match');
+      state = state.copyWith(
+        errorMessage: 'Las contraseñas no coinciden',
+      );
+      return;
+    }
+
     state = state.copyWith(isPosting: true, errorMessage: null);
 
     try {
-      // Intento de cambio de contraseña
       await changePasswordCallback(
           state.oldPassword.value, state.newPassword.value);
     } catch (e) {
-      // Manejo del error de cambio de contraseña
       state = state.copyWith(
         isPosting: false,
         errorMessage: 'Error al cambiar la contraseña.',
@@ -58,12 +98,31 @@ class FormChangePasswordNotifier
   void _touchEveryField() {
     final oldPassword = Password.dirty(state.oldPassword.value);
     final newPassword = Password.dirty(state.newPassword.value);
+    final confirmPassword = Password.dirty(state.confirmPassword.value);
+
+    print("Old Password: ${oldPassword.value}");
+    print("New Password: ${newPassword.value}");
+    print("Confirm Password: ${confirmPassword.value}");
+
+    // Validar que las contraseñas coincidan
+    if (newPassword.value != confirmPassword.value) {
+      state = state.copyWith(
+        isFormPosted: true,
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+        confirmPassword: confirmPassword,
+        isValid: false,
+        errorMessage: 'Las contraseñas no coinciden',
+      );
+      return;
+    }
 
     state = state.copyWith(
       isFormPosted: true,
       oldPassword: oldPassword,
       newPassword: newPassword,
-      isValid: Formz.validate([oldPassword, newPassword]),
+      confirmPassword: confirmPassword,
+      isValid: Formz.validate([oldPassword, newPassword, confirmPassword]),
     );
   }
 }
@@ -71,6 +130,10 @@ class FormChangePasswordNotifier
 class FormChangePasswordState {
   final Password oldPassword;
   final Password newPassword;
+  final Password confirmPassword;
+  final bool oldPasswordVisible;
+  final bool newPasswordVisible;
+  final bool confirmPasswordVisible;
   final bool isPosting;
   final String? errorMessage;
   final bool isFormPosted;
@@ -79,6 +142,10 @@ class FormChangePasswordState {
   const FormChangePasswordState({
     this.oldPassword = const Password.pure(),
     this.newPassword = const Password.pure(),
+    this.confirmPassword = const Password.pure(),
+    this.oldPasswordVisible = false,
+    this.newPasswordVisible = false,
+    this.confirmPasswordVisible = false,
     this.isPosting = false,
     this.errorMessage,
     this.isFormPosted = false,
@@ -88,6 +155,10 @@ class FormChangePasswordState {
   FormChangePasswordState copyWith({
     Password? oldPassword,
     Password? newPassword,
+    Password? confirmPassword,
+    bool? oldPasswordVisible,
+    bool? newPasswordVisible,
+    bool? confirmPasswordVisible,
     bool? isPosting,
     String? errorMessage,
     bool? isFormPosted,
@@ -96,6 +167,11 @@ class FormChangePasswordState {
     return FormChangePasswordState(
       oldPassword: oldPassword ?? this.oldPassword,
       newPassword: newPassword ?? this.newPassword,
+      confirmPassword: confirmPassword ?? this.confirmPassword,
+      oldPasswordVisible: oldPasswordVisible ?? this.oldPasswordVisible,
+      newPasswordVisible: newPasswordVisible ?? this.newPasswordVisible,
+      confirmPasswordVisible:
+          confirmPasswordVisible ?? this.confirmPasswordVisible,
       isPosting: isPosting ?? this.isPosting,
       errorMessage: errorMessage ?? this.errorMessage,
       isFormPosted: isFormPosted ?? this.isFormPosted,

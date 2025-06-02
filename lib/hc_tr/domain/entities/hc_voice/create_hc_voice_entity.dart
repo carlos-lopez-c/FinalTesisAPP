@@ -9,6 +9,7 @@ import 'package:h_c_1/hc_tr/domain/entities/hc_voice/sintomalogia.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_voice/uso_laboral_profesional_de_la_voz.dart';
 
 class CreateHcVoice {
+  String? id;
   String patientId;
   String nombreCompleto;
   String fechaNacimiento;
@@ -31,6 +32,7 @@ class CreateHcVoice {
   UsoLaboralProfesionalDeLaVoz usoLaboralProfesionalDeLaVoz;
 
   CreateHcVoice({
+    this.id,
     required this.patientId,
     required this.nombreCompleto,
     required this.fechaNacimiento,
@@ -54,6 +56,7 @@ class CreateHcVoice {
   });
 
   CreateHcVoice copyWith({
+    String? id,
     String? patientId,
     String? nombreCompleto,
     String? fechaNacimiento,
@@ -76,6 +79,7 @@ class CreateHcVoice {
     UsoLaboralProfesionalDeLaVoz? usoLaboralProfesionalDeLaVoz,
   }) {
     return CreateHcVoice(
+      id: id ?? this.id,
       patientId: patientId ?? this.patientId,
       nombreCompleto: nombreCompleto ?? this.nombreCompleto,
       fechaNacimiento: fechaNacimiento ?? this.fechaNacimiento,
@@ -103,6 +107,7 @@ class CreateHcVoice {
 
   Map<String, dynamic> toJson() {
     return {
+      "id": id,
       "patientId": patientId,
       "nombreCompleto": nombreCompleto,
       "fechaNacimiento": fechaNacimiento,
@@ -128,6 +133,7 @@ class CreateHcVoice {
 
   factory CreateHcVoice.fromJson(Map<String, dynamic> json) {
     return CreateHcVoice(
+      id: json["id"],
       patientId: json["patientId"],
       nombreCompleto: json["nombreCompleto"],
       fechaNacimiento: json["fechaNacimiento"],

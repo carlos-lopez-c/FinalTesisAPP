@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:h_c_1/auth/infrastructure/errors/auth_errors.dart';
 import 'package:h_c_1/auth/presentation/providers/auth_provider.dart';
 import 'package:h_c_1/citas_medicTR/domain/entities/cita.entity.dart';
 import 'package:h_c_1/citas_medicTR/domain/entities/registerCita.entity.dart';

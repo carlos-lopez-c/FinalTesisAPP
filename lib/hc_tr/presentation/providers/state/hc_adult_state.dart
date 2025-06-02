@@ -7,10 +7,12 @@ class HcAdultState {
   final String errorMessage;
   final CreateHcAdultEntity createHcAdult;
   final String cedula;
+  final String status;
 
   HcAdultState({
     this.successMessage = '',
     this.loading = false,
+    this.status = 'Nuevo',
     this.tipo = '',
     this.errorMessage = '',
     required this.createHcAdult,
@@ -21,6 +23,7 @@ class HcAdultState {
     String successMessage = '',
     String? tipo,
     bool? loading,
+    String? status,
     String? errorMessage,
     CreateHcAdultEntity? createHcAdult,
     String? cedula,
@@ -28,6 +31,7 @@ class HcAdultState {
     return HcAdultState(
       loading: loading ?? this.loading,
       tipo: tipo ?? this.tipo,
+      status: status ?? this.status,
       successMessage: successMessage,
       errorMessage: errorMessage ?? this.errorMessage,
       createHcAdult: createHcAdult ?? this.createHcAdult,

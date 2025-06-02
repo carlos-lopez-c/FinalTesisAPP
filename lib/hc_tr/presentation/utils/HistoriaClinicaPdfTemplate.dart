@@ -5,12 +5,12 @@ import 'package:flutter/services.dart'; // Importación necesaria para rootBundl
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:path_provider/path_provider.dart';
 
 class HistoriaClinicaPdfTemplate {
   static Future<String?> guardarYMostrarPdf(
     Map<String, dynamic> datos,
     BuildContext context,
+    String cedula,
   ) async {
     try {
       final pdfBytes = await generarPdfPlantilla(datos);
@@ -19,7 +19,7 @@ class HistoriaClinicaPdfTemplate {
         await dir.create(recursive: true);
       }
       final filePath =
-          '${dir.path}/historia_clinica_${DateTime.now().millisecondsSinceEpoch}.pdf';
+          '${dir.path}/AreaTerapia_historiaClinicaGeneral_$cedula.pdf';
       final file = File(filePath);
       await file.writeAsBytes(pdfBytes);
 
@@ -51,7 +51,8 @@ class HistoriaClinicaPdfTemplate {
     );
 
     // Cargar la imagen
-    final ByteData imageData = await rootBundle.load('assets/imagenes/san-miguel.png');
+    final ByteData imageData =
+        await rootBundle.load('assets/imagenes/san-miguel.png');
     final Uint8List imageBytes = imageData.buffer.asUint8List();
     final pdfImage = pw.MemoryImage(imageBytes);
 
@@ -334,7 +335,7 @@ class HistoriaClinicaPdfTemplate {
               'empatia|Empatía',
               'interesesPeculiares|Intereses peculiares',
               'interesPorInteraccion|Interés por interacción',
-            ]),           
+            ]),
             _section("Quién vive en casa",
                 [habitosPersonales['quienViveEnCasa'] ?? 'No especificado']),
             _sectionWithBooleans(
@@ -353,74 +354,75 @@ class HistoriaClinicaPdfTemplate {
   }
 
   // ENCABEZADO CON IMAGEN CENTRADA
- static pw.Widget _headerG(String title, {pw.MemoryImage? logoImage}) {
-  return pw.Center(
-    child: pw.Container(
-      constraints: pw.BoxConstraints(maxWidth: PdfPageFormat.a4.width - 40),
-      child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.center,
-        crossAxisAlignment: pw.CrossAxisAlignment.center,
-        children: [
-          if (logoImage != null)
-            pw.Container(
-              width: 180,
-              height: 150,
-              child: pw.Image(logoImage, fit: pw.BoxFit.contain),
+  static pw.Widget _headerG(String title, {pw.MemoryImage? logoImage}) {
+    return pw.Center(
+      child: pw.Container(
+        constraints: pw.BoxConstraints(maxWidth: PdfPageFormat.a4.width - 40),
+        child: pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.center,
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
+          children: [
+            if (logoImage != null)
+              pw.Container(
+                width: 180,
+                height: 150,
+                child: pw.Image(logoImage, fit: pw.BoxFit.contain),
+              ),
+            if (logoImage != null) pw.SizedBox(width: 15),
+            pw.Column(
+              mainAxisSize: pw.MainAxisSize.min,
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text(
+                  'FUNDACION DE NIÑOS ESPECIALES',
+                  style: pw.TextStyle(
+                    fontSize: 20,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.Text(
+                  '"SAN MIGUEL" FUNESAMI',
+                  style: pw.TextStyle(
+                    fontSize: 16,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.SizedBox(height: 5),
+                pw.Text(
+                  'HISTORIA CLÍNICA DE TERAPIAS',
+                  style: pw.TextStyle(
+                    fontSize: 16,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.Text(
+                  title,
+                  style: pw.TextStyle(
+                    fontSize: 15,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
-          if (logoImage != null) pw.SizedBox(width: 15),
-          pw.Column(
-            mainAxisSize: pw.MainAxisSize.min,
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text(
-                'FUNDACION DE NIÑOS ESPECIALES',
-                style: pw.TextStyle(
-                  fontSize: 20,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-              ),
-              pw.Text(
-                '"SAN MIGUEL" FUNESAMI',
-                style: pw.TextStyle(
-                  fontSize: 16,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-              ),
-              pw.SizedBox(height: 5),
-              pw.Text(
-                'HISTORIA CLÍNICA DE TERAPIAS',
-                style: pw.TextStyle(
-                  fontSize: 16,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-              ),
-              pw.Text(
-                title,
-                style: pw.TextStyle(
-                  fontSize: 15,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
+
   // SECCIÓN CON TÍTULO Y LÍNEAS
   static pw.Widget _header(String title) {
-  return pw.Center(
-    child: pw.Text(
-      title,
-      style: pw.TextStyle(
-        fontSize: 18,
-        fontWeight: pw.FontWeight.bold,
-        color: PdfColors.red, // Color rojo
+    return pw.Center(
+      child: pw.Text(
+        title,
+        style: pw.TextStyle(
+          fontSize: 18,
+          fontWeight: pw.FontWeight.bold,
+          color: PdfColors.red, // Color rojo
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   static pw.Widget _section(String title, List<String> lines) {
     return pw.Column(

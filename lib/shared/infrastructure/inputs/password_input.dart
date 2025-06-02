@@ -1,6 +1,6 @@
 import 'package:formz/formz.dart';
 
-enum PasswordError { empty, length, format }
+enum PasswordError { empty, length, format, mismatch }
 
 class Password extends FormzInput<String, PasswordError> {
   static final RegExp passwordRegExp = RegExp(
@@ -18,6 +18,9 @@ class Password extends FormzInput<String, PasswordError> {
     if (displayError == PasswordError.length) return 'Mínimo 12 caracteres';
     if (displayError == PasswordError.format) {
       return 'Debe de tener Mayúscula, letras, un número y un caracter especial';
+    }
+    if (displayError == PasswordError.mismatch) {
+      return 'Las contraseñas no coinciden';
     }
     return null;
   }

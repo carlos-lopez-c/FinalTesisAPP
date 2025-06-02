@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:h_c_1/auth/infrastructure/errors/auth_errors.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_voice/abuso_verbal.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_voice/antecedentes_morbido.dart';
 
@@ -17,6 +16,7 @@ import 'package:h_c_1/hc_tr/presentation/providers/hc_provider.dart';
 import 'package:h_c_1/hc_tr/presentation/providers/state/hc_voice_state.dart';
 import 'package:h_c_1/patient/domain/repositories/patient_repository.dart';
 import 'package:h_c_1/patient/infrastructure/repositories/patient_repository_impl.dart';
+import 'package:h_c_1/shared/infrastructure/errors/custom_error.dart';
 
 final initialVoice = HcVoiceState(
     createHcVoice: CreateHcVoice(
@@ -77,6 +77,9 @@ final initialVoice = HcVoiceState(
     ),
     loading: false,
     errorMessage: '',
+    successMessage: '',
+    tipo: 'Nuevo',
+    status: 'Nuevo',
     cedula: '');
 
 final hcVoiceFormProvider =
@@ -85,9 +88,11 @@ final hcVoiceFormProvider =
     final patientRepo = PatientRepositoryImpl();
     final getHcVoice = ref.watch(hcProvider.notifier).getHcVoice;
     final createHcVoice = ref.watch(hcProvider.notifier).createHcVoice;
+    final updateHcVoice = ref.watch(hcProvider.notifier).updateHcVoice;
     return HcVoiceFormNotifier(
         patientRepository: patientRepo,
         getHcVoice: getHcVoice,
+        updateHcVoice: updateHcVoice,
         createHcVoice: createHcVoice);
   },
 );
@@ -96,9 +101,11 @@ class HcVoiceFormNotifier extends StateNotifier<HcVoiceState> {
   final PatientRepository patientRepository;
   final Function(String) getHcVoice;
   final Function(CreateHcVoice) createHcVoice;
+  final Function(CreateHcVoice) updateHcVoice;
   HcVoiceFormNotifier({
     required this.getHcVoice,
     required this.createHcVoice,
+    required this.updateHcVoice,
     required this.patientRepository,
   }) : super(initialVoice);
 
@@ -109,9 +116,67 @@ class HcVoiceFormNotifier extends StateNotifier<HcVoiceState> {
   }
 
   void onTipoChanged(String value) {
-    state = state.copyWith(
-      tipo: value,
-    );
+    if (value != state.tipo) {
+      state = state.copyWith(
+        tipo: value,
+        status: 'Nuevo',
+        cedula: '',
+        successMessage: '',
+        errorMessage: '',
+        createHcVoice: CreateHcVoice(
+          patientId: '',
+          nombreCompleto: '',
+          fechaNacimiento: '',
+          estadoCivil: '',
+          ocupacionActual: '',
+          direccion: '',
+          derivadoPor: '',
+          razonDeDerivacion: '',
+          diagnosticoORL: '',
+          telefonoDeContacto: '',
+          fechaDeEvaluacion: '',
+          historiaClinica: HistoriaClinica(
+            motivoDeConsulta: '',
+            esLaPrimeraVezQueTieneEstaDificultad: '',
+            desdeCuandoTieneEstaDificultad: '',
+            formaDeInicio: '',
+            aQueLoAtribuye: '',
+            comoLoAfecta: '',
+            cuandoSeAgrava: '',
+            comoHaSidoSuEvolucion: '',
+            momentoDelDiaConMayorDificultad: '',
+            enQueSituacionesAparecenMolestias: '',
+          ),
+          sintomologia: Sintomologia(
+            fonastenia: '',
+            fonalgia: '',
+          ),
+          antecedentesMorbidos: AntecedentesMorbidos(
+            problemasDeVozEnSuFamilia: '',
+            presentaAlgunaEnfermedad: '',
+            lasEmocionesDananSuVoz: '',
+            medicamentosQueToma: '',
+            accidentesOenfermedadesGravesQueHayaTenido: '',
+            haSidoIntervenidoQuirurgicamente: '',
+            haSidoEntubado: '',
+            haConsultadoConOtrosProfesionales: '',
+          ),
+          antecedentesTerapeuticos: AntecedentesTerapeuticos(),
+          abusoVocal: AbusoVocal(),
+          malUsoVocal: MalUsoVocal(),
+          factoresExternos: FactoresExternos(),
+          habitosGenerales: HabitosGenerales(cuantoTiempo: '', horasDeSueno: 0),
+          usoLaboralProfesionalDeLaVoz: UsoLaboralProfesionalDeLaVoz(
+              horasDeTrabajo: 0,
+              posturaParaTrabajar: '',
+              utilizaSuVozDeFormaProlongada: '',
+              realizaReposoVocalDuranteLaJornadaLaboral: '',
+              ingieroLiquidosDuranteLaJornadaLaboral: '',
+              utilizaAmplificacionParaCantar: '',
+              asisteAClasesConProfesionalesDeLaVoz: ''),
+        ),
+      );
+    }
   }
 
   Future<void> onSearchHcVoice(String cedula) async {
@@ -119,17 +184,22 @@ class HcVoiceFormNotifier extends StateNotifier<HcVoiceState> {
       print('🟢 Obteniendo historia clínica....');
       state = state.copyWith(loading: true);
       final hcGeneral = await getHcVoice(cedula);
-      print("Aqui tambien llega ${hcGeneral?.toJson()}");
-      state = state.copyWith(
-        createHcVoice: hcGeneral,
-      );
+      state = state.copyWith(createHcVoice: hcGeneral, status: 'Editado');
     } on CustomError catch (e) {
       state = state.copyWith(
-        errorMessage: e.message ?? 'Error al obtener historia clínica',
+        errorMessage: e.message,
       );
     } finally {
       state = state.copyWith(loading: false);
     }
+  }
+
+  void clearErrorMessage() {
+    state = state.copyWith(errorMessage: '');
+  }
+
+  void clearSuccessMessage() {
+    state = state.copyWith(successMessage: '');
   }
 
   Future<void> onCreateHcGeneral() async {
@@ -147,10 +217,28 @@ class HcVoiceFormNotifier extends StateNotifier<HcVoiceState> {
           errorMessage: '');
     } on CustomError catch (e) {
       state = state.copyWith(
-        errorMessage: e.message ?? 'Error al crear historia clínica',
+        errorMessage: e.message,
         successMessage: '',
       );
       print('🔴 Error al crear historia clínica: $e');
+    } finally {
+      state = state.copyWith(loading: false);
+    }
+  }
+
+  Future<void> onUpdateHcVoice() async {
+    try {
+      state = state.copyWith(loading: true);
+      await updateHcVoice(state.createHcVoice);
+      state = state.copyWith(
+          successMessage: 'Historia clínica actualizada con éxito',
+          errorMessage: '');
+    } on CustomError catch (e) {
+      state = state.copyWith(
+        errorMessage: e.message,
+        successMessage: '',
+      );
+      print('🔴 Error al actualizar historia clínica: $e');
     } finally {
       state = state.copyWith(loading: false);
     }
@@ -171,9 +259,7 @@ class HcVoiceFormNotifier extends StateNotifier<HcVoiceState> {
         ),
       );
     } on CustomError catch (e) {
-      state = state.copyWith(
-          loading: false,
-          errorMessage: e.message ?? 'Error al obtener paciente');
+      state = state.copyWith(loading: false, errorMessage: e.message);
     }
   }
 

@@ -152,7 +152,6 @@ class AppointmentFormNotifier extends StateNotifier<AppointmentFormState> {
       Appointments cita, BuildContext context) async {
     try {
       state = state.copyWith(loading: true);
-
       // Crear un objeto CreateAppointments con los datos actualizados
       print(cita.toJson());
       // Llamar al repositorio para actualizar la cita
@@ -162,7 +161,7 @@ class AppointmentFormNotifier extends StateNotifier<AppointmentFormState> {
         date: DateTime.parse(cita.date),
         appointmentTime: cita.appointmentTime,
         medicalInsurance: cita.medicalInsurance,
-        doctorId: cita.doctorId,
+        doctorId: medicID,
         patient: cita.patient,
         status: cita.status,
         specialtyTherapyId: cita.specialtyTherapyId!,

@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:h_c_1/citas_medicTR/domain/datasources/appointment_datasource.dart';
 import 'package:h_c_1/citas_medicTR/domain/entities/cita.entity.dart';
 import 'package:h_c_1/citas_medicTR/domain/entities/registerCita.entity.dart';
-import 'package:h_c_1/shared/infrastructure/errors/custom_error.dart';
 import 'package:h_c_1/shared/infrastructure/errors/handle_error.dart';
 
 class AppointmentDatasourceImpl implements AppointmentDatasource {
@@ -144,11 +143,26 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
             code: 'appointment-id-empty',
             message: 'El ID de la cita es necesario para actualizar');
       }
+      DocumentSnapshot medicSnapshot =
+          await _firestore.collection('medic').doc(appointment.doctorId).get();
 
+      if (!medicSnapshot.exists) {
+        throw FirebaseException(
+            plugin: 'firestore',
+            code: 'medic-not-found',
+            message: 'Médico no encontrado');
+      }
+
+      String firstName = medicSnapshot['firstname'] ?? 'Nombre no disponible';
+      String lastName = medicSnapshot['lastname'] ?? 'Apellido no disponible';
       await _firestore
           .collection('appointments')
           .doc(appointment.id)
-          .update(appointment.toJson());
+          .update(appointment.toJson()
+            ..addAll({
+              'doctor': '$firstName $lastName',
+              'doctorID': appointment.doctorId,
+            }));
 
       print("Cita actualizada correctamente en Firestore");
     } on FirebaseException catch (e) {

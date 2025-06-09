@@ -2,6 +2,7 @@ class CreateAppointments {
   String? id;
   String patientId;
   DateTime date;
+  String? doctor;
   String appointmentTime;
   String medicalInsurance;
   String doctorId;
@@ -13,6 +14,7 @@ class CreateAppointments {
   CreateAppointments({
     required this.patientId,
     this.id,
+    this.doctor,
     required this.date,
     required this.appointmentTime,
     required this.medicalInsurance,
@@ -27,6 +29,7 @@ class CreateAppointments {
     String? id,
     String? patientId,
     DateTime? date,
+    String? doctor,
     String? patient,
     String? status,
     String? appointmentTime,
@@ -40,6 +43,7 @@ class CreateAppointments {
       patientId: patientId ?? this.patientId,
       date: date ?? this.date,
       patient: patient ?? this.patient,
+      doctor: doctor ?? this.doctor,
       status: status ?? this.status,
       appointmentTime: appointmentTime ?? this.appointmentTime,
       medicalInsurance: medicalInsurance ?? this.medicalInsurance,

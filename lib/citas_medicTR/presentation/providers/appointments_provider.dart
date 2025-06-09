@@ -107,6 +107,9 @@ class AppointmentNotifier extends StateNotifier<AppointmentState> {
       final appointments = await repository.getAppointmentsByDate(
           DateTime.parse(formattedDate), medicID);
 
+// Solo las citas del dia que esten con estado "Agendado"
+      appointments.removeWhere((cita) => cita.status != 'Agendado');
+      print('✅ Citas encontradas: ${appointments.length}');
       state = state.copyWith(
           loading: false,
           citasDelDia: appointments,

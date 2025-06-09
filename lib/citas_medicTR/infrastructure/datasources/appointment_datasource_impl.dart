@@ -153,6 +153,11 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
             message: 'Médico no encontrado');
       }
 
+      if (appointment.status == 'Pendiente') {
+        appointment.doctorId = ''; // Limpiar doctorId si la cita está pendiente
+        appointment.doctor = ''; // Limpiar doctor si la cita está pendiente
+      }
+
       String firstName = medicSnapshot['firstname'] ?? 'Nombre no disponible';
       String lastName = medicSnapshot['lastname'] ?? 'Apellido no disponible';
       await _firestore

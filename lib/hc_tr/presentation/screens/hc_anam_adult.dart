@@ -538,7 +538,8 @@ class _HcTrAnamAdultState extends ConsumerState<HcTrAnamAdult> {
                     _buildFormField(
                       label: "¿Con qué frecuencia?",
                       controller: conQueFrecuenciaPresentoNeumoniaController,
-                      onChanged: hcNotifier.setSeguridadConQueFrecuencia,
+                      onChanged: hcNotifier
+                          .setSeguridadConQueFrecuenciaPresentoNeumonia,
                     ),
                     const SizedBox(height: 16),
                     _buildRadioButtonGroupBool(

@@ -133,8 +133,7 @@ class AppointmentFormNotifier extends StateNotifier<AppointmentFormState> {
         diagnosis: state.diagnosis,
         status: 'Agendado',
         patient:
-            '${state.patientEntity?.firstname} ${state.patientEntity?.lastname}' ??
-                'No asignado',
+            '${state.patientEntity?.firstname} ${state.patientEntity?.lastname}',
         doctorId: medicID,
         patientId: state.patientId,
         specialtyTherapyId: state.specialtyTherapyId!,
@@ -142,7 +141,6 @@ class AppointmentFormNotifier extends StateNotifier<AppointmentFormState> {
 
       await onCallbackAppointment(newAppointment);
       state = state.copyWith(loading: false);
-      print('✅ Cita guardada correctamente');
       await getTypeTherapics(); // ✅ Recargar áreas terapéuticas después de guardar
     } catch (e) {
       state =

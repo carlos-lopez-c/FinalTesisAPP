@@ -63,6 +63,9 @@ class FirebaseErrorHandler {
 
   static CustomError handleFirebaseException(FirebaseException e) {
     switch (e.code) {
+      case 'medic-not-found':
+        return CustomError('Médico no encontrado. Por favor, verifica el ID.',
+            code: e.code);
       case 'id-hc-empty':
         return CustomError('El ID de la historia clínica no puede estar vacío.',
             code: e.code);

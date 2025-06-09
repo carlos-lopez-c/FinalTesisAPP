@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 import 'package:h_c_1/citas_medicTR/domain/datasources/appointment_datasource.dart';
 import 'package:h_c_1/citas_medicTR/domain/entities/cita.entity.dart';
 import 'package:h_c_1/citas_medicTR/domain/entities/registerCita.entity.dart';
 import 'package:h_c_1/shared/infrastructure/errors/custom_error.dart';
+import 'package:h_c_1/shared/infrastructure/errors/handle_error.dart';
 
 class AppointmentDatasourceImpl implements AppointmentDatasource {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -12,24 +14,25 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
       CreateAppointments appointment, String medicID) async {
     try {
       DocumentSnapshot docSnapshot =
-          await _firestore.collection('medics').doc(medicID).get();
-
+          await _firestore.collection('medic').doc(medicID).get();
       if (!docSnapshot.exists) {
-        throw Exception('Médico no encontrado');
+        throw FirebaseException(
+            plugin: 'firestore',
+            code: 'medic-not-found',
+            message: 'Médico no encontrado');
       }
-
-      // Obtiene el nombre del médico
-      String name = ('${docSnapshot['firsname']} ${docSnapshot['lastname']}') ??
-          'Nombre no disponible';
-      // Convierte el objeto appointment a un mapa
+      String name = ('${docSnapshot['firstname']} ${docSnapshot['lastname']}');
+      print('Creando cita : $name');
       Map<String, dynamic> appointmentData = appointment.toJson();
       appointmentData['doctor'] = name;
-      // Agrega la cita a la colección "appointments" en Firestore
       await _firestore.collection('appointments').add(appointmentData);
       print("Cita creada correctamente en Firestore");
+    } on FirebaseException catch (e) {
+      throw FirebaseErrorHandler.handleFirebaseException(e);
+    } on PlatformException catch (e) {
+      throw FirebaseErrorHandler.handlePlatformException(e);
     } catch (e) {
-      print("Error al crear la cita: $e");
-      throw Exception('Error al crear la cita');
+      throw FirebaseErrorHandler.handleGenericException(e);
     }
   }
 
@@ -44,26 +47,27 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
     try {
       print('getAppointmentsByStatus: $status');
 
-      // Consulta Firestore para obtener las citas con el estado "Pendiente"
       QuerySnapshot querySnapshot = await _firestore
-          .collection('appointments') // Colección de citas
-          .where('status', isEqualTo: status) // Filtra por estado
+          .collection('appointments')
+          .where('status', isEqualTo: status)
           .get();
 
-      // Mapea los documentos a objetos Appointments
       List<Appointments> appointments = querySnapshot.docs.map((doc) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
         return Appointments.fromJson({
           ...data,
-          'id': doc.id, // Asegúrate de incluir el ID del documento
+          'id': doc.id,
         });
       }).toList();
 
       print("Citas obtenidas: ${appointments.length}");
       return appointments;
+    } on FirebaseException catch (e) {
+      throw FirebaseErrorHandler.handleFirebaseException(e);
+    } on PlatformException catch (e) {
+      throw FirebaseErrorHandler.handlePlatformException(e);
     } catch (e) {
-      print("Error al obtener las citas: $e");
-      throw CustomError('Error al obtener las citas');
+      throw FirebaseErrorHandler.handleGenericException(e);
     }
   }
 
@@ -71,31 +75,28 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
   Future<List<Appointments>> getAppointmentsByDate(
       DateTime date, String medicID) async {
     try {
-      // Formatea la fecha para que coincida con el formato almacenado en Firestore
       String formattedDate =
           "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
 
-      // Consulta las citas que coinciden con la fecha y el medicID proporcionados
       QuerySnapshot querySnapshot = await _firestore
           .collection('appointments')
           .where('date', isEqualTo: formattedDate)
           .where('doctorID', isEqualTo: medicID)
           .get();
 
-      // Mapea los documentos obtenidos a objetos Appointments y agrega el ID del documento
       List<Appointments> appointments = querySnapshot.docs.map((doc) {
-        // Obtén los datos del documento
         final data = doc.data() as Map<String, dynamic>;
-        // Crea un objeto Appointments a partir de los datos
         final appointment = Appointments.fromJson(data);
-        // Asigna el ID del documento al objeto Appointments
         return appointment.copyWith(id: doc.id);
       }).toList();
 
       return appointments;
+    } on FirebaseException catch (e) {
+      throw FirebaseErrorHandler.handleFirebaseException(e);
+    } on PlatformException catch (e) {
+      throw FirebaseErrorHandler.handlePlatformException(e);
     } catch (e) {
-      print("Error al obtener las citas: $e");
-      throw Exception('Error al obtener las citas');
+      throw FirebaseErrorHandler.handleGenericException(e);
     }
   }
 
@@ -103,54 +104,59 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
   Future<void> updateAppointment(
       Appointments appointment, String medicID) async {
     try {
-      // Obtener el nombre del médico desde Firestore
       print('Actualizando cita: ${medicID}');
-      DocumentSnapshot medicSnapshot = await _firestore
-          .collection('medic') // Colección de médicos
-          .doc(medicID) // ID del médico
-          .get();
+      DocumentSnapshot medicSnapshot =
+          await _firestore.collection('medic').doc(medicID).get();
 
       if (!medicSnapshot.exists) {
-        throw Exception('Médico no encontrado');
+        throw FirebaseException(
+            plugin: 'firestore',
+            code: 'medic-not-found',
+            message: 'Médico no encontrado');
       }
 
-      // Obtener el nombre del médico
       String firstName = medicSnapshot['firstname'] ?? 'Nombre no disponible';
       String lastName = medicSnapshot['lastname'] ?? 'Apellido no disponible';
-      print(
-          'Nombre del médico: $firstName $lastName'); // Imprimir el nombre del médico
-      // Actualizar la cita en Firestore
-      await _firestore
-          .collection('appointments') // Colección de citas
-          .doc(appointment.id) // ID de la cita
-          .update({
-        'status': appointment.status, // Actualizar el estado
+      print('Nombre del médico: $firstName $lastName');
+
+      await _firestore.collection('appointments').doc(appointment.id).update({
+        'status': appointment.status,
         'doctor': '$firstName $lastName',
         'doctorID': medicID,
-        // Puedes agregar más campos si es necesario
       });
 
       print("Cita actualizada correctamente en Firestore");
+    } on FirebaseException catch (e) {
+      throw FirebaseErrorHandler.handleFirebaseException(e);
+    } on PlatformException catch (e) {
+      throw FirebaseErrorHandler.handlePlatformException(e);
     } catch (e) {
-      print("Error al actualizar la cita: $e");
-      throw Exception('Error al actualizar la cita');
+      throw FirebaseErrorHandler.handleGenericException(e);
     }
   }
 
   @override
   Future<void> updateAppointmentDate(CreateAppointments appointment) async {
     try {
-      // Actualizar la cita en Firestore
+      if (appointment.id == null || appointment.id!.isEmpty) {
+        throw FirebaseException(
+            plugin: 'firestore',
+            code: 'appointment-id-empty',
+            message: 'El ID de la cita es necesario para actualizar');
+      }
 
       await _firestore
-          .collection('appointments') // Colección de citas
-          .doc(appointment.id) // ID de la cita
+          .collection('appointments')
+          .doc(appointment.id)
           .update(appointment.toJson());
 
       print("Cita actualizada correctamente en Firestore");
+    } on FirebaseException catch (e) {
+      throw FirebaseErrorHandler.handleFirebaseException(e);
+    } on PlatformException catch (e) {
+      throw FirebaseErrorHandler.handlePlatformException(e);
     } catch (e) {
-      print("Error al actualizar la cita: $e");
-      throw Exception('Error al actualizar la cita');
+      throw FirebaseErrorHandler.handleGenericException(e);
     }
   }
 
@@ -161,27 +167,28 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
       print(
           'getAppointmentsByStatusAndMedicID: status=$status, medicID=$medicID');
 
-      // Consulta Firestore para obtener las citas con el estado "Agendado" y el medicID especificado
       QuerySnapshot querySnapshot = await _firestore
-          .collection('appointments') // Colección de citas
-          .where('status', isEqualTo: status) // Filtra por estado "Agendado"
-          .where('doctorID', isEqualTo: medicID) // Filtra por medicID
+          .collection('appointments')
+          .where('status', isEqualTo: status)
+          .where('doctorID', isEqualTo: medicID)
           .get();
 
-      // Mapea los documentos a objetos Appointments
       List<Appointments> appointments = querySnapshot.docs.map((doc) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
         return Appointments.fromJson({
           ...data,
-          'id': doc.id, // Asegúrate de incluir el ID del documento
+          'id': doc.id,
         });
       }).toList();
 
       print("Citas obtenidas: ${appointments.length}");
       return appointments;
+    } on FirebaseException catch (e) {
+      throw FirebaseErrorHandler.handleFirebaseException(e);
+    } on PlatformException catch (e) {
+      throw FirebaseErrorHandler.handlePlatformException(e);
     } catch (e) {
-      print("Error al obtener las citas: $e");
-      throw CustomError('Error al obtener las citas');
+      throw FirebaseErrorHandler.handleGenericException(e);
     }
   }
 }

@@ -142,6 +142,33 @@ class HcNotifier extends StateNotifier<HCState> {
       state = state.copyWith(loading: false);
     }
   }
+
+  Future<bool> existHcGeneral(String cedula) async {
+    try {
+      return await _hcRepository.existHcGeneral(cedula);
+    } on CustomError catch (e) {
+      state = state.copyWith(errorMessage: e.message);
+      return false;
+    }
+  }
+
+  Future<bool> existHcAdult(String cedula) async {
+    try {
+      return await _hcRepository.existHcAdult(cedula);
+    } on CustomError catch (e) {
+      state = state.copyWith(errorMessage: e.message);
+      return false;
+    }
+  }
+
+  Future<bool> existHcVoice(String cedula) async {
+    try {
+      return await _hcRepository.existHcVoice(cedula);
+    } on CustomError catch (e) {
+      state = state.copyWith(errorMessage: e.message);
+      return false;
+    }
+  }
 }
 
 class HCState {

@@ -734,9 +734,9 @@ class _HcTrAnamAdultState extends ConsumerState<HcTrAnamAdult> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (hcState.tipo == 'Nuevo') {
-            hcNotifier.onCreateHcGeneral();
+            hcNotifier.onCreateHcGeneral(context);
           } else {
-            hcNotifier.onUpdateHcAdult();
+            hcNotifier.onUpdateHcAdult(context);
           }
         },
         backgroundColor: const Color(0xFF1976D2),

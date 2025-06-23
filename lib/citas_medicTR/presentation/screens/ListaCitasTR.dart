@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:h_c_1/auth/presentation/providers/auth_provider.dart';
 import 'package:h_c_1/citas_medicTR/presentation/providers/appointments_provider.dart';
 import 'package:h_c_1/citas_medicTR/presentation/screens/DetalleCitaTR.dart';
@@ -114,6 +115,34 @@ class _ListaCitasTRState extends ConsumerState<ListaCitasTR> {
                         padding: EdgeInsets.symmetric(vertical: 12.0),
                         child: Text(
                           'HORARIO',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1976D2),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 2,
+                      ),
+                    ),
+                  ),
+
+                  // Botón de historial
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    child: ElevatedButton.icon(
+                      onPressed: () => context.push('/historial-citas'),
+                      icon: const Icon(Icons.history, color: Colors.white),
+                      label: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12.0),
+                        child: Text(
+                          'HISTORIAL DE CITAS',
                           style: TextStyle(
                             fontSize: 18,
                             color: Colors.white,

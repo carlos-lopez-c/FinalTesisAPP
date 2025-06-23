@@ -1181,9 +1181,9 @@ class _HcTrAnamVozState extends ConsumerState<HcTrAnamVoz> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (hcState.tipo == 'Nuevo') {
-            hcNotifier.onCreateHcGeneral();
+            hcNotifier.onCreateHcGeneral(context);
           } else {
-            hcNotifier.onUpdateHcVoice();
+            hcNotifier.onUpdateHcVoice(context);
           }
         },
         backgroundColor: const Color(0xFF1976D2),

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_voice/abuso_verbal.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_voice/antecedentes_morbido.dart';
 
@@ -17,6 +18,7 @@ import 'package:h_c_1/hc_tr/presentation/providers/state/hc_voice_state.dart';
 import 'package:h_c_1/patient/domain/repositories/patient_repository.dart';
 import 'package:h_c_1/patient/infrastructure/repositories/patient_repository_impl.dart';
 import 'package:h_c_1/shared/infrastructure/errors/custom_error.dart';
+import 'package:h_c_1/hc_tr/presentation/widgets/hc_voice/Template.dart';
 
 final initialVoice = HcVoiceState(
     createHcVoice: CreateHcVoice(
@@ -202,13 +204,17 @@ class HcVoiceFormNotifier extends StateNotifier<HcVoiceState> {
     state = state.copyWith(successMessage: '');
   }
 
-  Future<void> onCreateHcGeneral() async {
+  Future<void> onCreateHcGeneral(BuildContext context) async {
     try {
       state = state.copyWith(loading: true);
       // Asegúrate de que 'fechaEntrevista' esté en el formato correcto
       // Verifica si la cadena contiene una 'T'; si no, agrégala junto con la hora
 
       await createHcVoice(state.createHcVoice);
+
+      // Generar PDF después de crear la historia clínica
+      await HistoriaClinicaVozPdfTemplate.guardarYMostrarPdf(
+          state.createHcVoice.toJson(), context, state.cedula);
 
       // Limpiar campos
       state = initialVoice;
@@ -226,10 +232,15 @@ class HcVoiceFormNotifier extends StateNotifier<HcVoiceState> {
     }
   }
 
-  Future<void> onUpdateHcVoice() async {
+  Future<void> onUpdateHcVoice(BuildContext context) async {
     try {
       state = state.copyWith(loading: true);
       await updateHcVoice(state.createHcVoice);
+
+      // Generar PDF después de actualizar la historia clínica
+      await HistoriaClinicaVozPdfTemplate.guardarYMostrarPdf(
+          state.createHcVoice.toJson(), context, state.cedula);
+
       state = state.copyWith(
           successMessage: 'Historia clínica actualizada con éxito',
           errorMessage: '');

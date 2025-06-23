@@ -376,7 +376,7 @@ class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
 
       // Crear la historia clínica general
       await createHcGeneral(state.createHcGeneral);
-      HistoriaClinicaPdfTemplate.guardarYMostrarPdf(
+      await HistoriaClinicaPdfTemplate.guardarYMostrarPdf(
           state.createHcGeneral.toJson(), context, state.cedula);
       // Limpiar campos
       state = initialHcGeneral;
@@ -402,7 +402,7 @@ class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
       state = state.copyWith(
         successMessage: 'Historia clínica actualizada con éxito',
       );
-      HistoriaClinicaPdfTemplate.guardarYMostrarPdf(
+      await HistoriaClinicaPdfTemplate.guardarYMostrarPdf(
           state.createHcGeneral.toJson(), context, state.cedula);
     } on CustomError catch (e) {
       state = state.copyWith(

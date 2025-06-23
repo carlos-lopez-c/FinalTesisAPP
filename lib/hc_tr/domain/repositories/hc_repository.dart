@@ -18,4 +18,6 @@ abstract class HcRepository {
   Future<void> updateHcAdult(CreateHcAdultEntity hc);
   Future<void> updateHcVoice(CreateHcVoice hc);
   Future<bool> existHcGeneral(String cedula);
+  Future<bool> existHcAdult(String cedula);
+  Future<bool> existHcVoice(String cedula);
 }

@@ -5,6 +5,9 @@ import 'package:h_c_1/auth/presentation/screens/check_auth_status_screen.dart';
 import 'package:h_c_1/auth/presentation/screens/forward_password.dart';
 import 'package:h_c_1/auth/presentation/screens/login_screen.dart';
 import 'package:h_c_1/auth/presentation/screens/two_factor_screen.dart';
+import 'package:h_c_1/citas_medicTR/presentation/screens/DetalleCitaCompletadaTR.dart';
+import 'package:h_c_1/citas_medicTR/presentation/screens/DetalleCitaTR.dart';
+import 'package:h_c_1/citas_medicTR/presentation/screens/HistorialCitasTR.dart';
 import 'package:h_c_1/config/routes/app_router_notifier.dart';
 import 'package:h_c_1/home/presentation/screens/ChangePasswordScreen.dart';
 import 'package:h_c_1/home/presentation/screens/HomeScreen.dart';
@@ -44,6 +47,18 @@ final goRouterProvider = Provider((ref) {
       GoRoute(
         path: '/change-password',
         builder: (context, state) => const Changepasswordscreen(),
+      ),
+      GoRoute(
+        path: '/historial-citas',
+        builder: (context, state) => HistorialCitasTR(),
+      ),
+      GoRoute(
+        path: '/detalle-cita',
+        builder: (context, state) => DetalleCitaTr(),
+      ),
+      GoRoute(
+        path: '/detalle-cita-completada',
+        builder: (context, state) => DetalleCitaCompletadaTR(),
       ),
     ],
     redirect: (context, state) {

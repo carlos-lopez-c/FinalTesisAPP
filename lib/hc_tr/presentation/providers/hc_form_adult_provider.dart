@@ -12,6 +12,7 @@ import 'package:h_c_1/patient/domain/repositories/patient_repository.dart';
 import 'package:h_c_1/patient/infrastructure/repositories/patient_repository_impl.dart';
 import 'package:h_c_1/shared/infrastructure/errors/custom_error.dart';
 import 'package:intl/intl.dart';
+import 'package:h_c_1/hc_tr/presentation/widgets/hc_adult/Template.dart';
 
 final initialAdult = HcAdultState(
     errorMessage: '',
@@ -143,7 +144,7 @@ class HcAdultFormNotifier extends StateNotifier<HcAdultState> {
     state = state.copyWith(successMessage: '');
   }
 
-  Future<void> onCreateHcGeneral() async {
+  Future<void> onCreateHcGeneral(BuildContext context) async {
     try {
       state = state.copyWith(loading: true);
       // Asegúrate de que 'fechaEntrevista' esté en el formato correcto
@@ -162,7 +163,8 @@ class HcAdultFormNotifier extends StateNotifier<HcAdultState> {
       );
 
       await createAdultHc(state.createHcAdult);
-
+      await HistoriaClinicaPdfTemplate.guardarYMostrarPdf(
+          state.createHcAdult.toJson(), context, state.cedula);
       // Limpiar campos
       state = state.copyWith(
         cedula: '',
@@ -179,12 +181,13 @@ class HcAdultFormNotifier extends StateNotifier<HcAdultState> {
     }
   }
 
-  Future<void> onUpdateHcAdult() async {
+  Future<void> onUpdateHcAdult(BuildContext context) async {
     try {
       state = state.copyWith(loading: true);
       // Asegúrate de que 'fechaEntrevista' esté en el formato correcto
       await updateHcAdult(state.createHcAdult);
-
+      await HistoriaClinicaPdfTemplate.guardarYMostrarPdf(
+          state.createHcAdult.toJson(), context, state.cedula);
       // Limpiar campos
 
       state = state.copyWith(

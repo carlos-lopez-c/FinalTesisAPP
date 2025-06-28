@@ -21,9 +21,9 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   }
 
   @override
-  Future<List<Appointments>> getAppointmentsByStatus(String status) {
-    print('getAppointmentsByStatus');
-    return datasource.getAppointmentsByStatus(status);
+  Future<List<Appointments>> getAppointmentsByStatus(
+      String status, String specialtyTherapyId) {
+    return datasource.getAppointmentsByStatus(status, specialtyTherapyId);
   }
 
   @override
@@ -33,20 +33,22 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
 
   @override
   Future<List<Appointments>> getAppointmentsByDate(
-      DateTime date, String medicID) {
-    return datasource.getAppointmentsByDate(date, medicID);
+      DateTime date, String medicID, String specialtyTherapyId) {
+    return datasource.getAppointmentsByDate(date, medicID, specialtyTherapyId);
   }
 
   @override
   Future<List<Appointments>> getAppointmentsByStatusAndMedicID(
-      String status, String medicID) {
-    return datasource.getAppointmentsByStatusAndMedicID(status, medicID);
+      String status, String medicID, String specialtyTherapyId) {
+    return datasource.getAppointmentsByStatusAndMedicID(
+        status, medicID, specialtyTherapyId);
   }
 
   @override
   Future<List<Appointments>> getAppointmentsByPatientAndMedicID(
-      String patientId, String medicID) {
-    return datasource.getAppointmentsByPatientAndMedicID(patientId, medicID);
+      String patientId, String medicID, String specialtyTherapyId) {
+    return datasource.getAppointmentsByPatientAndMedicID(
+        patientId, medicID, specialtyTherapyId);
   }
 
   @override
@@ -55,19 +57,29 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   }
 
   @override
-  Stream<List<Appointments>> watchAppointmentsByStatus(String status) {
-    return datasource.watchAppointmentsByStatus(status);
+  Stream<List<Appointments>> watchAppointmentsByStatus(
+      String status, String specialtyTherapyId) {
+    return datasource.watchAppointmentsByStatus(status, specialtyTherapyId);
   }
 
   @override
   Stream<List<Appointments>> watchAppointmentsByStatusAndMedicID(
-      String status, String medicID) {
-    return datasource.watchAppointmentsByStatusAndMedicID(status, medicID);
+      String status, String medicID, String specialtyTherapyId) {
+    return datasource.watchAppointmentsByStatusAndMedicID(
+        status, medicID, specialtyTherapyId);
   }
 
   @override
   Stream<List<Appointments>> watchAppointmentsByPatientAndMedicID(
-      String patientId, String medicID) {
-    return datasource.watchAppointmentsByPatientAndMedicID(patientId, medicID);
+      String patientId, String medicID, String specialtyTherapyId) {
+    return datasource.watchAppointmentsByPatientAndMedicID(
+        patientId, medicID, specialtyTherapyId);
+  }
+
+  @override
+  Stream<List<Appointments>> watchAppointmentsByDateAndMedicID(
+      String date, String medicID, String specialtyTherapyId) {
+    return datasource.watchAppointmentsByDateAndMedicID(
+        date, medicID, specialtyTherapyId);
   }
 }

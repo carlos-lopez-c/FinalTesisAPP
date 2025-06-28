@@ -9,6 +9,8 @@ import 'package:h_c_1/citas_medicTR/infrastructure/repositories/appointment_repo
 import 'package:h_c_1/patient/domain/repositories/patient_repository.dart';
 import 'package:h_c_1/patient/infrastructure/repositories/patient_repository_impl.dart';
 import 'package:h_c_1/shared/infrastructure/errors/custom_error.dart';
+import 'package:h_c_1/type_therapy/domain/repositories/type_therapy_repository.dart';
+import 'package:h_c_1/type_therapy/infrastructure/repositories/type_therapy_repository_impl.dart';
 
 final appointmentProvider =
     StateNotifierProvider<AppointmentNotifier, AppointmentState>((ref) {
@@ -22,33 +24,65 @@ final appointmentProvider =
 final appointmentPendientesProvider =
     StreamProvider.autoDispose<List<Appointments>>((ref) {
   final repository = AppointmentRepositoryImpl();
-  return repository.watchAppointmentsByStatus('Pendiente');
+  final authState = ref.watch(authProvider);
+  final userRole = authState.user?.role ?? '';
+  final typeTherapyRepo = TypeTherapyRepositoryImpl();
+  return Stream.fromFuture(typeTherapyRepo.getTypeTherapies())
+      .asyncExpand((allTypes) {
+    final match = allTypes.firstWhere(
+      (t) => t.name.toLowerCase().contains(userRole.toLowerCase()),
+      orElse: () => allTypes.first,
+    );
+    return repository.watchAppointmentsByStatus('Pendiente', match.id);
+  });
 });
 
 final appointmentAgendadasProvider =
     StreamProvider.autoDispose<List<Appointments>>((ref) {
   final repository = AppointmentRepositoryImpl();
-  return repository.watchAppointmentsByStatus('Agendado');
+  final authState = ref.watch(authProvider);
+  final userRole = authState.user?.role ?? '';
+  final typeTherapyRepo = TypeTherapyRepositoryImpl();
+  return Stream.fromFuture(typeTherapyRepo.getTypeTherapies())
+      .asyncExpand((allTypes) {
+    final match = allTypes.firstWhere(
+      (t) => t.name.toLowerCase().contains(userRole.toLowerCase()),
+      orElse: () => allTypes.first,
+    );
+    return repository.watchAppointmentsByStatus('Agendado', match.id);
+  });
 });
 
 final appointmentCompletadasProvider =
     StreamProvider.autoDispose<List<Appointments>>((ref) {
   final repository = AppointmentRepositoryImpl();
-  return repository.watchAppointmentsByStatus('Completado');
+  final authState = ref.watch(authProvider);
+  final userRole = authState.user?.role ?? '';
+  final typeTherapyRepo = TypeTherapyRepositoryImpl();
+  return Stream.fromFuture(typeTherapyRepo.getTypeTherapies())
+      .asyncExpand((allTypes) {
+    final match = allTypes.firstWhere(
+      (t) => t.name.toLowerCase().contains(userRole.toLowerCase()),
+      orElse: () => allTypes.first,
+    );
+    return repository.watchAppointmentsByStatus('Completado', match.id);
+  });
 });
 
 final appointmentByStatusAndMedicProvider = StreamProvider.family
     .autoDispose<List<Appointments>, Map<String, String>>((ref, params) {
   final repository = AppointmentRepositoryImpl();
+  final specialtyTherapyId = params['specialtyTherapyId'];
   return repository.watchAppointmentsByStatusAndMedicID(
-      params['status']!, params['medicID']!);
+      params['status']!, params['medicID']!, specialtyTherapyId!);
 });
 
 final appointmentByPatientAndMedicProvider = StreamProvider.family
     .autoDispose<List<Appointments>, Map<String, String>>((ref, params) {
   final repository = AppointmentRepositoryImpl();
+  final specialtyTherapyId = params['specialtyTherapyId'];
   return repository.watchAppointmentsByPatientAndMedicID(
-      params['patientID']!, params['medicID']!);
+      params['patientID']!, params['medicID']!, specialtyTherapyId!);
 });
 
 class AppointmentNotifier extends StateNotifier<AppointmentState> {
@@ -56,10 +90,24 @@ class AppointmentNotifier extends StateNotifier<AppointmentState> {
   final PatientRepository patientRepository;
   final String medicID;
   final Ref ref;
+  String? specialtyTherapyId;
   AppointmentNotifier(this.repository, this.patientRepository,
       {required this.medicID, required this.ref})
       : super(AppointmentState()) {
-    listarCitas(estado: 'Pendiente'); // ✅ Cargar todas las citas al iniciar
+    _initSpecialtyTherapyId();
+  }
+
+  Future<void> _initSpecialtyTherapyId() async {
+    final authState = ref.read(authProvider);
+    final userRole = authState.user?.role ?? '';
+    final typeTherapyRepo = TypeTherapyRepositoryImpl();
+    final allTypes = await typeTherapyRepo.getTypeTherapies();
+    final match = allTypes.firstWhere(
+      (t) => t.name.toLowerCase().contains(userRole.toLowerCase()),
+      orElse: () => allTypes.first,
+    );
+    specialtyTherapyId = match.id;
+    listarCitas(estado: 'Pendiente');
   }
 
   void clearError() {
@@ -72,10 +120,12 @@ class AppointmentNotifier extends StateNotifier<AppointmentState> {
 
   /// 🔹 Listar citas (todas o por estado)
   Future<void> listarCitas({String estado = ''}) async {
+    if (specialtyTherapyId == null) return;
     print('🟢 Cargando citas...');
     state = state.copyWith(loading: true);
     try {
-      final citas = await repository.getAppointmentsByStatus(estado);
+      final citas =
+          await repository.getAppointmentsByStatus(estado, specialtyTherapyId!);
       state = state.copyWith(loading: false, citas: citas);
     } on CustomError catch (e) {
       print('🔴 Error al obtener citas: ${e.message}');
@@ -137,7 +187,7 @@ class AppointmentNotifier extends StateNotifier<AppointmentState> {
     try {
       final formattedDate = date.toIso8601String().split('T')[0]; // YYYY-MM-DD
       final appointments = await repository.getAppointmentsByDate(
-          DateTime.parse(formattedDate), medicID);
+          DateTime.parse(formattedDate), medicID, specialtyTherapyId!);
 
 // Solo las citas del dia que esten con estado "Agendado"
       appointments.removeWhere((cita) => cita.status != 'Agendado');
@@ -160,8 +210,8 @@ class AppointmentNotifier extends StateNotifier<AppointmentState> {
     print('🟢 Buscando citas por estado: $status');
     state = state.copyWith(loading: true);
     try {
-      final appointments =
-          await repository.getAppointmentsByStatusAndMedicID(status, medicID);
+      final appointments = await repository.getAppointmentsByStatusAndMedicID(
+          status, medicID, specialtyTherapyId!);
 
       state = state.copyWith(
         loading: false,
@@ -191,7 +241,7 @@ class AppointmentNotifier extends StateNotifier<AppointmentState> {
 
       // Luego buscar las citas de ese paciente
       final appointments = await repository.getAppointmentsByPatientAndMedicID(
-          paciente.id, medicID);
+          paciente.id, medicID, specialtyTherapyId!);
 
       state = state.copyWith(
         loading: false,

@@ -8,6 +8,51 @@ import 'package:h_c_1/shared/infrastructure/errors/handle_error.dart';
 class AppointmentDatasourceImpl implements AppointmentDatasource {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  /// 🔹 Método auxiliar para obtener el nombre de la especialidad
+  Future<String> _getSpecialtyTherapyName(String specialtyTherapyId) async {
+    try {
+      final doc = await _firestore
+          .collection('specialtyTherapy')
+          .doc(specialtyTherapyId)
+          .get();
+      if (doc.exists) {
+        return doc.data()?['name'] ?? 'Especialidad no encontrada';
+      }
+      return 'Especialidad no encontrada';
+    } catch (e) {
+      print('Error al obtener nombre de especialidad: $e');
+      return 'Error al cargar especialidad';
+    }
+  }
+
+  /// 🔹 Método auxiliar para enriquecer las citas con el nombre de la especialidad
+  Future<List<Appointments>> _enrichAppointmentsWithSpecialtyName(
+      List<Appointments> appointments) async {
+    final enrichedAppointments = <Appointments>[];
+
+    for (final appointment in appointments) {
+      if (appointment.specialtyTherapyId != null &&
+          appointment.specialtyTherapy.isEmpty) {
+        final specialtyName =
+            await _getSpecialtyTherapyName(appointment.specialtyTherapyId!);
+        enrichedAppointments
+            .add(appointment.copyWith(specialtyTherapy: specialtyName));
+      } else {
+        enrichedAppointments.add(appointment);
+      }
+    }
+
+    return enrichedAppointments;
+  }
+
+  /// 🔹 Método auxiliar para enriquecer streams de citas
+  Stream<List<Appointments>> _enrichStreamWithSpecialtyName(
+      Stream<List<Appointments>> appointmentsStream) {
+    return appointmentsStream.asyncMap((appointments) async {
+      return await _enrichAppointmentsWithSpecialtyName(appointments);
+    });
+  }
+
   @override
   Future<void> createAppointment(
       CreateAppointments appointment, String medicID) async {
@@ -42,16 +87,16 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
   }
 
   @override
-  Future<List<Appointments>> getAppointmentsByStatus(String status) async {
+  Future<List<Appointments>> getAppointmentsByStatus(
+      String status, String specialtyTherapyId) async {
     try {
-      print('getAppointmentsByStatus: $status');
-
       QuerySnapshot querySnapshot = await _firestore
           .collection('appointments')
           .where('status', isEqualTo: status)
+          .where('specialtyTherapyId', isEqualTo: specialtyTherapyId)
           .get();
 
-      List<Appointments> appointments = querySnapshot.docs.map((doc) {
+      final appointments = querySnapshot.docs.map((doc) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
         return Appointments.fromJson({
           ...data,
@@ -59,43 +104,37 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
         });
       }).toList();
 
-      print("Citas obtenidas: ${appointments.length}");
-      return appointments;
-    } on FirebaseException catch (e) {
-      throw FirebaseErrorHandler.handleFirebaseException(e);
-    } on PlatformException catch (e) {
-      throw FirebaseErrorHandler.handlePlatformException(e);
+      // Enriquecer con el nombre de la especialidad
+      return await _enrichAppointmentsWithSpecialtyName(appointments);
     } catch (e) {
-      throw FirebaseErrorHandler.handleGenericException(e);
+      throw Exception('Error al obtener citas por status y especialidad');
     }
   }
 
   @override
   Future<List<Appointments>> getAppointmentsByDate(
-      DateTime date, String medicID) async {
+      DateTime date, String medicID, String specialtyTherapyId) async {
     try {
       String formattedDate =
           "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-
       QuerySnapshot querySnapshot = await _firestore
           .collection('appointments')
           .where('date', isEqualTo: formattedDate)
           .where('doctorID', isEqualTo: medicID)
+          .where('specialtyTherapyId', isEqualTo: specialtyTherapyId)
           .get();
 
-      List<Appointments> appointments = querySnapshot.docs.map((doc) {
+      final appointments = querySnapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
         final appointment = Appointments.fromJson(data);
         return appointment.copyWith(id: doc.id);
       }).toList();
 
-      return appointments;
-    } on FirebaseException catch (e) {
-      throw FirebaseErrorHandler.handleFirebaseException(e);
-    } on PlatformException catch (e) {
-      throw FirebaseErrorHandler.handlePlatformException(e);
+      // Enriquecer con el nombre de la especialidad
+      return await _enrichAppointmentsWithSpecialtyName(appointments);
     } catch (e) {
-      throw FirebaseErrorHandler.handleGenericException(e);
+      throw Exception(
+          'Error al obtener citas por fecha, doctor y especialidad');
     }
   }
 
@@ -193,18 +232,16 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
 
   @override
   Future<List<Appointments>> getAppointmentsByStatusAndMedicID(
-      String status, String medicID) async {
+      String status, String medicID, String specialtyTherapyId) async {
     try {
-      print(
-          'getAppointmentsByStatusAndMedicID: status=$status, medicID=$medicID');
-
       QuerySnapshot querySnapshot = await _firestore
           .collection('appointments')
           .where('status', isEqualTo: status)
           .where('doctorID', isEqualTo: medicID)
+          .where('specialtyTherapyId', isEqualTo: specialtyTherapyId)
           .get();
 
-      List<Appointments> appointments = querySnapshot.docs.map((doc) {
+      final appointments = querySnapshot.docs.map((doc) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
         return Appointments.fromJson({
           ...data,
@@ -212,31 +249,26 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
         });
       }).toList();
 
-      print("Citas obtenidas: ${appointments.length}");
-      return appointments;
-    } on FirebaseException catch (e) {
-      throw FirebaseErrorHandler.handleFirebaseException(e);
-    } on PlatformException catch (e) {
-      throw FirebaseErrorHandler.handlePlatformException(e);
+      // Enriquecer con el nombre de la especialidad
+      return await _enrichAppointmentsWithSpecialtyName(appointments);
     } catch (e) {
-      throw FirebaseErrorHandler.handleGenericException(e);
+      throw Exception(
+          'Error al obtener citas por status, doctor y especialidad');
     }
   }
 
   @override
   Future<List<Appointments>> getAppointmentsByPatientAndMedicID(
-      String patientId, String medicID) async {
+      String patientId, String medicID, String specialtyTherapyId) async {
     try {
-      print(
-          'getAppointmentsByPatientAndMedicID: patientId=$patientId, medicID=$medicID');
-
       QuerySnapshot querySnapshot = await _firestore
           .collection('appointments')
           .where('patientID', isEqualTo: patientId)
           .where('doctorID', isEqualTo: medicID)
+          .where('specialtyTherapyId', isEqualTo: specialtyTherapyId)
           .get();
 
-      List<Appointments> appointments = querySnapshot.docs.map((doc) {
+      final appointments = querySnapshot.docs.map((doc) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
         return Appointments.fromJson({
           ...data,
@@ -244,22 +276,21 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
         });
       }).toList();
 
-      print("Citas obtenidas por paciente: ${appointments.length}");
-      return appointments;
-    } on FirebaseException catch (e) {
-      throw FirebaseErrorHandler.handleFirebaseException(e);
-    } on PlatformException catch (e) {
-      throw FirebaseErrorHandler.handlePlatformException(e);
+      // Enriquecer con el nombre de la especialidad
+      return await _enrichAppointmentsWithSpecialtyName(appointments);
     } catch (e) {
-      throw FirebaseErrorHandler.handleGenericException(e);
+      throw Exception(
+          'Error al obtener citas por paciente, doctor y especialidad');
     }
   }
 
   @override
-  Stream<List<Appointments>> watchAppointmentsByStatus(String status) {
-    return _firestore
+  Stream<List<Appointments>> watchAppointmentsByStatus(
+      String status, String specialtyTherapyId) {
+    final baseStream = _firestore
         .collection('appointments')
         .where('status', isEqualTo: status)
+        .where('specialtyTherapyId', isEqualTo: specialtyTherapyId)
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) {
               final data = doc.data() as Map<String, dynamic>;
@@ -268,15 +299,18 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
                 'id': doc.id,
               });
             }).toList());
+
+    return _enrichStreamWithSpecialtyName(baseStream);
   }
 
   @override
   Stream<List<Appointments>> watchAppointmentsByStatusAndMedicID(
-      String status, String medicID) {
-    return _firestore
+      String status, String medicID, String specialtyTherapyId) {
+    final baseStream = _firestore
         .collection('appointments')
         .where('status', isEqualTo: status)
         .where('doctorID', isEqualTo: medicID)
+        .where('specialtyTherapyId', isEqualTo: specialtyTherapyId)
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) {
               final data = doc.data() as Map<String, dynamic>;
@@ -285,15 +319,18 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
                 'id': doc.id,
               });
             }).toList());
+
+    return _enrichStreamWithSpecialtyName(baseStream);
   }
 
   @override
   Stream<List<Appointments>> watchAppointmentsByPatientAndMedicID(
-      String patientId, String medicID) {
-    return _firestore
+      String patientId, String medicID, String specialtyTherapyId) {
+    final baseStream = _firestore
         .collection('appointments')
         .where('patientID', isEqualTo: patientId)
         .where('doctorID', isEqualTo: medicID)
+        .where('specialtyTherapyId', isEqualTo: specialtyTherapyId)
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) {
               final data = doc.data() as Map<String, dynamic>;
@@ -302,5 +339,28 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
                 'id': doc.id,
               });
             }).toList());
+
+    return _enrichStreamWithSpecialtyName(baseStream);
+  }
+
+  @override
+  Stream<List<Appointments>> watchAppointmentsByDateAndMedicID(
+      String date, String medicID, String specialtyTherapyId) {
+    final baseStream = _firestore
+        .collection('appointments')
+        .where('date', isEqualTo: date)
+        .where('doctorID', isEqualTo: medicID)
+        .where('status', isEqualTo: 'Agendado')
+        .where('specialtyTherapyId', isEqualTo: specialtyTherapyId)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              return Appointments.fromJson({
+                ...data,
+                'id': doc.id,
+              });
+            }).toList());
+
+    return _enrichStreamWithSpecialtyName(baseStream);
   }
 }

@@ -2,19 +2,36 @@ import 'package:flutter/material.dart';
 import '../widgets/headerPS.dart';
 import 'search_hc_ps_ninos.dart';
 
-class HistoriaClinicaNinoPS extends StatelessWidget {
+class HistoriaClinicaNinoPS extends StatefulWidget {
+  @override
+  _HistoriaClinicaNinoPSState createState() => _HistoriaClinicaNinoPSState();
+}
+
+class _HistoriaClinicaNinoPSState extends State<HistoriaClinicaNinoPS> {
   final _formKey = GlobalKey<FormState>();
+  String tipo = 'Nuevo';
+  final TextEditingController cedulaController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F8FA),
       appBar: AppBar(
-        title: Text('Area de psicologia'),
+        backgroundColor: const Color(0xFF1976D2),
+        elevation: 0,
+        title: const Text(
+          'Historia Clínica de Niños',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -23,413 +40,184 @@ class HistoriaClinicaNinoPS extends StatelessWidget {
                 textoDinamico: 'HISTORIA CLÍNICA DE NIÑOS',
               ),
               const SizedBox(height: 20),
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => BusquedaPsN()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    side: const BorderSide(color: Colors.black, width: 1.5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  child: const Text(
-                    'BUSCAR HISTORIA CLINICA',
-                    style: TextStyle(color: Colors.black),
-                  ),
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              ),
-              const SizedBox(height: 25),
-              const Text(
-                '1.- DATOS PERSONALES:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Nombres y Apellidos',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor llene este campo';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      decoration: const InputDecoration(
-                        labelText: 'Fecha de Nacimiento',
-                        border: OutlineInputBorder(),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(child: _buildRadioButtonGroup()),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: cedulaController,
+                              decoration: const InputDecoration(
+                                labelText: 'Buscar por cédula',
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          ElevatedButton(
+                            onPressed: () {
+                              if (tipo == 'Nuevo') {
+                                // Aquí iría la lógica de buscar paciente por cédula
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => BusquedaPsN()),
+                                );
+                              }
+                            },
+                            child: const Text('Buscar'),
+                          ),
+                        ],
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor llene este campo';
-                        }
-                        return null;
-                      },
-                    ),
+                      const SizedBox(height: 25),
+                      if (tipo == 'Nuevo') ...[
+                        _buildSection('1.- DATOS PERSONALES:'),
+                        Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildFormField(
+                                label: 'Nombres y Apellidos',
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildFormField(
+                                      label: 'Fecha de Nacimiento',
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: _buildFormField(
+                                      label: 'Edad',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              _buildFormField(
+                                label: 'Curso Escolar Actual',
+                              ),
+                              _buildFormField(
+                                label: 'Institución',
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildFormField(
+                                      label: 'Nombre del Papá',
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: _buildFormField(
+                                      label: 'Nombre de la Mamá',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              _buildFormField(
+                                label: 'Dirección',
+                              ),
+                              _buildFormField(
+                                label: 'Teléfono',
+                              ),
+                              _buildFormField(
+                                label: 'Remisión',
+                              ),
+                              _buildFormField(
+                                label: 'Fecha de Evaluación',
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: TextFormField(
-                      decoration: const InputDecoration(
-                        labelText: 'Edad',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor llene este campo';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Curso Escolar Actual',
-                  border: OutlineInputBorder(),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor llene este campo';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Institución',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor llene este campo';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      decoration: const InputDecoration(
-                        labelText: 'Nombre del Papá',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor llene este campo';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: TextFormField(
-                      decoration: const InputDecoration(
-                        labelText: 'Nombre de la Mamá',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor llene este campo';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Dirección',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor llene este campo';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Teléfono',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor llene este campo';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Remisión',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor llene este campo';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Fecha de Evaluación',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor llene este campo';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Final de Cobertura',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor llene este campo';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Observaciones',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor llene este campo';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Responsable',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor llene este campo';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                '2.- MOTIVO DE CONSULTA:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Describa el motivo de la consulta',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor llene este campo';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                '4.- ANTECEDENTES FAMILIARES:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                maxLines: 1,
-                decoration: const InputDecoration(
-                  labelText: 'Datos de embarazo y parto.',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor llene este campo';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 5),
-              TextFormField(
-                maxLines: 1,
-                decoration: const InputDecoration(
-                  labelText: 'Desarrollo Psicomotor.',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor llene este campo';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 5),
-              TextFormField(
-                maxLines: 1,
-                decoration: const InputDecoration(
-                  labelText: 'Desarrollo del lenguaje.',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor llene este campo';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 5),
-              TextFormField(
-                maxLines: 1,
-                decoration: const InputDecoration(
-                  labelText: 'Desarrollo Intelectual.',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor llene este campo';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 5),
-              TextFormField(
-                maxLines: 1,
-                decoration: const InputDecoration(
-                  labelText: 'Desarrollo Socio-Afectivo.',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor llene este campo';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                '5.- ANTECEDENTES Y ESTRUCTURA FAMILIAR:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Describa los antecedentes y estructura familiar',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor llene este campo';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                '6.- PRUEBAS APLICADAS:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Describa las pruebas aplicadas',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor llene este campo';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                '7.- IMPRESIÓN DIAGNÓSTICA:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Describa la impresión diagnóstica',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor llene este campo';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                '8.- ÁREAS DE INTERVENCIÓN:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Describa las áreas de intervención',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor llene este campo';
-                  }
-                  return null;
-                },
               ),
             ],
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (_formKey.currentState!.validate()) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Procesando datos')),
-            );
+    );
+  }
+
+  Widget _buildRadioButtonGroup() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildRadioButton('Nuevo'),
+        const SizedBox(width: 20),
+        _buildRadioButton('Buscar'),
+      ],
+    );
+  }
+
+  Widget _buildRadioButton(String value) {
+    return Row(
+      children: [
+        Radio<String>(
+          value: value,
+          groupValue: tipo,
+          onChanged: (String? newValue) {
+            setState(() {
+              tipo = newValue!;
+            });
+          },
+          activeColor: const Color(0xFF1976D2),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1976D2),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSection(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 18.0,
+          color: Color(0xFF1976D2),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFormField({
+    required String label,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Por favor llene este campo';
           }
+          return null;
         },
-        child: const Icon(Icons.save),
       ),
     );
   }

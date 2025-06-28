@@ -384,6 +384,7 @@ class _DetalleCitaTrState extends ConsumerState<DetalleCitaTr> {
   }
 
   void _showSnackBar(BuildContext context, String message, bool isSuccess) {
+    print('este es el snacbar que tambien se muestra');
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),

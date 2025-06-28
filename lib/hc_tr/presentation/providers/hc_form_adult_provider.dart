@@ -58,11 +58,13 @@ final hcAdultFormProvider =
     final createAdultHc = ref.read(hcProvider.notifier).createHcAdult;
     final updateHcAdult = ref.read(hcProvider.notifier).updateHcAdult;
     final getHcAdult = ref.read(hcProvider.notifier).getHcAdult;
+    final existHcAdult = ref.read(hcProvider.notifier).existHcAdult;
     return HcAdultFormNotifier(
         updateHcAdult: updateHcAdult,
         patientRepository: patientRepo,
         createAdultHc: createAdultHc,
-        getHcAdult: getHcAdult);
+        getHcAdult: getHcAdult,
+        existHcAdult: existHcAdult);
   },
 );
 
@@ -71,11 +73,13 @@ class HcAdultFormNotifier extends StateNotifier<HcAdultState> {
   final Function(CreateHcAdultEntity) createAdultHc;
   final Function(String) getHcAdult;
   final Function(CreateHcAdultEntity) updateHcAdult;
+  final Function(String) existHcAdult;
   HcAdultFormNotifier({
     required this.updateHcAdult,
     required this.getHcAdult,
     required this.createAdultHc,
     required this.patientRepository,
+    required this.existHcAdult,
   }) : super(initialAdult);
 
   void onCedulaChanged(String value) {
@@ -86,6 +90,25 @@ class HcAdultFormNotifier extends StateNotifier<HcAdultState> {
 
   void getPacienteByDni(String dni) async {
     try {
+      print('🔹 Buscando paciente por DNI: $dni');
+      if (dni.isEmpty) {
+        state = state.copyWith(
+          errorMessage: 'Error, debe ingresar un número de cédula',
+        );
+        return;
+      }
+
+      // 🔹 VALIDACIÓN: Verificar si ya existe una historia clínica para este paciente
+      final existHc = await existHcAdult(dni);
+      if (existHc) {
+        print('🔹 Historia clínica de adultos ya existe para este paciente');
+        state = state.copyWith(
+          errorMessage:
+              'Historia clínica de adultos ya existe para este paciente',
+        );
+        return;
+      }
+
       print('🔹 Buscando paciente por DNI: $dni');
       state = state.copyWith(loading: true);
       final paciente = await patientRepository.getPatientByDni(dni);

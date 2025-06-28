@@ -12,4 +12,13 @@ abstract class AppointmentDatasource {
   Future<List<Appointments>> getAppointmentsByDate(
       DateTime date, String medicID);
   Future<void> updateAppointmentDate(CreateAppointments appointment);
+  Future<List<Appointments>> getAppointmentsByPatientAndMedicID(
+      String patientId, String medicID);
+
+  /// 🔹 Métodos en tiempo real (STREAMS)
+  Stream<List<Appointments>> watchAppointmentsByStatus(String status);
+  Stream<List<Appointments>> watchAppointmentsByStatusAndMedicID(
+      String status, String medicID);
+  Stream<List<Appointments>> watchAppointmentsByPatientAndMedicID(
+      String patientId, String medicID);
 }

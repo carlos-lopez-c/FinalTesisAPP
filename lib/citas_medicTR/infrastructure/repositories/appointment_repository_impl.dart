@@ -44,7 +44,30 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   }
 
   @override
+  Future<List<Appointments>> getAppointmentsByPatientAndMedicID(
+      String patientId, String medicID) {
+    return datasource.getAppointmentsByPatientAndMedicID(patientId, medicID);
+  }
+
+  @override
   Future<void> updateAppointmentDate(CreateAppointments appointment) {
     return datasource.updateAppointmentDate(appointment);
+  }
+
+  @override
+  Stream<List<Appointments>> watchAppointmentsByStatus(String status) {
+    return datasource.watchAppointmentsByStatus(status);
+  }
+
+  @override
+  Stream<List<Appointments>> watchAppointmentsByStatusAndMedicID(
+      String status, String medicID) {
+    return datasource.watchAppointmentsByStatusAndMedicID(status, medicID);
+  }
+
+  @override
+  Stream<List<Appointments>> watchAppointmentsByPatientAndMedicID(
+      String patientId, String medicID) {
+    return datasource.watchAppointmentsByPatientAndMedicID(patientId, medicID);
   }
 }

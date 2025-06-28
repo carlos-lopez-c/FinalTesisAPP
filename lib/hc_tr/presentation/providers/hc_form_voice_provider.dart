@@ -91,11 +91,13 @@ final hcVoiceFormProvider =
     final getHcVoice = ref.watch(hcProvider.notifier).getHcVoice;
     final createHcVoice = ref.watch(hcProvider.notifier).createHcVoice;
     final updateHcVoice = ref.watch(hcProvider.notifier).updateHcVoice;
+    final existHcVoice = ref.watch(hcProvider.notifier).existHcVoice;
     return HcVoiceFormNotifier(
         patientRepository: patientRepo,
         getHcVoice: getHcVoice,
         updateHcVoice: updateHcVoice,
-        createHcVoice: createHcVoice);
+        createHcVoice: createHcVoice,
+        existHcVoice: existHcVoice);
   },
 );
 
@@ -104,11 +106,13 @@ class HcVoiceFormNotifier extends StateNotifier<HcVoiceState> {
   final Function(String) getHcVoice;
   final Function(CreateHcVoice) createHcVoice;
   final Function(CreateHcVoice) updateHcVoice;
+  final Function(String) existHcVoice;
   HcVoiceFormNotifier({
     required this.getHcVoice,
     required this.createHcVoice,
     required this.updateHcVoice,
     required this.patientRepository,
+    required this.existHcVoice,
   }) : super(initialVoice);
 
   void onCedulaChanged(String value) {
@@ -257,6 +261,22 @@ class HcVoiceFormNotifier extends StateNotifier<HcVoiceState> {
 
   void getPacienteByDni(String dni) async {
     try {
+      if (dni.isEmpty) {
+        state = state.copyWith(
+          errorMessage: 'Error, debe ingresar un número de cédula',
+        );
+        return;
+      }
+
+      // 🔹 VALIDACIÓN: Verificar si ya existe una historia clínica para este paciente
+      final existHc = await existHcVoice(dni);
+      if (existHc) {
+        state = state.copyWith(
+          errorMessage: 'Historia clínica de voz ya existe para este paciente',
+        );
+        return;
+      }
+
       print('🔹 Buscando paciente por DNI: $dni');
       state = state.copyWith(loading: true);
       final paciente = await patientRepository.getPatientByDni(dni);

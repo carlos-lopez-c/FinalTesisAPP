@@ -104,27 +104,36 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
       Appointments appointment, String medicID) async {
     try {
       print('Actualizando cita: ${medicID}');
-      DocumentSnapshot medicSnapshot =
-          await _firestore.collection('medic').doc(medicID).get();
+      if (appointment.status.toLowerCase() == 'pendiente') {
+        // Limpiar doctor y doctorID en Firestore
+        await _firestore.collection('appointments').doc(appointment.id).update({
+          'status': appointment.status,
+          'doctor': '',
+          'doctorID': '',
+        });
+        print("Cita actualizada a pendiente y doctor limpiado en Firestore");
+      } else {
+        DocumentSnapshot medicSnapshot =
+            await _firestore.collection('medic').doc(medicID).get();
 
-      if (!medicSnapshot.exists) {
-        throw FirebaseException(
-            plugin: 'firestore',
-            code: 'medic-not-found',
-            message: 'Médico no encontrado');
+        if (!medicSnapshot.exists) {
+          throw FirebaseException(
+              plugin: 'firestore',
+              code: 'medic-not-found',
+              message: 'Médico no encontrado');
+        }
+
+        String firstName = medicSnapshot['firstname'] ?? 'Nombre no disponible';
+        String lastName = medicSnapshot['lastname'] ?? 'Apellido no disponible';
+        print('Nombre del médico: $firstName $lastName');
+
+        await _firestore.collection('appointments').doc(appointment.id).update({
+          'status': appointment.status,
+          'doctor': '$firstName $lastName',
+          'doctorID': medicID,
+        });
+        print("Cita actualizada correctamente en Firestore");
       }
-
-      String firstName = medicSnapshot['firstname'] ?? 'Nombre no disponible';
-      String lastName = medicSnapshot['lastname'] ?? 'Apellido no disponible';
-      print('Nombre del médico: $firstName $lastName');
-
-      await _firestore.collection('appointments').doc(appointment.id).update({
-        'status': appointment.status,
-        'doctor': '$firstName $lastName',
-        'doctorID': medicID,
-      });
-
-      print("Cita actualizada correctamente en Firestore");
     } on FirebaseException catch (e) {
       throw FirebaseErrorHandler.handleFirebaseException(e);
     } on PlatformException catch (e) {
@@ -153,19 +162,22 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
             message: 'Médico no encontrado');
       }
 
+      String firstName = medicSnapshot['firstname'] ?? 'Nombre no disponible';
+      String lastName = medicSnapshot['lastname'] ?? 'Apellido no disponible';
+
       if (appointment.status == 'Pendiente') {
         appointment.doctorId = ''; // Limpiar doctorId si la cita está pendiente
         appointment.doctor = ''; // Limpiar doctor si la cita está pendiente
+      } else if (appointment.status == 'Agendado') {
+        appointment.doctor = '$firstName $lastName';
       }
 
-      String firstName = medicSnapshot['firstname'] ?? 'Nombre no disponible';
-      String lastName = medicSnapshot['lastname'] ?? 'Apellido no disponible';
       await _firestore
           .collection('appointments')
           .doc(appointment.id)
           .update(appointment.toJson()
             ..addAll({
-              'doctor': '$firstName $lastName',
+              'doctor': appointment.doctor,
               'doctorID': appointment.doctorId,
             }));
 
@@ -209,5 +221,86 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
     } catch (e) {
       throw FirebaseErrorHandler.handleGenericException(e);
     }
+  }
+
+  @override
+  Future<List<Appointments>> getAppointmentsByPatientAndMedicID(
+      String patientId, String medicID) async {
+    try {
+      print(
+          'getAppointmentsByPatientAndMedicID: patientId=$patientId, medicID=$medicID');
+
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('appointments')
+          .where('patientID', isEqualTo: patientId)
+          .where('doctorID', isEqualTo: medicID)
+          .get();
+
+      List<Appointments> appointments = querySnapshot.docs.map((doc) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        return Appointments.fromJson({
+          ...data,
+          'id': doc.id,
+        });
+      }).toList();
+
+      print("Citas obtenidas por paciente: ${appointments.length}");
+      return appointments;
+    } on FirebaseException catch (e) {
+      throw FirebaseErrorHandler.handleFirebaseException(e);
+    } on PlatformException catch (e) {
+      throw FirebaseErrorHandler.handlePlatformException(e);
+    } catch (e) {
+      throw FirebaseErrorHandler.handleGenericException(e);
+    }
+  }
+
+  @override
+  Stream<List<Appointments>> watchAppointmentsByStatus(String status) {
+    return _firestore
+        .collection('appointments')
+        .where('status', isEqualTo: status)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              return Appointments.fromJson({
+                ...data,
+                'id': doc.id,
+              });
+            }).toList());
+  }
+
+  @override
+  Stream<List<Appointments>> watchAppointmentsByStatusAndMedicID(
+      String status, String medicID) {
+    return _firestore
+        .collection('appointments')
+        .where('status', isEqualTo: status)
+        .where('doctorID', isEqualTo: medicID)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              return Appointments.fromJson({
+                ...data,
+                'id': doc.id,
+              });
+            }).toList());
+  }
+
+  @override
+  Stream<List<Appointments>> watchAppointmentsByPatientAndMedicID(
+      String patientId, String medicID) {
+    return _firestore
+        .collection('appointments')
+        .where('patientID', isEqualTo: patientId)
+        .where('doctorID', isEqualTo: medicID)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              return Appointments.fromJson({
+                ...data,
+                'id': doc.id,
+              });
+            }).toList());
   }
 }

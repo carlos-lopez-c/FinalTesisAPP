@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 
 class HistorialInfoCard extends StatelessWidget {
-  const HistorialInfoCard({super.key});
+  final bool esBusquedaPorCedula;
+  final String? cedulaBusqueda;
+  final int cantidadCitas;
+
+  const HistorialInfoCard({
+    super.key,
+    this.esBusquedaPorCedula = false,
+    this.cedulaBusqueda,
+    this.cantidadCitas = 0,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,25 +31,29 @@ class HistorialInfoCard extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            Icons.check_circle,
-            color: Colors.green,
+            esBusquedaPorCedula ? Icons.search : Icons.check_circle,
+            color: esBusquedaPorCedula ? Colors.blue : Colors.green,
             size: 24,
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Mostrando citas completadas',
-                  style: TextStyle(
+                  esBusquedaPorCedula
+                      ? 'Búsqueda por cédula: $cedulaBusqueda'
+                      : 'Mostrando citas completadas',
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF1976D2),
                   ),
                 ),
                 Text(
-                  'Solo se muestran las citas que han sido atendidas',
+                  esBusquedaPorCedula
+                      ? 'Se encontraron $cantidadCitas citas para este paciente'
+                      : 'Solo se muestran las citas que han sido atendidas',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[600],

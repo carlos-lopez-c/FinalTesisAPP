@@ -19,6 +19,38 @@ final appointmentProvider =
       medicID: authState.user!.medicID, ref: ref);
 });
 
+final appointmentPendientesProvider =
+    StreamProvider.autoDispose<List<Appointments>>((ref) {
+  final repository = AppointmentRepositoryImpl();
+  return repository.watchAppointmentsByStatus('Pendiente');
+});
+
+final appointmentAgendadasProvider =
+    StreamProvider.autoDispose<List<Appointments>>((ref) {
+  final repository = AppointmentRepositoryImpl();
+  return repository.watchAppointmentsByStatus('Agendado');
+});
+
+final appointmentCompletadasProvider =
+    StreamProvider.autoDispose<List<Appointments>>((ref) {
+  final repository = AppointmentRepositoryImpl();
+  return repository.watchAppointmentsByStatus('Completado');
+});
+
+final appointmentByStatusAndMedicProvider = StreamProvider.family
+    .autoDispose<List<Appointments>, Map<String, String>>((ref, params) {
+  final repository = AppointmentRepositoryImpl();
+  return repository.watchAppointmentsByStatusAndMedicID(
+      params['status']!, params['medicID']!);
+});
+
+final appointmentByPatientAndMedicProvider = StreamProvider.family
+    .autoDispose<List<Appointments>, Map<String, String>>((ref, params) {
+  final repository = AppointmentRepositoryImpl();
+  return repository.watchAppointmentsByPatientAndMedicID(
+      params['patientID']!, params['medicID']!);
+});
+
 class AppointmentNotifier extends StateNotifier<AppointmentState> {
   final AppointmentRepository repository;
   final PatientRepository patientRepository;
@@ -131,7 +163,12 @@ class AppointmentNotifier extends StateNotifier<AppointmentState> {
       final appointments =
           await repository.getAppointmentsByStatusAndMedicID(status, medicID);
 
-      state = state.copyWith(loading: false, citasAgendadas: appointments);
+      state = state.copyWith(
+        loading: false,
+        citasAgendadas: appointments,
+        esBusquedaPorCedula: false,
+        cedulaBusqueda: '',
+      );
 
       print('✅ Citas encontradas: ${appointments.length}');
     } on CustomError catch (e) {
@@ -139,9 +176,58 @@ class AppointmentNotifier extends StateNotifier<AppointmentState> {
       state = state.copyWith(
           loading: false,
           errorMessage: e.message ?? 'Error al obtener citas por estado');
-    } finally {
-      state = state.copyWith(loading: false);
     }
+  }
+
+  /// 🔹 Buscar citas por cédula del paciente
+  Future<void> buscarCitasPorCedula(String cedula) async {
+    print('🟢 Buscando citas por cédula: $cedula');
+    state = state.copyWith(loading: true, cedulaBusqueda: cedula);
+
+    try {
+      // Primero buscar el paciente por cédula directamente del repository
+      // para evitar generar mensajes de éxito adicionales
+      final paciente = await patientRepository.getPatientByDni(cedula);
+
+      // Luego buscar las citas de ese paciente
+      final appointments = await repository.getAppointmentsByPatientAndMedicID(
+          paciente.id, medicID);
+
+      state = state.copyWith(
+        loading: false,
+        citasAgendadas: appointments,
+        paciente: paciente,
+        esBusquedaPorCedula: true,
+        successMessage: 'Búsqueda completada',
+      );
+
+      print('✅ Citas encontradas para el paciente: ${appointments.length}');
+    } on CustomError catch (e) {
+      print('🔴 Error al buscar citas por cédula: ${e.message}');
+      state = state.copyWith(
+        loading: false,
+        errorMessage: e.message ?? 'Error al buscar citas por cédula',
+        esBusquedaPorCedula: false,
+      );
+    }
+  }
+
+  /// 🔹 Limpiar búsqueda y volver al historial completo
+  void limpiarBusqueda() {
+    state = state.copyWith(
+      cedulaBusqueda: '',
+      esBusquedaPorCedula: false,
+      paciente: null,
+      errorMessage: '',
+      successMessage: '',
+    );
+    // Recargar el historial completo
+    getAppointmentsByStatusAndMedicID("Completado");
+  }
+
+  /// 🔹 Actualizar cédula de búsqueda
+  void onCedulaBusquedaChanged(String cedula) {
+    state = state.copyWith(cedulaBusqueda: cedula);
   }
 
   Future<void> actualizarCita(Appointments cita) async {
@@ -172,7 +258,12 @@ class AppointmentNotifier extends StateNotifier<AppointmentState> {
       // ✅ Actualizar la lista localmente sin necesidad de llamar al backend otra vez
       final nuevasCitas = state.citas.map((cita) {
         if (cita.id == citaId) {
-          return cita.copyWith(status: nuevoEstado);
+          if (nuevoEstado.toLowerCase() == 'pendiente') {
+            // Limpiar doctor asignado
+            return cita.copyWith(status: nuevoEstado, doctorId: '', doctor: '');
+          } else {
+            return cita.copyWith(status: nuevoEstado);
+          }
         }
         return cita;
       }).toList();
@@ -184,9 +275,15 @@ class AppointmentNotifier extends StateNotifier<AppointmentState> {
 
       // ✅ Si la cita seleccionada es la que se actualizó, actualizar también
       if (state.citaSeleccionada?.id == citaId) {
-        state = state.copyWith(
-            citaSeleccionada:
-                state.citaSeleccionada!.copyWith(status: nuevoEstado));
+        if (nuevoEstado.toLowerCase() == 'pendiente') {
+          state = state.copyWith(
+              citaSeleccionada: state.citaSeleccionada!
+                  .copyWith(status: nuevoEstado, doctorId: '', doctor: ''));
+        } else {
+          state = state.copyWith(
+              citaSeleccionada:
+                  state.citaSeleccionada!.copyWith(status: nuevoEstado));
+        }
       }
     } on CustomError catch (e) {
       print('🔴 Error al actualizar estado: ${e.message}');
@@ -210,6 +307,8 @@ class AppointmentState {
   final DateTime calendarioCitaSeleccionada;
   final String errorMessage;
   final String successMessage;
+  final String cedulaBusqueda;
+  final bool esBusquedaPorCedula;
 
   AppointmentState(
       {this.loading = false,
@@ -220,7 +319,9 @@ class AppointmentState {
       DateTime? calendarioCitaSeleccionada,
       this.errorMessage = '',
       this.successMessage = '',
-      this.paciente})
+      this.paciente,
+      this.cedulaBusqueda = '',
+      this.esBusquedaPorCedula = false})
       : calendarioCitaSeleccionada =
             calendarioCitaSeleccionada ?? DateTime.now();
 
@@ -234,6 +335,8 @@ class AppointmentState {
     Patient? paciente,
     String? errorMessage,
     String? successMessage,
+    String? cedulaBusqueda,
+    bool? esBusquedaPorCedula,
   }) {
     return AppointmentState(
       loading: loading ?? this.loading,
@@ -246,6 +349,8 @@ class AppointmentState {
       errorMessage: errorMessage ?? this.errorMessage,
       successMessage: successMessage ?? this.successMessage,
       paciente: paciente ?? this.paciente,
+      cedulaBusqueda: cedulaBusqueda ?? this.cedulaBusqueda,
+      esBusquedaPorCedula: esBusquedaPorCedula ?? this.esBusquedaPorCedula,
     );
   }
 }

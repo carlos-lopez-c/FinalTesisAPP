@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:h_c_1/hc_tr/presentation/providers/hc_form_general_provider.dart';
-import 'package:h_c_1/hc_tr/presentation/utils/HistoriaClinicaPdfTemplate.dart';
+import 'package:h_c_1/hc_tr/presentation/providers/hc_form_adult_provider.dart';
+import 'package:h_c_1/hc_tr/presentation/widgets/hc_adult/Template.dart';
 
 class GenerarPdfButton extends ConsumerWidget {
   const GenerarPdfButton({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hcState = ref.watch(hcGeneralProvider);
+    final hcState = ref.watch(hcAdultFormProvider);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: ElevatedButton.icon(
         onPressed: () async {
-          final json = ref.read(hcGeneralProvider).createHcGeneral.toJson();
+          final json = ref.read(hcAdultFormProvider).createHcAdult.toJson();
           HistoriaClinicaPdfTemplate.guardarYMostrarPdf(json, context, "");
         },
         style: ElevatedButton.styleFrom(

@@ -242,6 +242,11 @@ class HcVoiceFormNotifier extends StateNotifier<HcVoiceState> {
       await updateHcVoice(state.createHcVoice);
 
       // Generar PDF después de actualizar la historia clínica
+      final datos = state.createHcVoice.toJson();
+      print('🔹 Datos: ${datos['antecendentesMorbidos']}');
+      print('🔹 Datos: ${datos['abusoVocal']}');
+      print('🔹 Datos: ${datos['malUsoVocal']}');
+      print('🔹 Datos: ${datos['factoresExternos']}');
       await HistoriaClinicaVozPdfTemplate.guardarYMostrarPdf(
           state.createHcVoice.toJson(), context, state.cedula);
 

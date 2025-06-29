@@ -186,8 +186,10 @@ class HcAdultFormNotifier extends StateNotifier<HcAdultState> {
       );
 
       await createAdultHc(state.createHcAdult);
+      final datos = state.createHcAdult.toJson();
+      print('🔹 Datos: ${datos['procesoDeAlimentacion']}');
       await HistoriaClinicaPdfTemplate.guardarYMostrarPdf(
-          state.createHcAdult.toJson(), context, state.cedula);
+          datos, context, state.cedula);
       // Limpiar campos
       state = state.copyWith(
         cedula: '',
@@ -209,8 +211,10 @@ class HcAdultFormNotifier extends StateNotifier<HcAdultState> {
       state = state.copyWith(loading: true);
       // Asegúrate de que 'fechaEntrevista' esté en el formato correcto
       await updateHcAdult(state.createHcAdult);
+      final datos = state.createHcAdult.toJson();
+      print('🔹 Datos: ${datos['procesoDeAlimentacion']}');
       await HistoriaClinicaPdfTemplate.guardarYMostrarPdf(
-          state.createHcAdult.toJson(), context, state.cedula);
+          datos, context, state.cedula);
       // Limpiar campos
 
       state = state.copyWith(

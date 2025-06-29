@@ -267,7 +267,7 @@ class _HcTrAnamAdultState extends ConsumerState<HcTrAnamAdult> {
                     ),
                     const SizedBox(height: 16),
                     _buildFormField(
-                      disabled: false,
+                      disabled: true,
                       controller: nombreCompletoController,
                       label: 'Nombre completo',
                       onChanged: hcNotifier.setNombreCompleto,

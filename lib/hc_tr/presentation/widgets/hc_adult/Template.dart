@@ -54,6 +54,7 @@ class HistoriaClinicaPdfTemplate {
         await rootBundle.load('assets/imagenes/san-miguel.png');
     final Uint8List imageBytes = imageData.buffer.asUint8List();
     final pdfImage = pw.MemoryImage(imageBytes);
+
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
@@ -95,21 +96,27 @@ class HistoriaClinicaPdfTemplate {
             "Presenta dificultad para tomar liquidos?: ${_boolToSiNo(datos['seguridad']?['presentaAlgunaDificultadParaTomarLiquidosDeUnVaso'])}",
             "Presenta dificultad con sopas o granos?: ${_boolToSiNo(datos['seguridad']?['presentaDificultadConSopasOLosGranosPequenosComoArroz'])}",
             "Ha presentado neumonias?: ${_boolToSiNo(datos['seguridad']?['haPresentadoNeumonias'])}",
+            "Con que frecuencia presento neumonias?: ${datos['seguridad']?['conQueFrecuenciaPresentoNeumonia'] ?? ''}",
+            "Se queda con restos de alimento en la boca?: ${_boolToSiNo(datos['seguridad']?['seQuedaConRestosDeAlimentosEnLaBocaLuegoDeAlimentarse'])}",
+            "Siente que el alimento se va hacia su nariz?: ${_boolToSiNo(datos['seguridad']?['sienteQueElAlimentoSeVaHaciaSuNariz'])}",
           ]),
           _section("PROCESO DE ALIMENTACIÓN", [
-            "Se demora mas tiempo que el resto?: ${_boolToSiNo(datos['seDemoraMasTiempoQueElRestoDeLaFamiliaEnComer'])}",
-            "Cuanto tiempo?: ${datos['cuantoTiempo'] ?? ''}",
-            "Cree que come muy rapido?: ${_boolToSiNo(datos['creeUstedQueComeMuyRapido'])}",
+            "Se demora mas tiempo que el resto?: ${_boolToSiNo(datos['procesoDeAlimentacion']?['seDemoraMasTiempoQueElRestoDeLaFamiliaEnComer'])}",
+            "Cuanto tiempo?: ${datos['procesoDeAlimentacion']?['cuantoTiempo'] ?? ''}",
+            "Cree que come muy rapido?: ${_boolToSiNo(datos['procesoDeAlimentacion']?['creeUstedQueComeMuyRapido'])}",
+            "Suele realizar alguna otra actividad mientras come?: ${_boolToSiNo(datos['procesoDeAlimentacion']?['sueleRealizarAlgunaOtraActividadMientrasCome'])}",
+            "Que otra actividad?: ${datos['procesoDeAlimentacion']?['queOtraActividad'] ?? ''}",
           ]),
           _section("SALUD BUCAL", [
-            "Cuenta con todas sus piezas dentales?: ${_boolToSiNo(datos['cuentaConTodasSusPiezasDentales'])}",
-            "Por que?: ${datos['porQueNoCuentaConTodasSusPiezasDentales'] ?? ''}",
-            "Utiliza placa dental?: ${_boolToSiNo(datos['utilizaPlacaDental'])}",
-            "Se realiza aseo bucal despues de cada comida?: ${_boolToSiNo(datos['seRealizaAseoBucalDespuesDeCadaComida'])}",
-            "Con que frecuencia se lava los dientes?: ${datos['conQueFrecuenciaSeLavaLosDientes'] ?? ''}",
-            "Asiste regularmente a controles dentales?: ${_boolToSiNo(datos['asisteRegularmenteAControlesDentales'])}",
-            "Con que frecuencia?: ${datos['conQueFrecuenciaAsisteAControlesDentales'] ?? ''}",
-            "Que molestia o dolor presenta?: ${datos['queMolestiaODolor'] ?? ''}",
+            "Cuenta con todas sus piezas dentales?: ${_boolToSiNo(datos['saludBocal']?['cuentaConTodasSusPiezasDentales'])}",
+            "Por que?: ${datos['saludBocal']?['porQueNoCuentaConTodasSusPiezasDentales'] ?? ''}",
+            "Utiliza placa dental?: ${_boolToSiNo(datos['saludBocal']?['utilizaPlacaDental'])}",
+            "Se realiza aseo bucal despues de cada comida?: ${_boolToSiNo(datos['saludBocal']?['seRealizaAseoBucalDespuesDeCadaComida'])}",
+            "Con que frecuencia se lava los dientes?: ${datos['saludBocal']?['conQueFrecuenciaSeLavaLosDientes'] ?? ''}",
+            "Asiste regularmente a controles dentales?: ${_boolToSiNo(datos['saludBocal']?['asisteRegularmenteAControlesDentales'])}",
+            "Con que frecuencia?: ${datos['saludBocal']?['conQueFrecuenciaAsisteAControlesDentales'] ?? ''}",
+            "Tiene alguna molestia o dolor dentro de su boca?: ${_boolToSiNo(datos['saludBocal']?['tieneAlgunaMolestiaODolorDentroDeSuBoca'])}",
+            "Que molestia o dolor presenta?: ${datos['saludBocal']?['queMolestiaODolor'] ?? ''}",
           ]),
         ],
       ),

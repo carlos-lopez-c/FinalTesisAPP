@@ -254,20 +254,41 @@ class AuthDatasourceImpl implements AuthDatasource {
       if (currentUser != null &&
           currentUser.email != null &&
           currentUser.email!.isNotEmpty) {
-        // Si hay un usuario con correo, vincular las credenciales de teléfono
-        try {
-          await currentUser.linkWithCredential(credential);
-          print("Credenciales vinculadas exitosamente");
-          return true;
-        } catch (linkError) {
-          // Si el codigo es incorrecto, se lanzará una excepción
-          return true;
+        // Verifica si el proveedor 'phone' ya está vinculado
+        final providers = currentUser.providerData;
+        final hasPhoneProvider = providers.any((p) => p.providerId == 'phone');
+
+        if (!hasPhoneProvider) {
+          // Si no está vinculado, intenta vincular
+          try {
+            await currentUser.linkWithCredential(credential);
+            print("Credenciales vinculadas exitosamente");
+            return true;
+          } catch (linkError) {
+            print("Error al vincular credenciales: $linkError");
+            return false;
+          }
+        } else {
+          // Si ya está vinculado, solo verifica el código (signInWithCredential)
+          try {
+            await _firebaseAuth.signInWithCredential(credential);
+            print("Sign In With Credential: \\${_firebaseAuth.currentUser}");
+            return true;
+          } catch (signInError) {
+            print("Error al iniciar sesión con credencial: $signInError");
+            return false;
+          }
         }
       } else {
         // Si no hay un usuario autenticado por correo, hacer el login normal con teléfono
-        await _firebaseAuth.signInWithCredential(credential);
-        print("Sign In With Credential: ${_firebaseAuth.currentUser}");
-        return true;
+        try {
+          await _firebaseAuth.signInWithCredential(credential);
+          print("Sign In With Credential: \\${_firebaseAuth.currentUser}");
+          return true;
+        } catch (signInError) {
+          print("Error al iniciar sesión con credencial: $signInError");
+          return false;
+        }
       }
     } on firebase_auth.FirebaseAuthException catch (e) {
       print("Error: ${e}");

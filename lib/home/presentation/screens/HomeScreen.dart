@@ -22,7 +22,10 @@ class HomeScreen extends ConsumerWidget {
     }
 
     final role = authState.user!.role;
-
+    final nameComplete = authState.user!.userInformation!.firstName +
+        ' ' +
+        authState.user!.userInformation!.lastName;
+    print(nameComplete);
     // Verificar el rol del usuario y asignar tabs dinámicamente
     List<Tab> tabs = [];
     List<Widget> tabViews = [];
@@ -35,10 +38,7 @@ class HomeScreen extends ConsumerWidget {
       ];
 
       tabViews = [
-        HomeContent(
-            name: authState.user!.userInformation!.firstName +
-                ' ' +
-                authState.user!.userInformation!.lastName),
+        HomeContent(name: nameComplete),
         Terapiatab(),
         ListaCitasTR(),
       ];
@@ -50,7 +50,7 @@ class HomeScreen extends ConsumerWidget {
       ];
 
       tabViews = [
-        HomeContent(),
+        HomeContent(name: nameComplete),
         PsicologiaTab(),
         ListaCitasTR(),
       ];

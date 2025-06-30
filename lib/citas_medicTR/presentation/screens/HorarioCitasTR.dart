@@ -22,6 +22,10 @@ class _HorarioCitasTrState extends ConsumerState<HorarioCitasTr> {
       ref
           .read(appointmentProvider.notifier)
           .getAppointmentsByStatusAndMedicID("Agendado");
+      // Cargar las citas del día actual al iniciar la pantalla
+      ref
+          .read(appointmentProvider.notifier)
+          .getAppointmentsByDate(DateTime.now());
     });
   }
 

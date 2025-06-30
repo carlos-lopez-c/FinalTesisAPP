@@ -287,6 +287,7 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
   @override
   Stream<List<Appointments>> watchAppointmentsByStatus(
       String status, String specialtyTherapyId) {
+
     final baseStream = _firestore
         .collection('appointments')
         .where('status', isEqualTo: status)

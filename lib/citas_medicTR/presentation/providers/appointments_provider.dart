@@ -22,51 +22,42 @@ final appointmentProvider =
 });
 
 final appointmentPendientesProvider =
-    StreamProvider.autoDispose<List<Appointments>>((ref) {
+    StreamProvider.autoDispose<List<Appointments>>((ref) async* {
   final repository = AppointmentRepositoryImpl();
   final authState = ref.watch(authProvider);
   final userRole = authState.user?.role ?? '';
+  print('🟢 userRole: $userRole');
+  final typeTherapyName = userRole == 'Therapy' ? 'Terapia' : 'Psicologia';
   final typeTherapyRepo = TypeTherapyRepositoryImpl();
-  return Stream.fromFuture(typeTherapyRepo.getTypeTherapies())
-      .asyncExpand((allTypes) {
-    final match = allTypes.firstWhere(
-      (t) => t.name.toLowerCase().contains(userRole.toLowerCase()),
-      orElse: () => allTypes.first,
-    );
-    return repository.watchAppointmentsByStatus('Pendiente', match.id);
-  });
+  final typeTherapy =
+      await typeTherapyRepo.getTypeTherapiesByNameUnique(typeTherapyName);
+  yield* repository.watchAppointmentsByStatus('Pendiente', typeTherapy.id);
 });
 
 final appointmentAgendadasProvider =
-    StreamProvider.autoDispose<List<Appointments>>((ref) {
+    StreamProvider.autoDispose<List<Appointments>>((ref) async* {
   final repository = AppointmentRepositoryImpl();
+
   final authState = ref.watch(authProvider);
   final userRole = authState.user?.role ?? '';
+  final typeTherapyName = userRole == 'Therapy' ? 'Terapia' : 'Psicologia';
   final typeTherapyRepo = TypeTherapyRepositoryImpl();
-  return Stream.fromFuture(typeTherapyRepo.getTypeTherapies())
-      .asyncExpand((allTypes) {
-    final match = allTypes.firstWhere(
-      (t) => t.name.toLowerCase().contains(userRole.toLowerCase()),
-      orElse: () => allTypes.first,
-    );
-    return repository.watchAppointmentsByStatus('Agendado', match.id);
-  });
+  final typeTherapy =
+      await typeTherapyRepo.getTypeTherapiesByNameUnique(typeTherapyName);
+  yield* repository.watchAppointmentsByStatus('Agendado', typeTherapy.id);
 });
 
 final appointmentCompletadasProvider =
-    StreamProvider.autoDispose<List<Appointments>>((ref) {
+    StreamProvider.autoDispose<List<Appointments>>((ref) async* {
   final repository = AppointmentRepositoryImpl();
   final authState = ref.watch(authProvider);
   final userRole = authState.user?.role ?? '';
+  print('🟢 userRole: $userRole');
+  final typeTherapyName = userRole == 'Therapy' ? 'Terapia' : 'Psicologia';
   final typeTherapyRepo = TypeTherapyRepositoryImpl();
-  return Stream.fromFuture(typeTherapyRepo.getTypeTherapies())
-      .asyncExpand((allTypes) {
-    final match = allTypes.firstWhere(
-      (t) => t.name.toLowerCase().contains(userRole.toLowerCase()),
-      orElse: () => allTypes.first,
-    );
-    return repository.watchAppointmentsByStatus('Completado', match.id);
-  });
+  final typeTherapy =
+      await typeTherapyRepo.getTypeTherapiesByNameUnique(typeTherapyName);
+  yield* repository.watchAppointmentsByStatus('Completado', typeTherapy.id);
 });
 
 final appointmentByStatusAndMedicProvider = StreamProvider.family
@@ -100,13 +91,11 @@ class AppointmentNotifier extends StateNotifier<AppointmentState> {
   Future<void> _initSpecialtyTherapyId() async {
     final authState = ref.read(authProvider);
     final userRole = authState.user?.role ?? '';
+    final typeTherapyName = userRole == 'Therapy' ? 'Terapia' : 'Psicologia';
     final typeTherapyRepo = TypeTherapyRepositoryImpl();
-    final allTypes = await typeTherapyRepo.getTypeTherapies();
-    final match = allTypes.firstWhere(
-      (t) => t.name.toLowerCase().contains(userRole.toLowerCase()),
-      orElse: () => allTypes.first,
-    );
-    specialtyTherapyId = match.id;
+    final typeTherapy =
+        await typeTherapyRepo.getTypeTherapiesByNameUnique(typeTherapyName);
+    specialtyTherapyId = typeTherapy.id;
     listarCitas(estado: 'Pendiente');
   }
 
@@ -121,6 +110,7 @@ class AppointmentNotifier extends StateNotifier<AppointmentState> {
   /// 🔹 Listar citas (todas o por estado)
   Future<void> listarCitas({String estado = ''}) async {
     if (specialtyTherapyId == null) return;
+    print('🟢 specialtyTherapyId: $specialtyTherapyId');
     print('🟢 Cargando citas...');
     state = state.copyWith(loading: true);
     try {

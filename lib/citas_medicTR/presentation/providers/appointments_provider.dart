@@ -27,7 +27,7 @@ final appointmentPendientesProvider =
   final authState = ref.watch(authProvider);
   final userRole = authState.user?.role ?? '';
   print('🟢 userRole: $userRole');
-  final typeTherapyName = userRole == 'Therapy' ? 'Terapia' : 'Psicologia';
+  final typeTherapyName = userRole == 'Therapy' ? 'Terapia' : 'Psicología';
   final typeTherapyRepo = TypeTherapyRepositoryImpl();
   final typeTherapy =
       await typeTherapyRepo.getTypeTherapiesByNameUnique(typeTherapyName);
@@ -40,7 +40,7 @@ final appointmentAgendadasProvider =
 
   final authState = ref.watch(authProvider);
   final userRole = authState.user?.role ?? '';
-  final typeTherapyName = userRole == 'Therapy' ? 'Terapia' : 'Psicologia';
+  final typeTherapyName = userRole == 'Therapy' ? 'Terapia' : 'Psicología';
   final typeTherapyRepo = TypeTherapyRepositoryImpl();
   final typeTherapy =
       await typeTherapyRepo.getTypeTherapiesByNameUnique(typeTherapyName);
@@ -53,7 +53,7 @@ final appointmentCompletadasProvider =
   final authState = ref.watch(authProvider);
   final userRole = authState.user?.role ?? '';
   print('🟢 userRole: $userRole');
-  final typeTherapyName = userRole == 'Therapy' ? 'Terapia' : 'Psicologia';
+  final typeTherapyName = userRole == 'Therapy' ? 'Terapia' : 'Psicología';
   final typeTherapyRepo = TypeTherapyRepositoryImpl();
   final typeTherapy =
       await typeTherapyRepo.getTypeTherapiesByNameUnique(typeTherapyName);
@@ -91,7 +91,7 @@ class AppointmentNotifier extends StateNotifier<AppointmentState> {
   Future<void> _initSpecialtyTherapyId() async {
     final authState = ref.read(authProvider);
     final userRole = authState.user?.role ?? '';
-    final typeTherapyName = userRole == 'Therapy' ? 'Terapia' : 'Psicologia';
+    final typeTherapyName = userRole == 'Therapy' ? 'Terapia' : 'Psicología';
     final typeTherapyRepo = TypeTherapyRepositoryImpl();
     final typeTherapy =
         await typeTherapyRepo.getTypeTherapiesByNameUnique(typeTherapyName);

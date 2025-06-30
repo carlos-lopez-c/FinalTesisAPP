@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:h_c_1/auth/presentation/providers/auth_provider.dart';
 import 'package:h_c_1/citas_medicTR/presentation/providers/appointments_provider.dart';
 import 'package:h_c_1/citas_medicTR/presentation/screens/DetalleCitaTR.dart';
 import 'package:h_c_1/citas_medicTR/presentation/screens/HorarioCitasTR.dart';
-import 'package:h_c_1/citas_medicTR/presentation/widgets/ItemWidget_TR.dart';
-import 'package:h_c_1/citas_medicTR/presentation/widgets/inidicacion_TR.dart';
 
 class ListaCitasTR extends ConsumerStatefulWidget {
   @override
@@ -62,36 +59,39 @@ class _ListaCitasTRState extends ConsumerState<ListaCitasTR> {
         children: [
           // Encabezado
           Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: const BoxDecoration(
-              color: Color(0xFF1976D2),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(24),
-                bottomRight: Radius.circular(24),
-              ),
-            ),
-            child: Column(
-              children: [
-                const Text(
-                  'LISTADO DE CITAS MÉDICAS',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'SECCIÓN DE CITAS MÉDICAS',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ),
+  width: double.infinity, // ← Asegura ancho completo
+  padding: const EdgeInsets.all(20),
+  decoration: const BoxDecoration(
+    color: Color(0xFF1976D2),
+    borderRadius: BorderRadius.only(
+      bottomLeft: Radius.circular(24),
+      bottomRight: Radius.circular(24),
+    ),
+  ),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch, // ← Expande el Column
+    children: [
+      const Text(
+        'LISTADO DE CITAS MÉDICAS',
+        textAlign: TextAlign.center, // ← Centra este texto también (opcional)
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      const SizedBox(height: 8),
+      const Text(
+        'En esta página solo se mostrarán las citas pendientes',
+        textAlign: TextAlign.center, // ← Centrado directo (alternativa a Align)
+        style: TextStyle(
+          color: Colors.white70,
+          fontSize: 16,
+        ),
+      ),
+    ],
+  ),
+),
 
           // Contenido principal
           Expanded(
@@ -130,54 +130,8 @@ class _ListaCitasTRState extends ConsumerState<ListaCitasTR> {
                         elevation: 2,
                       ),
                     ),
-                  ),
-
-                  // Botón de historial
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: ElevatedButton.icon(
-                      onPressed: () => context.push('/historial-citas'),
-                      icon: const Icon(Icons.history, color: Colors.white),
-                      label: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12.0),
-                        child: Text(
-                          'HISTORIAL DE CITAS',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1976D2),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 2,
-                      ),
-                    ),
-                  ),
-
-                  // Indicaciones
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: const IndicacionTrWidget(),
-                  ),
-
+                  ),                                   
+                  
                   const SizedBox(height: 16),
 
                   // Lista de citas en tiempo real

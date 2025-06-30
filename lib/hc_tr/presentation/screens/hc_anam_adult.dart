@@ -173,79 +173,118 @@ class _HcTrAnamAdultState extends ConsumerState<HcTrAnamAdult> {
             headerTRWidget(textoDinamico: 'ANAMNESIS ALIMENTARIA ADULTOS'),
             const SizedBox(height: 20),
             Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Center(
-                      child: _buildRadioButtonGroup(
-                        title: '',
-                        options: ['Nuevo', 'Buscar'],
-                        selectedValue: hcState.tipo,
-                        onChanged: hcNotifier.onTipoChanged,
-                      ),
+  elevation: 2,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(12),
+  ),
+  child: Padding(
+    padding: EdgeInsets.all(16.0),  // Removido const aquí
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(  // Removido const aquí
+          'Tipo de registro',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1976D2),
+        ),
+        ),
+        SizedBox(height: 12),  // Removido const aquí
+        
+        // Radio buttons
+        Row(
+          children: [
+            Row(
+              children: [
+                Radio<String>(
+                  value: 'Nuevo',
+                  groupValue: hcState.tipo,
+                  onChanged: (value) => hcNotifier.onTipoChanged(value ?? 'Nuevo'),
+                  activeColor: Color(0xFF1976D2),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                SizedBox(width: 4),  // Removido const aquí
+                Text('Nuevo'),  // Removido const aquí
+              ],
+            ),
+            SizedBox(width: 20),  // Removido const aquí
+            Row(
+              children: [
+                Radio<String>(
+                  value: 'Buscar',
+                  groupValue: hcState.tipo,
+                  onChanged: (value) => hcNotifier.onTipoChanged(value ?? 'Buscar'),
+                  activeColor: Color(0xFF1976D2),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                SizedBox(width: 4),  // Removido const aquí
+                Text('Buscar'),  // Removido const aquí
+              ],
+            ),
+          ],
+        ),
+
+        SizedBox(height: 20),  // Removido const aquí
+        
+        // Campo de búsqueda
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: cedulaController,
+                onChanged: hcNotifier.onCedulaChanged,
+                decoration: InputDecoration(
+                  labelText: 'Buscar por cédula',
+                  labelStyle: TextStyle(color: Color(0xFF1976D2)),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Color(0xFF1976D2)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Color(0xFF1976D2)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Color(0xFF1976D2), 
+                      width: 2
                     ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: cedulaController,
-                            onChanged: hcNotifier.onCedulaChanged,
-                            decoration: InputDecoration(
-                              labelText: 'Buscar por cédula',
-                              labelStyle:
-                                  const TextStyle(color: Color(0xFF1976D2)),
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide:
-                                    const BorderSide(color: Color(0xFF1976D2)),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide:
-                                    const BorderSide(color: Color(0xFF1976D2)),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                    color: Color(0xFF1976D2), width: 2),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () {
-                            if (hcState.tipo == 'Nuevo') {
-                              hcNotifier.getPacienteByDni(hcState.cedula);
-                            } else {
-                              hcNotifier.onSearchHcAdult(hcState.cedula);
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF1976D2),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text('Buscar'),
-                        ),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
+            SizedBox(width: 10),  // Removido const aquí
+            ElevatedButton(
+              onPressed: () {
+                if (hcState.tipo == 'Nuevo') {
+                  hcNotifier.getPacienteByDni(hcState.cedula);
+                } else {
+                  hcNotifier.onSearchHcAdult(hcState.cedula);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF1976D2),
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16, 
+                  vertical: 12
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text('Buscar'),  // Removido const aquí
+            ),
+          ],
+        ),
+      ],
+    ),
+  ),
+),
             const SizedBox(height: 20),
             Card(
               elevation: 2,

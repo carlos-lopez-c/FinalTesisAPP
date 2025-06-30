@@ -136,7 +136,7 @@ class HomeContent extends StatelessWidget {
                     width: 200,
                     height: 200,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   const Text(
                     'Fundación de niños especiales',
                     style: TextStyle(
@@ -159,7 +159,7 @@ class HomeContent extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 30),
             // Mensaje de bienvenida
             Container(
               padding: const EdgeInsets.all(20),
@@ -185,7 +185,7 @@ class HomeContent extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   const Text(
                     'Sistema de gestión de citas e historias clínicas',
                     style: TextStyle(
@@ -197,7 +197,7 @@ class HomeContent extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 25),
             // Botón de cambio de contraseña
             Container(
               width: double.infinity,
@@ -221,7 +221,7 @@ class HomeContent extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 25),
             // Footer
             Container(
               padding: const EdgeInsets.all(16),

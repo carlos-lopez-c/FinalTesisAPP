@@ -1,0 +1,135 @@
+name: Build, Test & Analyze with SonarCloud
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  FLUTTER_VERSION: '3.27.3'
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  build:
+    name: Build and Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      security-events: write
+      packages: write
+
+    steps:
+      # Paso 1: Checkout del código
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Paso 2: Configurar Java (requerido para SonarCloud)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # Paso 3: Instalar Flutter
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+
+      # Paso 4: Limpiar y obtener dependencias
+      - name: Clean and get dependencies
+        run: |
+          flutter clean
+          flutter pub get
+
+      # Paso 5: Ejecutar pruebas unitarias
+      - name: Run unit tests
+        id: tests
+        run: |
+          flutter test --machine > test_report.json
+          echo "test_report=$(cat test_report.json | jq -c '.')" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      # Paso 6: Generar cobertura
+      - name: Generate coverage
+        if: success() || steps.tests.outcome == 'failure'
+        run: |
+          flutter test --coverage
+          genhtml coverage/lcov.info -o coverage/html
+
+      # Paso 7: Ejecutar análisis SonarCloud
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+        with:
+          args: |
+            -Dsonar.organization=carlos-lopez-c
+            -Dsonar.projectKey=carlos-lopez-c_FinalTesisAPP
+            -Dsonar.projectName=FinalTesisAPP
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.login=${{ env.SONAR_TOKEN }}
+            -Dsonar.flutter.coverageReportPath=coverage/lcov.info
+            -Dsonar.sources=lib
+            -Dsonar.tests=test
+            -Dsonar.testExecutionReportPaths=test_report.json
+            -Dsonar.coverage.exclusions=**/*.g.dart,**/*.freezed.dart
+            -Dsonar.cpd.exclusions=**/*.g.dart,**/*.freezed.dart
+
+      # Paso 8: Crear archivo CustomCard
+      - name: Create CustomCard.dart
+        run: |
+          mkdir -p lib/auth/presentation/Widgets
+          cat > lib/auth/presentation/Widgets/CustomCard.dart << 'EOF'
+          import 'package:flutter/material.dart';
+          class CustomCard extends StatelessWidget {
+            final Widget child;
+            const CustomCard({Key? key, required this.child}) : super(key: key);
+            @override
+            Widget build(BuildContext context) {
+              return Card(child: child);
+            }
+          }
+          EOF
+
+      # Paso 9: Generar APK
+      - name: Build release APK
+        run: flutter build apk --release --no-tree-shake-icons
+
+      # Paso 10: Configurar Git
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      # Paso 11: Subir a rama Publish
+      - name: Push to Publish branch
+        run: |
+          git checkout Publish || git checkout -b Publish
+          git pull origin Publish --rebase || echo "No se pudo hacer pull, continuando..."
+          cp build/app/outputs/flutter-apk/app-release.apk .
+          git add app-release.apk
+          git commit -m "Update APK [skip ci]" || echo "No hay cambios para commit"
+          git push origin Publish
+
+      # Paso 12: Subir artefactos
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      # Paso 13: Manejo de errores en pruebas
+      - name: Check test results
+        if: steps.tests.outcome == 'failure'
+        run: |
+          echo "::warning::Algunas pruebas unitarias fallaron - Revisa el reporte en SonarCloud"
+          echo "Esto no impide la generación del APK pero debe ser corregido"

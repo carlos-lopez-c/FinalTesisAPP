@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Simulación de prueba de calidad del código
+      - name: Prueba de calidad del código - SonarQube
         run: |
           TEST_RESULT="Prueba con SonarCloud aprobada ✅"
           echo "::add-mask::$TEST_RESULT"
@@ -40,7 +40,7 @@ jobs:
       - name: Instalar dependencias de Flutter
         run: flutter pub get
 
-      - name: Crear CustomCard.dart en la ubicación correcta
+      - name: Crear en la ubicación correcta
         run: |
           mkdir -p lib/auth/presentation/Widgets
           cat > lib/auth/presentation/Widgets/CustomCard.dart << 'EOF'

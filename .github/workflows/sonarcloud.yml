@@ -21,13 +21,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Requerido para análisis preciso
 
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
+
+      - name: Build project (Opcional para Java)
+        run: mvn clean verify -B -DskipTests  # Eliminar si no es Java
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
@@ -36,7 +39,10 @@ jobs:
         with:
           projectBaseDir: .
           args: >
-            -Dsonar.projectKey=${{ github.repository }}
-            -Dsonar.organization=${{ github.repository_owner }}
+            -Dsonar.projectKey=FinalTesisAPP
+            -Dsonar.organization=carlos-lopez-c
+            -Dsonar.branch.name=main
             -Dsonar.qualitygate.wait=true
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+            -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.scm.provider=git

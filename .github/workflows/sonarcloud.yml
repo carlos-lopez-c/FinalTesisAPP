@@ -21,16 +21,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Requerido para análisis preciso
+          fetch-depth: 0
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Build project (Opcional para Java)
-        run: mvn clean verify -B -DskipTests  # Eliminar si no es Java
+      # Paso OPCIONAL para Java (solo si usas Maven)
+      # - name: Build with Maven
+      #   if: contains(github.event.pull_request.labels.*.name, 'java')  # Ejemplo condicional
+      #   run: |
+      #     cd ruta/al/pom.xml  # Especifica la ruta si está en subdirectorio
+      #     mvn clean verify -B -DskipTests
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
@@ -44,5 +42,4 @@ jobs:
             -Dsonar.branch.name=main
             -Dsonar.qualitygate.wait=true
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-            -Dsonar.sourceEncoding=UTF-8
-            -Dsonar.scm.provider=git
+            -Dsonar.sources=./src  # Ajusta esta ruta según tu estructura

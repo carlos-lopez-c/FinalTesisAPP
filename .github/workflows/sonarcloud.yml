@@ -21,14 +21,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Obligatorio para SonarCloud
+          fetch-depth: 0
 
-      - name: Validate SONAR_TOKEN
-        run: |
-          if [ -z "${{ secrets.SONAR_TOKEN }}" ]; then
-            echo "❌ ERROR: Agrega 'SONAR_TOKEN' en Secrets"
-            exit 1
-          fi
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
@@ -37,7 +36,7 @@ jobs:
         with:
           projectBaseDir: .
           args: >
-            -Dsonar.projectKey=${{ github.repository }}  # Usa "usuario/repo" como clave
-            -Dsonar.organization=${{ github.repository_owner }}  # Usa tu usuario/organización
+            -Dsonar.projectKey=${{ github.repository }}
+            -Dsonar.organization=${{ github.repository_owner }}
             -Dsonar.qualitygate.wait=true
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}

@@ -4,6 +4,7 @@ import 'package:h_c_1/citas_medicTR/domain/datasources/appointment_datasource.da
 import 'package:h_c_1/citas_medicTR/domain/entities/cita.entity.dart';
 import 'package:h_c_1/citas_medicTR/domain/entities/registerCita.entity.dart';
 import 'package:h_c_1/shared/infrastructure/errors/handle_error.dart';
+import 'package:intl/intl.dart';
 
 class AppointmentDatasourceImpl implements AppointmentDatasource {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -94,6 +95,7 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
           .collection('appointments')
           .where('status', isEqualTo: status)
           .where('specialtyTherapyId', isEqualTo: specialtyTherapyId)
+          .where('date', isGreaterThan: DateTime.now())
           .get();
 
       final appointments = querySnapshot.docs.map((doc) {
@@ -115,6 +117,8 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
   Future<List<Appointments>> getAppointmentsByDate(
       DateTime date, String medicID, String specialtyTherapyId) async {
     try {
+      String nowAsString =
+          DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
       String formattedDate =
           "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
       QuerySnapshot querySnapshot = await _firestore
@@ -122,6 +126,7 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
           .where('date', isEqualTo: formattedDate)
           .where('doctorID', isEqualTo: medicID)
           .where('specialtyTherapyId', isEqualTo: specialtyTherapyId)
+          .where('date', isGreaterThan: nowAsString)
           .get();
 
       final appointments = querySnapshot.docs.map((doc) {
@@ -234,13 +239,16 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
   Future<List<Appointments>> getAppointmentsByStatusAndMedicID(
       String status, String medicID, String specialtyTherapyId) async {
     try {
+      String nowAsString =
+          DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
       QuerySnapshot querySnapshot = await _firestore
           .collection('appointments')
           .where('status', isEqualTo: status)
           .where('doctorID', isEqualTo: medicID)
           .where('specialtyTherapyId', isEqualTo: specialtyTherapyId)
+          .where('date', isGreaterThan: nowAsString)
           .get();
-
+      print('nowAsString: $nowAsString');
       final appointments = querySnapshot.docs.map((doc) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
         return Appointments.fromJson({
@@ -266,6 +274,7 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
           .where('patientID', isEqualTo: patientId)
           .where('doctorID', isEqualTo: medicID)
           .where('specialtyTherapyId', isEqualTo: specialtyTherapyId)
+          .where('status', isEqualTo: 'Completado')
           .get();
 
       final appointments = querySnapshot.docs.map((doc) {
@@ -287,11 +296,11 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
   @override
   Stream<List<Appointments>> watchAppointmentsByStatus(
       String status, String specialtyTherapyId) {
-
     final baseStream = _firestore
         .collection('appointments')
         .where('status', isEqualTo: status)
         .where('specialtyTherapyId', isEqualTo: specialtyTherapyId)
+        .where('date', isGreaterThan: DateTime.now())
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) {
               final data = doc.data() as Map<String, dynamic>;
@@ -312,6 +321,7 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
         .where('status', isEqualTo: status)
         .where('doctorID', isEqualTo: medicID)
         .where('specialtyTherapyId', isEqualTo: specialtyTherapyId)
+        .where('date', isGreaterThan: DateTime.now())
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) {
               final data = doc.data() as Map<String, dynamic>;

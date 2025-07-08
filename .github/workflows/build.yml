@@ -1,4 +1,5 @@
 name: SonarQube Scan
+
 on:
   push:
     branches: [ main ]
@@ -11,7 +12,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Necesario para el análisis de SonarQube
+          fetch-depth: 0  # Necesario para el análisis de SonarCloud
+
+      - name: Crear configuración de Sonar
+        run: |
+          echo "sonar.projectKey=FinalTesisAPP" >> sonar-project.properties
+          echo "sonar.organization=carlos-eduardo-lopez-candelejo" >> sonar-project.properties
+          echo "sonar.host.url=https://sonarcloud.io" >> sonar-project.properties
+          echo "sonar.coverage.exclusions=**/*" >> sonar-project.properties
+          echo "sonar.exclusions=**/*.dart,**/test/**,**/lib/generated/**" >> sonar-project.properties
+          echo "sonar.issue.ignore.allfile=.*" >> sonar-project.properties
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5

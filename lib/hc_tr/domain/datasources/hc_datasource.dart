@@ -20,4 +20,5 @@ abstract class HcDatasource {
   Future<bool> existHcGeneral(String cedula);
   Future<bool> existHcAdult(String cedula);
   Future<bool> existHcVoice(String cedula);
+  Future<bool> existHcPsAdult(String cedula);
 }

@@ -2,24 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_c_1/hc_ps/presentation/providers/hc_ps_form_provider.dart';
 import '../widgets/headerPS.dart';
+import '../widgets/GenerarPdfButton.dart';
 
 class HistoriaClinicaAdultPS extends ConsumerStatefulWidget {
+  const HistoriaClinicaAdultPS({Key? key}) : super(key: key);
+
   @override
   _HistoriaClinicaAdultPSState createState() => _HistoriaClinicaAdultPSState();
 }
 
 class _HistoriaClinicaAdultPSState
     extends ConsumerState<HistoriaClinicaAdultPS> {
-  final _formKey = GlobalKey<FormState>();
+  bool _hasShownMessage = false;
 
   late TextEditingController cedulaController;
+  late TextEditingController fechaEvaluacionController;
   late TextEditingController nombreCompletoController;
   late TextEditingController fechaNacimientoController;
   late TextEditingController telefonoController;
   late TextEditingController institucionController;
   late TextEditingController direccionController;
   late TextEditingController remisionController;
-  late TextEditingController fechaEvaluacionController;
   late TextEditingController coberturaController;
   late TextEditingController observacionesController;
   late TextEditingController responsableController;
@@ -34,13 +37,13 @@ class _HistoriaClinicaAdultPSState
   void initState() {
     super.initState();
     cedulaController = TextEditingController();
+    fechaEvaluacionController = TextEditingController();
     nombreCompletoController = TextEditingController();
     fechaNacimientoController = TextEditingController();
     telefonoController = TextEditingController();
     institucionController = TextEditingController();
     direccionController = TextEditingController();
     remisionController = TextEditingController();
-    fechaEvaluacionController = TextEditingController();
     coberturaController = TextEditingController();
     observacionesController = TextEditingController();
     responsableController = TextEditingController();
@@ -55,13 +58,13 @@ class _HistoriaClinicaAdultPSState
   @override
   void dispose() {
     cedulaController.dispose();
+    fechaEvaluacionController.dispose();
     nombreCompletoController.dispose();
     fechaNacimientoController.dispose();
     telefonoController.dispose();
     institucionController.dispose();
     direccionController.dispose();
     remisionController.dispose();
-    fechaEvaluacionController.dispose();
     coberturaController.dispose();
     observacionesController.dispose();
     responsableController.dispose();
@@ -79,15 +82,36 @@ class _HistoriaClinicaAdultPSState
     final hcState = ref.watch(hcPsAdultFormProvider);
     final hcNotifier = ref.read(hcPsAdultFormProvider.notifier);
 
-    // Actualizar los controladores con los valores del estado
+    // Agregar listener para mensajes de éxito y error
+    ref.listen<HcFormAdultState?>(hcPsAdultFormProvider, (previous, next) {
+      if (!_hasShownMessage) {
+        if (next!.successMessage.isNotEmpty) {
+          _hasShownMessage = true;
+          _showSnackBar(context, next.successMessage, true);
+          Future.delayed(const Duration(seconds: 2), () {
+            ref.read(hcPsAdultFormProvider.notifier).clearSuccessMessage();
+            _hasShownMessage = false;
+          });
+        } else if (next.errorMessage.isNotEmpty) {
+          _hasShownMessage = true;
+          _showSnackBar(context, next.errorMessage, false);
+          Future.delayed(const Duration(seconds: 2), () {
+            ref.read(hcPsAdultFormProvider.notifier).clearErrorMessage();
+            _hasShownMessage = false;
+          });
+        }
+      }
+    });
+
+    // Actualizar controladores con los valores del estado
     cedulaController.text = hcState.cedula;
+    fechaEvaluacionController.text = hcState.createHcPsAdult.fechaEvalucion;
     nombreCompletoController.text = hcState.createHcPsAdult.nombreCompleto;
     fechaNacimientoController.text = hcState.createHcPsAdult.fechaNacimiento;
     telefonoController.text = hcState.createHcPsAdult.telefono;
     institucionController.text = hcState.createHcPsAdult.institucion;
     direccionController.text = hcState.createHcPsAdult.direccion;
     remisionController.text = hcState.createHcPsAdult.remision;
-    fechaEvaluacionController.text = hcState.createHcPsAdult.fechaEvalucion;
     coberturaController.text = hcState.createHcPsAdult.cobertura;
     observacionesController.text = hcState.createHcPsAdult.observaciones;
     responsableController.text = hcState.createHcPsAdult.responsable;
@@ -102,267 +126,501 @@ class _HistoriaClinicaAdultPSState
     areasIntervencionController.text = hcState.createHcPsAdult.areasIntervecion;
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F8FA),
       appBar: AppBar(
-        title: const Text('Área de Psicología'),
+        backgroundColor: const Color(0xFF1976D2),
+        elevation: 0,
+        title: const Text(
+          'Historia Clínica Psicológica Adultos',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              headerPSWidget(
-                textoDinamico: 'HISTORIA CLÍNICA DE ADULTOS',
+        child: ListView(
+          padding: const EdgeInsets.all(12.0),
+          children: [
+            headerPSWidget(
+                textoDinamico: 'HISTORIA CLÍNICA PSICOLÓGICA ADULTOS'),
+            const SizedBox(height: 20),
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(height: 20),
-              Center(
-                  child: _buildRadioButtonGroup(
-                title: '',
-                options: ['Nuevo', 'Buscar'],
-                selectedValue: hcState.tipo,
-                onChanged: hcNotifier.onTipoChanged,
-              )),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: cedulaController,
-                      onChanged: hcNotifier.onCedulaChanged,
-                      decoration:
-                          const InputDecoration(labelText: 'Buscar por cédula'),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Tipo de registro',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1976D2),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (hcState.tipo == 'Nuevo') {
-                        hcNotifier.getPacienteByDni(hcState.cedula);
-                      } else {
-                        hcNotifier.onSearchHcPsAdult(hcState.cedula);
-                      }
-                    },
-                    child: const Text('Buscar'),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+
+                    // Radio buttons
+                    Row(
+                      children: [
+                        Row(
+                          children: [
+                            Radio<String>(
+                              value: 'Nuevo',
+                              groupValue: hcState.tipo,
+                              onChanged: (value) =>
+                                  hcNotifier.onTipoChanged(value ?? 'Nuevo'),
+                              activeColor: const Color(0xFF1976D2),
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            const SizedBox(width: 4),
+                            const Text('Nuevo'),
+                          ],
+                        ),
+                        const SizedBox(width: 20),
+                        Row(
+                          children: [
+                            Radio<String>(
+                              value: 'Buscar',
+                              groupValue: hcState.tipo,
+                              onChanged: (value) =>
+                                  hcNotifier.onTipoChanged(value ?? 'Buscar'),
+                              activeColor: const Color(0xFF1976D2),
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            const SizedBox(width: 4),
+                            const Text('Buscar'),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Campo de búsqueda
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: cedulaController,
+                            onChanged: hcNotifier.onCedulaChanged,
+                            decoration: const InputDecoration(
+                              labelText: 'Buscar por cédula',
+                              labelStyle: TextStyle(color: Color(0xFF1976D2)),
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(12)),
+                                borderSide:
+                                    BorderSide(color: Color(0xFF1976D2)),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(12)),
+                                borderSide:
+                                    BorderSide(color: Color(0xFF1976D2)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(12)),
+                                borderSide: BorderSide(
+                                    color: Color(0xFF1976D2), width: 2),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        ElevatedButton(
+                          onPressed: () {
+                            if (hcState.tipo == 'Nuevo') {
+                              print(
+                                  '🔹Holaaa Buscando paciente por DNI: ${hcState.cedula}');
+                              hcNotifier.getPacienteByDni(hcState.cedula);
+                            } else {
+                              hcNotifier.onSearchHcPsAdult(hcState.cedula);
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF1976D2),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text('Buscar'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 25),
-              _buildSection('1.- DATOS PERSONALES:'),
-              _buildFormField(
-                label: 'Nombres y Apellidos',
-                controller: nombreCompletoController,
-                onChanged: hcNotifier.setNombreCompleto,
-                validator: (value) => _validateRequired(value),
+            ),
+            const SizedBox(height: 20),
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              _buildFormField(
-                label: 'Fecha de Nacimiento (AAAA-MM-DD)',
-                controller: fechaNacimientoController,
-                onChanged: (value) => hcNotifier.setFechaNacimiento,
-                validator: (value) => _validateDate(value),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '1.- Datos personales',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1976D2),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildFormField(
+                      disabled: true,
+                      controller: nombreCompletoController,
+                      label: 'Nombre completo',
+                      onChanged: hcNotifier.setNombreCompleto,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      disabled: hcState.status == 'Editado' ? true : false,
+                      label: 'Fecha de nacimiento (dd/mm/aaaa)',
+                      controller: fechaNacimientoController,
+                      onChanged: hcNotifier.setFechaNacimiento,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      disabled: hcState.status == 'Editado' ? true : false,
+                      label: 'Teléfono',
+                      controller: telefonoController,
+                      onChanged: hcNotifier.setTelefono,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      disabled: hcState.status == 'Editado' ? true : false,
+                      label: 'Institución',
+                      controller: institucionController,
+                      onChanged: hcNotifier.setInstitucion,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      disabled: hcState.status == 'Editado' ? true : false,
+                      label: 'Dirección',
+                      controller: direccionController,
+                      onChanged: hcNotifier.setDireccion,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      disabled: hcState.status == 'Editado' ? true : false,
+                      label: 'Remisión',
+                      controller: remisionController,
+                      onChanged: hcNotifier.setRemision,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      disabled: true,
+                      label: 'Fecha de evaluación (dd/mm/aaaa)',
+                      controller: fechaEvaluacionController,
+                      onChanged: hcNotifier.setFechaEvaluacion,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      disabled: hcState.status == 'Editado' ? true : false,
+                      label: 'Final de cobertura',
+                      controller: coberturaController,
+                      onChanged: hcNotifier.setCobertura,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      disabled: hcState.status == 'Editado' ? true : false,
+                      label: 'Observaciones',
+                      controller: observacionesController,
+                      onChanged: hcNotifier.setObservaciones,
+                      maxLines: 3,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormField(
+                      disabled: hcState.status == 'Editado' ? true : false,
+                      label: 'Responsable',
+                      controller: responsableController,
+                      onChanged: hcNotifier.setResponsable,
+                    ),
+                  ],
+                ),
               ),
-              _buildFormField(
-                label: 'Teléfono',
-                controller: telefonoController,
-                onChanged: hcNotifier.setTelefono,
-                keyboardType: TextInputType.phone,
-                validator: (value) => _validatePhone(value),
+            ),
+            const SizedBox(height: 20),
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              _buildFormField(
-                label: 'Institución',
-                controller: institucionController,
-                onChanged: hcNotifier.setInstitucion,
-                validator: (value) => _validateRequired(value),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '2.- Motivo de consulta',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1976D2),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildFormField(
+                      label: 'Describa el motivo de la consulta',
+                      controller: motivoConsultaController,
+                      onChanged: hcNotifier.setMotivoConsulta,
+                      maxLines: 3,
+                    ),
+                  ],
+                ),
               ),
-              _buildFormField(
-                label: 'Dirección',
-                controller: direccionController,
-                onChanged: hcNotifier.setDireccion,
-                validator: (value) => _validateRequired(value),
+            ),
+            const SizedBox(height: 20),
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              _buildFormField(
-                label: 'Remisión',
-                controller: remisionController,
-                onChanged: hcNotifier.setRemision,
-                validator: (value) => _validateRequired(value),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '3.- Desencadenantes del motivo de consulta',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1976D2),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildFormField(
+                      label: 'Describa los desencadenantes',
+                      controller: desencadenantesController,
+                      onChanged: hcNotifier.setDesencadenantesMotivoConsulta,
+                      maxLines: 3,
+                    ),
+                  ],
+                ),
               ),
-              _buildFormField(
-                label: 'Fecha de Evaluación (AAAA-MM-DD)',
-                controller: fechaEvaluacionController,
-                onChanged: (value) => hcNotifier.setFechaEvaluacion,
-                validator: (value) => _validateDate(value),
+            ),
+            const SizedBox(height: 20),
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              _buildFormField(
-                label: 'Final de Cobertura',
-                controller: coberturaController,
-                onChanged: hcNotifier.setCobertura,
-                validator: (value) => _validateRequired(value),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '4.- Antecedentes familiares',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1976D2),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildFormField(
+                      label: 'Describa los antecedentes familiares',
+                      controller: antecedentesFamiliaresController,
+                      onChanged: hcNotifier.setAntecedenteFamiliares,
+                      maxLines: 4,
+                    ),
+                  ],
+                ),
               ),
-              _buildFormField(
-                label: 'Observaciones',
-                controller: observacionesController,
-                onChanged: hcNotifier.setObservaciones,
-                maxLines: 3,
-                validator: (value) => _validateRequired(value),
+            ),
+            const SizedBox(height: 20),
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              _buildFormField(
-                label: 'Responsable',
-                controller: responsableController,
-                onChanged: hcNotifier.setResponsable,
-                validator: (value) => _validateRequired(value),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '5.- Pruebas aplicadas',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1976D2),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildFormField(
+                      label: 'Describa las pruebas aplicadas',
+                      controller: pruebasAplicadasController,
+                      onChanged: hcNotifier.setPruebasAplicadas,
+                      maxLines: 3,
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 20),
-              _buildSection('2.- MOTIVO DE CONSULTA:'),
-              _buildFormField(
-                label: 'Describa el motivo de la consulta',
-                controller: motivoConsultaController,
-                onChanged: hcNotifier.setMotivoConsulta,
-                maxLines: 3,
-                validator: (value) => _validateRequired(value),
+            ),
+            const SizedBox(height: 20),
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(height: 20),
-              _buildSection('3.- DESENCADENANTES DE MOTIVO DE CONSULTA:'),
-              _buildFormField(
-                label: 'Describa los desencadenantes',
-                controller: desencadenantesController,
-                onChanged: hcNotifier.setDesencadenantesMotivoConsulta,
-                maxLines: 3,
-                validator: (value) => _validateRequired(value),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '6.- Impresión diagnóstica',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1976D2),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildFormField(
+                      label: 'Describa la impresión diagnóstica',
+                      controller: impresionDiagnosticaController,
+                      onChanged: hcNotifier.setImpresionDiagnostica,
+                      maxLines: 3,
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 20),
-              _buildSection('4.- ANTECEDENTES FAMILIARES:'),
-              _buildFormField(
-                label: 'Describa los antecedentes familiares',
-                controller: antecedentesFamiliaresController,
-                onChanged: hcNotifier.setAntecedenteFamiliares,
-                maxLines: 4,
-                validator: (value) => _validateRequired(value),
+            ),
+            const SizedBox(height: 20),
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(height: 20),
-              _buildSection('5.- PRUEBAS APLICADAS:'),
-              _buildFormField(
-                label: 'Describa las pruebas aplicadas',
-                controller: pruebasAplicadasController,
-                onChanged: hcNotifier.setPruebasAplicadas,
-                maxLines: 3,
-                validator: (value) => _validateRequired(value),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '7.- Áreas de intervención',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1976D2),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildFormField(
+                      label: 'Describa las áreas de intervención',
+                      controller: areasIntervencionController,
+                      onChanged: hcNotifier.setAreasIntervencion,
+                      maxLines: 3,
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 20),
-              _buildSection('6.- IMPRESIÓN DIAGNÓSTICA:'),
-              _buildFormField(
-                label: 'Describa la impresión diagnóstica',
-                controller: impresionDiagnosticaController,
-                onChanged: hcNotifier.setImpresionDiagnostica,
-                maxLines: 3,
-                validator: (value) => _validateRequired(value),
-              ),
-              const SizedBox(height: 20),
-              _buildSection('7.- ÁREAS DE INTERVENCIÓN:'),
-              _buildFormField(
-                label: 'Describa las áreas de intervención',
-                controller: areasIntervencionController,
-                onChanged: hcNotifier.setAreasIntervencion,
-                maxLines: 3,
-                validator: (value) => _validateRequired(value),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 20),
+            const GenerarPdfButton(),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          if (_formKey.currentState!.validate()) {
-            if (hcState.tipo == 'Nuevo') {
-              hcNotifier.onCreateHcPsAdult(context);
-            } else if (hcState.tipo == 'Buscar') {
-              hcNotifier.onUpdateHcPsAdult(context);
-            }
+          if (hcState.tipo == 'Nuevo') {
+            hcNotifier.onCreateHcPsAdult(context);
+          } else {
+            hcNotifier.onUpdateHcPsAdult(context);
           }
         },
+        backgroundColor: const Color(0xFF1976D2),
         child: const Icon(Icons.save),
       ),
     );
   }
 
-  // 🔹 Sección con título estilizado
-  Widget _buildSection(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
-      child: Text(title,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0)),
-    );
-  }
-
-  Widget _buildRadioButtonGroup({
-    required String title,
-    required List<String> options,
-    required String selectedValue,
-    required Function(String) onChanged,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8.0),
-          child: Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
-          ),
-        ),
-        Wrap(
-          spacing: 20.0,
-          runSpacing: 10.0,
-          alignment: WrapAlignment.start,
-          children: options.map((option) {
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Radio(
-                  value: option,
-                  groupValue: selectedValue,
-                  onChanged: (value) => onChanged(value as String),
-                ),
-                Text(option),
-              ],
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
-  // 🔹 Campo de texto conectado al estado
   Widget _buildFormField({
     required String label,
     required TextEditingController controller,
     required Function(String) onChanged,
+    bool disabled = false,
     int maxLines = 1,
-    TextInputType keyboardType = TextInputType.text,
-    String? Function(String?)? validator,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        controller: controller,
-        onChanged: onChanged,
-        maxLines: maxLines,
-        keyboardType: keyboardType,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(),
+    return TextFormField(
+      controller: controller,
+      enabled: !disabled,
+      onChanged: disabled
+          ? null
+          : onChanged, // Solo pasa el callback si está habilitado
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Color(0xFF1976D2)),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF1976D2)),
         ),
-        validator: validator,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF1976D2)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 2),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+      style: const TextStyle(
+        fontSize: 16,
+        color: Colors.black87,
       ),
     );
   }
 
-  String? _validateRequired(String? value) =>
-      (value == null || value.isEmpty) ? 'Este campo es obligatorio' : null;
-
-  String? _validateDate(String? value) =>
-      DateTime.tryParse(value ?? '') == null ? 'Fecha inválida' : null;
-
-  String? _validatePhone(String? value) =>
-      (value == null || value.length < 7) ? 'Número inválido' : null;
+  void _showSnackBar(BuildContext context, String message, bool isSuccess) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor:
+            isSuccess ? Colors.green.shade300 : Colors.red.shade300,
+        behavior: SnackBarBehavior.fixed,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
 }

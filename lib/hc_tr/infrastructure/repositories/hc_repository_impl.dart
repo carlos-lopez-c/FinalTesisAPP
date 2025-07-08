@@ -85,4 +85,9 @@ class HcRepositoryImpl implements HcRepository {
   Future<bool> existHcVoice(String cedula) {
     return datasource.existHcVoice(cedula);
   }
+
+  @override
+  Future<bool> existHcPsAdult(String cedula) {
+    return datasource.existHcPsAdult(cedula);
+  }
 }

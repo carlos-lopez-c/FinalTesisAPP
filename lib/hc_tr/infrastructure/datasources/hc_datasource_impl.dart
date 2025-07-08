@@ -483,4 +483,41 @@ class HcDatasourceImpl implements HcDatasource {
       throw FirebaseErrorHandler.handleGenericException(e);
     }
   }
+
+  @override
+  Future<bool> existHcPsAdult(String cedula) async {
+    try {
+      // 1. Buscar al paciente por su DNI
+      final pacientesSnapshot = await firestore
+          .collection('patients') // Colección de pacientes
+          .where('dni', isEqualTo: cedula) // Filtra por DNI
+          .limit(1) // Limita a 1 resultado (asumimos que el DNI es único)
+          .get();
+
+      if (pacientesSnapshot.docs.isEmpty) {
+        return false; // No se encontró el paciente
+      }
+
+      // Obtener el ID del paciente
+      final pacienteId = pacientesSnapshot.docs.first.id;
+
+      // 2. Buscar la historia clínica por el ID del paciente
+      final hcSnapshot = await firestore
+          .collection(
+              'HcPsAdult') // Colección de historias clínicas de psicología
+          .where('patientId',
+              isEqualTo: pacienteId) // Filtra por ID del paciente
+          .limit(
+              1) // Limita a 1 resultado (asumimos que hay una sola HC por paciente)
+          .get();
+
+      return hcSnapshot.docs.isNotEmpty; // Retorna true si se encontró la HC
+    } on FirebaseException catch (e) {
+      throw FirebaseErrorHandler.handleFirebaseException(e);
+    } on PlatformException catch (e) {
+      throw FirebaseErrorHandler.handlePlatformException(e);
+    } catch (e) {
+      throw FirebaseErrorHandler.handleGenericException(e);
+    }
+  }
 }

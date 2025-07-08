@@ -54,6 +54,17 @@ class HcNotifier extends StateNotifier<HCState> {
       state = state.copyWith(loading: false);
     }
   }
+
+  Future<bool> existHcPsAdult(String cedula) async {
+    try {
+      final exists = await _hcRepository.existHcPsAdult(cedula);
+      return exists;
+    } on CustomError catch (e) {
+      print('🔴 Error al verificar existencia: ${e.message}');
+      state = state.copyWith(errorMessage: e.message);
+      return false;
+    }
+  }
 }
 
 class HCState {

@@ -26,8 +26,53 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
     }
   }
 
-  /// 🔹 Método auxiliar para enriquecer las citas con el nombre de la especialidad
+  /// 🔹 Método auxiliar para enriquecer las citas con el nombre de la especialidad (optimizado)
   Future<List<Appointments>> _enrichAppointmentsWithSpecialtyName(
+      List<Appointments> appointments) async {
+    if (appointments.isEmpty) return appointments;
+
+    // Obtener IDs únicos de especialidades que necesitan ser enriquecidas
+    final specialtyIds = appointments
+        .where((appointment) => 
+            appointment.specialtyTherapyId != null && 
+            appointment.specialtyTherapy.isEmpty)
+        .map((appointment) => appointment.specialtyTherapyId!)
+        .toSet();
+
+    if (specialtyIds.isEmpty) return appointments;
+
+    // Hacer una sola consulta batch para todas las especialidades
+    final specialtyNamesMap = <String, String>{};
+    
+    try {
+      final specialtyDocs = await _firestore
+          .collection('specialtyTherapy')
+          .where(FieldPath.documentId, whereIn: specialtyIds.toList())
+          .get();
+
+      for (final doc in specialtyDocs.docs) {
+        specialtyNamesMap[doc.id] = doc.data()['name'] ?? 'Especialidad no encontrada';
+      }
+    } catch (e) {
+      print('Error al obtener especialidades en batch: $e');
+      // Fallback al método original si falla el batch
+      return _enrichAppointmentsWithSpecialtyNameFallback(appointments);
+    }
+
+    // Enriquecer las citas con los nombres obtenidos
+    return appointments.map((appointment) {
+      if (appointment.specialtyTherapyId != null &&
+          appointment.specialtyTherapy.isEmpty) {
+        final specialtyName = specialtyNamesMap[appointment.specialtyTherapyId!] ?? 
+                              'Especialidad no encontrada';
+        return appointment.copyWith(specialtyTherapy: specialtyName);
+      }
+      return appointment;
+    }).toList();
+  }
+
+  /// 🔹 Método de fallback para enriquecimiento individual
+  Future<List<Appointments>> _enrichAppointmentsWithSpecialtyNameFallback(
       List<Appointments> appointments) async {
     final enrichedAppointments = <Appointments>[];
 
@@ -91,11 +136,12 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
   Future<List<Appointments>> getAppointmentsByStatus(
       String status, String specialtyTherapyId) async {
     try {
+      final nowAsString = DateFormat('yyyy-MM-dd').format(DateTime.now());
       QuerySnapshot querySnapshot = await _firestore
           .collection('appointments')
           .where('status', isEqualTo: status)
           .where('specialtyTherapyId', isEqualTo: specialtyTherapyId)
-          .where('date', isGreaterThan: DateTime.now())
+          .where('date', isGreaterThanOrEqualTo: nowAsString)
           .get();
 
       final appointments = querySnapshot.docs.map((doc) {
@@ -126,7 +172,7 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
           .where('date', isEqualTo: formattedDate)
           .where('doctorID', isEqualTo: medicID)
           .where('specialtyTherapyId', isEqualTo: specialtyTherapyId)
-          .where('date', isGreaterThan: nowAsString)
+          .where('date', isGreaterThanOrEqualTo: nowAsString)
           .get();
 
       final appointments = querySnapshot.docs.map((doc) {
@@ -246,7 +292,7 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
           .where('status', isEqualTo: status)
           .where('doctorID', isEqualTo: medicID)
           .where('specialtyTherapyId', isEqualTo: specialtyTherapyId)
-          .where('date', isGreaterThan: nowAsString)
+          .where('date', isGreaterThanOrEqualTo: nowAsString)
           .get();
       print('nowAsString: $nowAsString');
       final appointments = querySnapshot.docs.map((doc) {
@@ -296,11 +342,12 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
   @override
   Stream<List<Appointments>> watchAppointmentsByStatus(
       String status, String specialtyTherapyId) {
+    final nowAsString = DateFormat('yyyy-MM-dd').format(DateTime.now());
     final baseStream = _firestore
         .collection('appointments')
         .where('status', isEqualTo: status)
         .where('specialtyTherapyId', isEqualTo: specialtyTherapyId)
-        .where('date', isGreaterThan: DateTime.now())
+        .where('date', isGreaterThanOrEqualTo: nowAsString)
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) {
               final data = doc.data() as Map<String, dynamic>;
@@ -316,12 +363,13 @@ class AppointmentDatasourceImpl implements AppointmentDatasource {
   @override
   Stream<List<Appointments>> watchAppointmentsByStatusAndMedicID(
       String status, String medicID, String specialtyTherapyId) {
+    final nowAsString = DateFormat('yyyy-MM-dd').format(DateTime.now());
     final baseStream = _firestore
         .collection('appointments')
         .where('status', isEqualTo: status)
         .where('doctorID', isEqualTo: medicID)
         .where('specialtyTherapyId', isEqualTo: specialtyTherapyId)
-        .where('date', isGreaterThan: DateTime.now())
+        .where('date', isGreaterThanOrEqualTo: nowAsString)
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) {
               final data = doc.data() as Map<String, dynamic>;

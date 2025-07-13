@@ -7,6 +7,7 @@ import 'package:h_c_1/hc_tr/domain/entities/hc_general/hc_general_entity.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_voice/create_hc_voice_entity.dart';
 import 'package:h_c_1/shared/infrastructure/errors/custom_error.dart';
 import 'package:h_c_1/shared/infrastructure/errors/handle_error.dart';
+import 'package:h_c_1/hc_ps/domain/entities/hc_ps_nino/create_hc_nino.dart';
 
 class HcDatasourceImpl implements HcDatasource {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -518,6 +519,88 @@ class HcDatasourceImpl implements HcDatasource {
       throw FirebaseErrorHandler.handlePlatformException(e);
     } catch (e) {
       throw FirebaseErrorHandler.handleGenericException(e);
+    }
+  }
+
+  @override
+  Future<void> createHcPsNino(CreateHcPsNino hc) async {
+    try {
+      await firestore.collection('HcPsNino').add(hc.toJson());
+      print("Historia clínica de niño guardada en Firestore");
+    } catch (e) {
+      print('Error al crear la historia clínica de niño: $e');
+      throw CustomError('Error al crear la historia clínica de niño');
+    }
+  }
+
+  @override
+  Future<CreateHcPsNino> getHcPsNino(String cedula) async {
+    try {
+      final pacientesSnapshot = await firestore
+          .collection('patients')
+          .where('dni', isEqualTo: cedula)
+          .limit(1)
+          .get();
+      if (pacientesSnapshot.docs.isEmpty) {
+        throw CustomError('No se encontró un paciente con el DNI proporcionado');
+      }
+      final pacienteId = pacientesSnapshot.docs.first.id;
+      final hcSnapshot = await firestore
+          .collection('HcPsNino')
+          .where('patientId', isEqualTo: pacienteId)
+          .limit(1)
+          .get();
+      if (hcSnapshot.docs.isEmpty) {
+        throw CustomError('No se encontró una historia clínica para este paciente');
+      }
+      final hcData = hcSnapshot.docs.first.data();
+      final hcId = hcSnapshot.docs.first.id;
+      return CreateHcPsNino.fromJson(hcData)..id = hcId;
+    } catch (e) {
+      print('Error al obtener la historia clínica de niño: $e');
+      throw CustomError('Error al obtener la historia clínica de niño');
+    }
+  }
+
+  @override
+  Future<void> updateHcPsNino(CreateHcPsNino hc) async {
+    try {
+      if (hc.id == null || hc.id!.isEmpty) {
+        throw CustomError('El ID del documento es necesario para actualizar');
+      }
+      final hcData = hc.toJson();
+      await firestore
+          .collection('HcPsNino')
+          .doc(hc.id)
+          .update(hcData);
+      print('Historia clínica de niño actualizada correctamente');
+    } catch (e) {
+      print('Error al actualizar la historia clínica de niño: $e');
+      throw CustomError('Error al actualizar la historia clínica de niño');
+    }
+  }
+
+  @override
+  Future<bool> existHcPsNino(String cedula) async {
+    try {
+      final pacientesSnapshot = await firestore
+          .collection('patients')
+          .where('dni', isEqualTo: cedula)
+          .limit(1)
+          .get();
+      if (pacientesSnapshot.docs.isEmpty) {
+        return false;
+      }
+      final pacienteId = pacientesSnapshot.docs.first.id;
+      final hcSnapshot = await firestore
+          .collection('HcPsNino')
+          .where('patientId', isEqualTo: pacienteId)
+          .limit(1)
+          .get();
+      return hcSnapshot.docs.isNotEmpty;
+    } catch (e) {
+      print('Error al verificar existencia de historia clínica de niño: $e');
+      return false;
     }
   }
 }

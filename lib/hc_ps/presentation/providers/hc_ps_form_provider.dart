@@ -5,6 +5,7 @@ import 'package:h_c_1/hc_ps/presentation/providers/hc_provider.dart';
 import 'package:h_c_1/hc_ps/presentation/utils/HistoriaClinicaPsicologicaPdfTemplate.dart';
 import 'package:h_c_1/patient/domain/repositories/patient_repository.dart';
 import 'package:h_c_1/patient/infrastructure/repositories/patient_repository_impl.dart';
+import 'dart:io';
 
 // 📌 Estado inicial del formulario
 final initialPsAdult = CreateHcPsAdult(
@@ -140,8 +141,24 @@ class HcPsAdultFormNotifier extends StateNotifier<HcFormAdultState> {
       await onCallbackHcPsAdult(state.createHcPsAdult);
       final datos = state.createHcPsAdult.toJson();
       print('🔹 Datos para PDF: $datos');
-      await HistoriaClinicaPsicologicaPdfTemplate.guardarYMostrarPdf(
-          datos, context, state.cedula);
+      await HistoriaClinicaPsicologicaPdfTemplate.generarPdfPlantillaAdulto(
+              datos)
+          .then((pdfBytes) async {
+        final dir = Directory('/storage/emulated/0/Documents');
+        if (!await dir.exists()) {
+          await dir.create(recursive: true);
+        }
+        final filePath =
+            '${dir.path}/AreaPsicologia_historiaClinicaAdultos_${state.cedula}.pdf';
+        final file = File(filePath);
+        await file.writeAsBytes(pdfBytes);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('PDF guardado en: $filePath'),
+            duration: const Duration(seconds: 5),
+          ));
+        }
+      });
 
       // Limpiar campos
       state = state.copyWith(
@@ -167,8 +184,24 @@ class HcPsAdultFormNotifier extends StateNotifier<HcFormAdultState> {
       await onCallbackHcPsAdultEdit(state.createHcPsAdult);
       final datos = state.createHcPsAdult.toJson();
       print('🔹 Datos para PDF: $datos');
-      await HistoriaClinicaPsicologicaPdfTemplate.guardarYMostrarPdf(
-          datos, context, state.cedula);
+      await HistoriaClinicaPsicologicaPdfTemplate.generarPdfPlantillaAdulto(
+              datos)
+          .then((pdfBytes) async {
+        final dir = Directory('/storage/emulated/0/Documents');
+        if (!await dir.exists()) {
+          await dir.create(recursive: true);
+        }
+        final filePath =
+            '${dir.path}/AreaPsicologia_historiaClinicaAdultos_${state.cedula}.pdf';
+        final file = File(filePath);
+        await file.writeAsBytes(pdfBytes);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('PDF guardado en: $filePath'),
+            duration: const Duration(seconds: 5),
+          ));
+        }
+      });
 
       // Limpiar campos
       state = state.copyWith(
@@ -240,6 +273,11 @@ class HcPsAdultFormNotifier extends StateNotifier<HcFormAdultState> {
   void setDireccion(String value) {
     state = state.copyWith(
         createHcPsAdult: state.createHcPsAdult.copyWith(direccion: value));
+  }
+
+  void setEdad(String value) {
+    state = state.copyWith(
+        createHcPsAdult: state.createHcPsAdult.copyWith(edad: value));
   }
 
   void setEstructuraFamiliar(String value) {
@@ -316,8 +354,6 @@ class HcPsAdultFormNotifier extends StateNotifier<HcFormAdultState> {
         );
         return;
       }
-
-      // 🔹 VALIDACIÓN: Verificar si ya existe una historia clínica para este paciente
       if (state.tipo == 'Nuevo') {
         final existHc = await onCallbackExistHcPsAdult(dni);
         if (existHc) {
@@ -330,19 +366,21 @@ class HcPsAdultFormNotifier extends StateNotifier<HcFormAdultState> {
           return;
         }
       }
-
       state = state.copyWith(loading: true);
       final paciente = await patientRepository.getPatientByDni(dni);
-
-      // Formatear la fecha de nacimiento correctamente
       final fechaNacimiento =
           '${paciente.birthdate.year.toString().padLeft(4, '0')}-${paciente.birthdate.month.toString().padLeft(2, '0')}-${paciente.birthdate.day.toString().padLeft(2, '0')}';
-
-      // Obtener la fecha actual para la evaluación
       final now = DateTime.now();
       final fechaEvaluacion =
           '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-
+      // Calcular edad
+      int age = now.year - paciente.birthdate.year;
+      if (now.month < paciente.birthdate.month ||
+          (now.month == paciente.birthdate.month &&
+              now.day < paciente.birthdate.day)) {
+        age--;
+      }
+      final edad = age.toString();
       state = state.copyWith(
         loading: false,
         cedula: dni,
@@ -351,6 +389,7 @@ class HcPsAdultFormNotifier extends StateNotifier<HcFormAdultState> {
           nombreCompleto: '${paciente.firstname} ${paciente.lastname}',
           fechaNacimiento: fechaNacimiento,
           fechaEvalucion: fechaEvaluacion,
+          edad: edad,
         ),
         successMessage: 'Paciente encontrado correctamente',
         errorMessage: '',

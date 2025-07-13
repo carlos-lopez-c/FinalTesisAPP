@@ -19,7 +19,7 @@ class HistoriaClinicaPsicologicaPdfTemplate {
         await dir.create(recursive: true);
       }
       final filePath =
-          '${dir.path}/AreaPsicologia_historiaClinicaAdultos_$cedula.pdf';
+          '${dir.path}/AreaPsicologia_historiaClinicaNinos_$cedula.pdf';
       final file = File(filePath);
       await file.writeAsBytes(pdfBytes);
 
@@ -67,14 +67,15 @@ class HistoriaClinicaPsicologicaPdfTemplate {
         margin: const pw.EdgeInsets.all(20),
         build: (context) => [
           // ENCABEZADO SOLO EN LA PRIMERA PÁGINA
-          _headerG("", logoImage: pdfImage),
+          _headerG("HISTORIA CLÍNICA DE NIÑOS - ÁREA DE PSICOLOGÍA",
+              logoImage: pdfImage),
           pw.SizedBox(height: 15),
-          _header("HISTORIA CLÍNICA PSICOLÓGICA ADULTOS"),
+          _header("HISTORIA CLÍNICA DE NIÑOS - ÁREA DE PSICOLOGÍA"),
           pw.SizedBox(height: 15),
 
           // DATOS DE IDENTIFICACIÓN
           _section("DATOS DE IDENTIFICACIÓN", [
-            "Fecha de evaluación: ${_formatDate(datos['fechaEvalucion'])}",
+            "Fecha de evaluación: " + _formatDate(datos['fechaEvaluacion']),
             "Nombre completo: ${datos['nombreCompleto'] ?? ''}",
             "Fecha de nacimiento: ${_formatDate(datos['fechaNacimiento'])}",
             "Edad: $edad",
@@ -84,47 +85,120 @@ class HistoriaClinicaPsicologicaPdfTemplate {
             "Remisión: ${datos['remision'] ?? ''}",
             "Final de cobertura: ${datos['cobertura'] ?? ''}",
             "Responsable: ${datos['responsable'] ?? ''}",
-            // "Estructura familiar: ${datos['estructuraFamiliar'] ?? ''}",
-            // "Curso: ${datos['curso'] ?? ''}",
           ]),
 
-          // OBSERVACIONES
-          _section(
-              "OBSERVACIONES", [datos['observaciones'] ?? 'Sin observaciones']),
-
-          // MOTIVO DE CONSULTA
-          _section("MOTIVO DE CONSULTA",
+          // Sección 2: Motivo de consulta
+          _section("2. MOTIVO DE CONSULTA",
               [datos['motivoConsulta'] ?? 'No especificado']),
 
-          // DESENCADENANTES
-          _section("DESENCADENANTES DEL MOTIVO DE CONSULTA",
+          // Sección 3: Desencadenantes de motivo de consulta
+          _section("3. DESENCADENANTES DE MOTIVO DE CONSULTA",
               [datos['desencadenantesMotivoConsulta'] ?? 'No especificado']),
 
-          // ANTECEDENTES FAMILIARES
-          _section("ANTECEDENTES FAMILIARES",
-              [datos['antecedenteFamiliares'] ?? 'No especificado']),
-
-          // PRUEBAS APLICADAS
-          _section("PRUEBAS APLICADAS",
-              [datos['pruebasAplicadas'] ?? 'No especificado']),
-
-          // IMPRESIÓN DIAGNÓSTICA
-          _section("IMPRESIÓN DIAGNÓSTICA",
-              [datos['impresionDiagnostica'] ?? 'No especificado']),
-
-          // ÁREAS DE INTERVENCIÓN
-          _section("ÁREAS DE INTERVENCIÓN",
-              [datos['areasIntervecion'] ?? 'No especificado']),
-
-          // INFORMACIÓN ADICIONAL
-          _section("INFORMACIÓN ADICIONAL", [
-            "Fecha de creación: ${_formatDate(datos['fechaCreacion'])}",
-            "ID del paciente: ${datos['patientId'] ?? ''}",
+          // Sección 4: Antecedentes familiares (campos amplios uno debajo del otro)
+          _section("4. ANTECEDENTES FAMILIARES", [
+            "Datos de embarazo y parto: ${datos['datosEmbarazoParto'] ?? ''}",
+            "Desarrollo psicomotor: ${datos['datosPsicomotor'] ?? ''}",
+            "Desarrollo del lenguaje: ${datos['desarrolloLenguaje'] ?? ''}",
+            "Desarrollo intelectual: ${datos['desarrolloIntelectual'] ?? ''}",
+            "Desarrollo socio-afectivo: ${datos['desarrolloSocioAfectivo'] ?? ''}",
           ]),
+
+          // Sección 5: Antecedentes y estructura familiar
+          _section("5. ANTECEDENTES Y ESTRUCTURA FAMILIAR",
+              [datos['estructuraFamiliar'] ?? '']),
+
+          // Sección 6: Pruebas aplicadas
+          _section("6. PRUEBAS APLICADAS", [datos['pruebasAplicadas'] ?? '']),
+
+          // Sección 7: Impresión diagnóstica
+          _section("7. IMPRESIÓN DIAGNÓSTICA",
+              [datos['impresionDiagnostica'] ?? '']),
+
+          // Sección 8: Áreas de intervención
+          _section(
+              "8. ÁREAS DE INTERVENCIÓN", [datos['areasIntervencion'] ?? '']),
         ],
       ),
     );
 
+    return pdf.save();
+  }
+
+  static Future<Uint8List> generarPdfPlantillaAdulto(
+      Map<String, dynamic> datos) async {
+    final pdf = pw.Document();
+    final theme = pw.ThemeData.withFont(
+      base: pw.Font.helvetica(),
+      bold: pw.Font.helveticaBold(),
+    );
+
+    // Cargar la imagen
+    final ByteData imageData =
+        await rootBundle.load('assets/imagenes/san-miguel.png');
+    final Uint8List imageBytes = imageData.buffer.asUint8List();
+    final pdfImage = pw.MemoryImage(imageBytes);
+
+    // Calcular edad
+    final edad = datos['edad'] ?? _calcularEdad(datos['fechaNacimiento']);
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        theme: theme,
+        margin: const pw.EdgeInsets.all(20),
+        build: (context) => [
+          _headerG("HISTORIA CLÍNICA DE ADULTOS - ÁREA DE PSICOLOGÍA",
+              logoImage: pdfImage),
+          pw.SizedBox(height: 15),
+          _header("HISTORIA CLÍNICA DE ADULTOS - ÁREA DE PSICOLOGÍA"),
+          pw.SizedBox(height: 15),
+
+          // DATOS DE IDENTIFICACIÓN
+          _section("DATOS DE IDENTIFICACIÓN", [
+            "Fecha de evaluación: " +
+                _formatDate(
+                    datos['fechaEvalucion'] ?? datos['fechaEvaluacion']),
+            "Nombre completo: ${datos['nombreCompleto'] ?? ''}",
+            "Fecha de nacimiento: ${_formatDate(datos['fechaNacimiento'])}",
+            "Edad: $edad",
+            "Teléfono: ${datos['telefono'] ?? ''}",
+            "Institución: ${datos['institucion'] ?? ''}",
+            "Dirección: ${datos['direccion'] ?? ''}",
+            "Remisión: ${datos['remision'] ?? ''}",
+            "Final de cobertura: ${datos['cobertura'] ?? ''}",
+            "Responsable: ${datos['responsable'] ?? ''}",
+          ]),
+
+          // Sección 2: Motivo de consulta
+          _section("2. MOTIVO DE CONSULTA",
+              [datos['motivoConsulta'] ?? 'No especificado']),
+
+          // Sección 3: Desencadenantes de motivo de consulta
+          _section("3. DESENCADENANTES DE MOTIVO DE CONSULTA",
+              [datos['desencadenantesMotivoConsulta'] ?? 'No especificado']),
+
+          // Sección 4: Antecedentes familiares (campo amplio)
+          _section("4. ANTECEDENTES FAMILIARES",
+              [datos['antecedenteFamiliares'] ?? '']),
+
+          // Sección 5: Antecedentes y estructura familiar
+          _section("5. ANTECEDENTES Y ESTRUCTURA FAMILIAR",
+              [datos['estructuraFamiliar'] ?? '']),
+
+          // Sección 6: Pruebas aplicadas
+          _section("6. PRUEBAS APLICADAS", [datos['pruebasAplicadas'] ?? '']),
+
+          // Sección 7: Impresión diagnóstica
+          _section("7. IMPRESIÓN DIAGNÓSTICA",
+              [datos['impresionDiagnostica'] ?? '']),
+
+          // Sección 8: Áreas de intervención
+          _section(
+              "8. ÁREAS DE INTERVENCIÓN", [datos['areasIntervecion'] ?? '']),
+        ],
+      ),
+    );
     return pdf.save();
   }
 

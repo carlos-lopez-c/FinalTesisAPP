@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:h_c_1/hc_ps/presentation/providers/hc_ps_form_provider.dart';
+import 'package:h_c_1/hc_ps/presentation/providers/hc_ps_form_nino_provider.dart';
 import 'package:h_c_1/hc_ps/presentation/utils/HistoriaClinicaPsicologicaPdfTemplate.dart';
 
-class GenerarPdfButton extends ConsumerWidget {
-  const GenerarPdfButton({super.key});
+class GenerarPdfButtonNino extends ConsumerWidget {
+  const GenerarPdfButtonNino({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hcState = ref.watch(hcPsAdultFormProvider);
+    final hcState = ref.watch(hcPsNinoFormProvider);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: ElevatedButton.icon(
         onPressed: () async {
-          final json = ref.read(hcPsAdultFormProvider).createHcPsAdult.toJson();
+          final json = ref.read(hcPsNinoFormProvider).createHcPsNino.toJson();
           await HistoriaClinicaPsicologicaPdfTemplate.guardarYMostrarPdf(
               json, context, "");
         },
@@ -36,29 +36,6 @@ class GenerarPdfButton extends ConsumerWidget {
           ),
         ),
       ),
-    );
-  }
-
-  // Mostrar un diálogo de carga
-  void _mostrarIndicadorCarga(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return Dialog(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Procesando PDF...'),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 }

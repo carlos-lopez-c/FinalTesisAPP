@@ -32,6 +32,8 @@ class _HistoriaClinicaAdultPSState
   late TextEditingController pruebasAplicadasController;
   late TextEditingController impresionDiagnosticaController;
   late TextEditingController areasIntervencionController;
+  late TextEditingController edadController;
+  late TextEditingController estructuraFamiliarController;
 
   @override
   void initState() {
@@ -53,6 +55,8 @@ class _HistoriaClinicaAdultPSState
     pruebasAplicadasController = TextEditingController();
     impresionDiagnosticaController = TextEditingController();
     areasIntervencionController = TextEditingController();
+    edadController = TextEditingController();
+    estructuraFamiliarController = TextEditingController();
   }
 
   @override
@@ -74,6 +78,8 @@ class _HistoriaClinicaAdultPSState
     pruebasAplicadasController.dispose();
     impresionDiagnosticaController.dispose();
     areasIntervencionController.dispose();
+    edadController.dispose();
+    estructuraFamiliarController.dispose();
     super.dispose();
   }
 
@@ -124,6 +130,12 @@ class _HistoriaClinicaAdultPSState
     impresionDiagnosticaController.text =
         hcState.createHcPsAdult.impresionDiagnostica;
     areasIntervencionController.text = hcState.createHcPsAdult.areasIntervecion;
+    edadController.text = hcState.createHcPsAdult.edad ?? '';
+    estructuraFamiliarController.text =
+        hcState.createHcPsAdult.estructuraFamiliar;
+
+    // Determinar si los campos fijos deben ser solo lectura
+    final readOnlyDatosFijos = hcState.tipo == 'Buscar/Editar';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F8FA),
@@ -131,7 +143,7 @@ class _HistoriaClinicaAdultPSState
         backgroundColor: const Color(0xFF1976D2),
         elevation: 0,
         title: const Text(
-          'Historia Clínica Psicológica Adultos',
+          'Historia Clínica de Adultos - Psicología',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -140,411 +152,391 @@ class _HistoriaClinicaAdultPSState
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: Form(
-        child: ListView(
-          padding: const EdgeInsets.all(12.0),
-          children: [
-            headerPSWidget(
-                textoDinamico: 'HISTORIA CLÍNICA PSICOLÓGICA ADULTOS'),
-            const SizedBox(height: 20),
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Tipo de registro',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1976D2),
+      body: ListView(
+        padding: const EdgeInsets.all(16.0),
+        children: [
+          headerPSWidget(
+            textoDinamico: 'HISTORIA CLÍNICA DE ADULTOS - PSICOLOGÍA',
+          ),
+          const SizedBox(height: 20),
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Tipo de Registro',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1976D2),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Radio<String>(
+                        value: 'Nuevo',
+                        groupValue: hcState.tipo,
+                        onChanged: (value) =>
+                            hcNotifier.onTipoChanged(value ?? 'Nuevo'),
+                        activeColor: const Color(0xFF1976D2),
                       ),
+                      const Text('Nuevo', style: TextStyle(fontSize: 16)),
+                      const SizedBox(width: 24),
+                      Radio<String>(
+                        value: 'Buscar/Editar',
+                        groupValue: hcState.tipo,
+                        onChanged: (value) =>
+                            hcNotifier.onTipoChanged(value ?? 'Buscar/Editar'),
+                        activeColor: const Color(0xFF1976D2),
+                      ),
+                      const Text('Buscar/Editar',
+                          style: TextStyle(fontSize: 16)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '1.- DATOS PERSONALES',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1976D2),
                     ),
-                    const SizedBox(height: 12),
-
-                    // Radio buttons
-                    Row(
-                      children: [
-                        Row(
-                          children: [
-                            Radio<String>(
-                              value: 'Nuevo',
-                              groupValue: hcState.tipo,
-                              onChanged: (value) =>
-                                  hcNotifier.onTipoChanged(value ?? 'Nuevo'),
-                              activeColor: const Color(0xFF1976D2),
-                              materialTapTargetSize:
-                                  MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            const SizedBox(width: 4),
-                            const Text('Nuevo'),
-                          ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildFormField(
+                          label: 'Cédula',
+                          controller: cedulaController,
+                          onChanged: hcNotifier.onCedulaChanged,
+                          disabled: false,
                         ),
-                        const SizedBox(width: 20),
-                        Row(
-                          children: [
-                            Radio<String>(
-                              value: 'Buscar',
-                              groupValue: hcState.tipo,
-                              onChanged: (value) =>
-                                  hcNotifier.onTipoChanged(value ?? 'Buscar'),
-                              activeColor: const Color(0xFF1976D2),
-                              materialTapTargetSize:
-                                  MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            const SizedBox(width: 4),
-                            const Text('Buscar'),
-                          ],
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Campo de búsqueda
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: cedulaController,
-                            onChanged: hcNotifier.onCedulaChanged,
-                            decoration: const InputDecoration(
-                              labelText: 'Buscar por cédula',
-                              labelStyle: TextStyle(color: Color(0xFF1976D2)),
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(12)),
-                                borderSide:
-                                    BorderSide(color: Color(0xFF1976D2)),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(12)),
-                                borderSide:
-                                    BorderSide(color: Color(0xFF1976D2)),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(12)),
-                                borderSide: BorderSide(
-                                    color: Color(0xFF1976D2), width: 2),
-                              ),
-                            ),
+                      ),
+                      const SizedBox(width: 12),
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          if (hcState.tipo == 'Nuevo') {
+                            hcNotifier.getPacienteByDni(cedulaController.text);
+                          } else {
+                            hcNotifier.onSearchHcPsAdult(cedulaController.text);
+                          }
+                        },
+                        icon: const Icon(Icons.search),
+                        label: const Text('Buscar'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF1976D2),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () {
-                            if (hcState.tipo == 'Nuevo') {
-                              print(
-                                  '🔹Holaaa Buscando paciente por DNI: ${hcState.cedula}');
-                              hcNotifier.getPacienteByDni(hcState.cedula);
-                            } else {
-                              hcNotifier.onSearchHcPsAdult(hcState.cedula);
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF1976D2),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text('Buscar'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _buildFormField(
+                    label: 'Nombre completo',
+                    controller: nombreCompletoController,
+                    onChanged: hcNotifier.setNombreCompleto,
+                    disabled: readOnlyDatosFijos,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildFormField(
+                          label: 'Fecha de nacimiento (dd/mm/aaaa)',
+                          controller: fechaNacimientoController,
+                          onChanged: hcNotifier.setFechaNacimiento,
+                          disabled: readOnlyDatosFijos,
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '1.- Datos personales',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1976D2),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildFormField(
-                      disabled: true,
-                      controller: nombreCompletoController,
-                      label: 'Nombre completo',
-                      onChanged: hcNotifier.setNombreCompleto,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildFormField(
-                      disabled: hcState.status == 'Editado' ? true : false,
-                      label: 'Fecha de nacimiento (dd/mm/aaaa)',
-                      controller: fechaNacimientoController,
-                      onChanged: hcNotifier.setFechaNacimiento,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildFormField(
-                      disabled: hcState.status == 'Editado' ? true : false,
-                      label: 'Teléfono',
-                      controller: telefonoController,
-                      onChanged: hcNotifier.setTelefono,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildFormField(
-                      disabled: hcState.status == 'Editado' ? true : false,
-                      label: 'Institución',
-                      controller: institucionController,
-                      onChanged: hcNotifier.setInstitucion,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildFormField(
-                      disabled: hcState.status == 'Editado' ? true : false,
-                      label: 'Dirección',
-                      controller: direccionController,
-                      onChanged: hcNotifier.setDireccion,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildFormField(
-                      disabled: hcState.status == 'Editado' ? true : false,
-                      label: 'Remisión',
-                      controller: remisionController,
-                      onChanged: hcNotifier.setRemision,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildFormField(
-                      disabled: true,
-                      label: 'Fecha de evaluación (dd/mm/aaaa)',
-                      controller: fechaEvaluacionController,
-                      onChanged: hcNotifier.setFechaEvaluacion,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildFormField(
-                      disabled: hcState.status == 'Editado' ? true : false,
-                      label: 'Final de cobertura',
-                      controller: coberturaController,
-                      onChanged: hcNotifier.setCobertura,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildFormField(
-                      disabled: hcState.status == 'Editado' ? true : false,
-                      label: 'Observaciones',
-                      controller: observacionesController,
-                      onChanged: hcNotifier.setObservaciones,
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildFormField(
-                      disabled: hcState.status == 'Editado' ? true : false,
-                      label: 'Responsable',
-                      controller: responsableController,
-                      onChanged: hcNotifier.setResponsable,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '2.- Motivo de consulta',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1976D2),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildFormField(
+                          label: 'Edad',
+                          controller: edadController,
+                          onChanged: hcNotifier.setEdad,
+                          disabled: readOnlyDatosFijos,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildFormField(
-                      label: 'Describa el motivo de la consulta',
-                      controller: motivoConsultaController,
-                      onChanged: hcNotifier.setMotivoConsulta,
-                      maxLines: 3,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '3.- Desencadenantes del motivo de consulta',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1976D2),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _buildFormField(
+                    label: 'Teléfono',
+                    controller: telefonoController,
+                    onChanged: hcNotifier.setTelefono,
+                    disabled: false,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildFormField(
+                    label: 'Institución',
+                    controller: institucionController,
+                    onChanged: hcNotifier.setInstitucion,
+                    disabled: false,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildFormField(
+                    label: 'Dirección',
+                    controller: direccionController,
+                    onChanged: hcNotifier.setDireccion,
+                    disabled: false,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildFormField(
+                    label: 'Remisión',
+                    controller: remisionController,
+                    onChanged: hcNotifier.setRemision,
+                    disabled: false,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildFormField(
+                          label: 'Fecha de evaluación (dd/mm/aaaa)',
+                          controller: fechaEvaluacionController,
+                          onChanged: hcNotifier.setFechaEvaluacion,
+                          disabled: readOnlyDatosFijos,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildFormField(
-                      label: 'Describa los desencadenantes',
-                      controller: desencadenantesController,
-                      onChanged: hcNotifier.setDesencadenantesMotivoConsulta,
-                      maxLines: 3,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '4.- Antecedentes familiares',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1976D2),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildFormField(
+                          label: 'Responsable',
+                          controller: responsableController,
+                          onChanged: hcNotifier.setResponsable,
+                          disabled: false,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildFormField(
-                      label: 'Describa los antecedentes familiares',
-                      controller: antecedentesFamiliaresController,
-                      onChanged: hcNotifier.setAntecedenteFamiliares,
-                      maxLines: 4,
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _buildFormField(
+                    label: 'Final de cobertura',
+                    controller: coberturaController,
+                    onChanged: hcNotifier.setCobertura,
+                    disabled: false,
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 20),
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '5.- Pruebas aplicadas',
+          ),
+          const SizedBox(height: 16),
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('2.- Motivo de consulta',
                       style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1976D2),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildFormField(
-                      label: 'Describa las pruebas aplicadas',
-                      controller: pruebasAplicadasController,
-                      onChanged: hcNotifier.setPruebasAplicadas,
-                      maxLines: 3,
-                    ),
-                  ],
-                ),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: Color(0xFF1976D2))),
+                  const SizedBox(height: 8),
+                  _buildFormField(
+                    label: 'Motivo de consulta',
+                    controller: motivoConsultaController,
+                    onChanged: hcNotifier.setMotivoConsulta,
+                    maxLines: 4,
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 20),
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '6.- Impresión diagnóstica',
+          ),
+          const SizedBox(height: 16),
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('3.- Desencadenantes de motivo de consulta',
                       style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1976D2),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildFormField(
-                      label: 'Describa la impresión diagnóstica',
-                      controller: impresionDiagnosticaController,
-                      onChanged: hcNotifier.setImpresionDiagnostica,
-                      maxLines: 3,
-                    ),
-                  ],
-                ),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: Color(0xFF1976D2))),
+                  const SizedBox(height: 8),
+                  _buildFormField(
+                    label: 'Desencadenantes de motivo de consulta',
+                    controller: desencadenantesController,
+                    onChanged: hcNotifier.setDesencadenantesMotivoConsulta,
+                    maxLines: 4,
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 20),
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '7.- Áreas de intervención',
+          ),
+          const SizedBox(height: 16),
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('4.- Antecedentes familiares',
                       style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1976D2),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildFormField(
-                      label: 'Describa las áreas de intervención',
-                      controller: areasIntervencionController,
-                      onChanged: hcNotifier.setAreasIntervencion,
-                      maxLines: 3,
-                    ),
-                  ],
-                ),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: Color(0xFF1976D2))),
+                  const SizedBox(height: 8),
+                  _buildFormField(
+                    label: 'Antecedentes familiares',
+                    controller: antecedentesFamiliaresController,
+                    onChanged: hcNotifier.setAntecedenteFamiliares,
+                    maxLines: 4,
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 20),
-            const GenerarPdfButton(),
-          ],
-        ),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('5.- Antecedentes y estructura familiar',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: Color(0xFF1976D2))),
+                  const SizedBox(height: 8),
+                  _buildFormField(
+                    label: 'Antecedentes y estructura familiar',
+                    controller: estructuraFamiliarController,
+                    onChanged: hcNotifier.setEstructuraFamiliar,
+                    maxLines: 4,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('6.- Pruebas aplicadas',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: Color(0xFF1976D2))),
+                  const SizedBox(height: 8),
+                  _buildFormField(
+                    label: 'Pruebas aplicadas',
+                    controller: pruebasAplicadasController,
+                    onChanged: hcNotifier.setPruebasAplicadas,
+                    maxLines: 4,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('7.- Impresión diagnóstica',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: Color(0xFF1976D2))),
+                  const SizedBox(height: 8),
+                  _buildFormField(
+                    label: 'Impresión diagnóstica',
+                    controller: impresionDiagnosticaController,
+                    onChanged: hcNotifier.setImpresionDiagnostica,
+                    maxLines: 4,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('8.- Áreas de intervención',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: Color(0xFF1976D2))),
+                  const SizedBox(height: 8),
+                  _buildFormField(
+                    label: 'Áreas de intervención',
+                    controller: areasIntervencionController,
+                    onChanged: hcNotifier.setAreasIntervencion,
+                    maxLines: 4,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -606,6 +598,41 @@ class _HistoriaClinicaAdultPSState
         fontSize: 16,
         color: Colors.black87,
       ),
+    );
+  }
+
+  Widget _buildRadioButtonGroup({
+    required String title,
+    required List<String> options,
+    required String selectedValue,
+    required Function(String) onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1976D2),
+          ),
+        ),
+        const SizedBox(height: 8),
+        ...options.map((option) {
+          return RadioListTile(
+            title: Text(option),
+            value: option,
+            groupValue: selectedValue,
+            onChanged: (value) {
+              if (value != null) {
+                onChanged(value);
+              }
+            },
+            activeColor: const Color(0xFF1976D2),
+          );
+        }).toList(),
+      ],
     );
   }
 

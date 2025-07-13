@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_c_1/hc_ps/domain/entities/hc_ps_adult/create_hc_adult.dart';
+import 'package:h_c_1/hc_ps/domain/entities/hc_ps_nino/create_hc_nino.dart';
 import 'package:h_c_1/hc_tr/domain/repositories/hc_repository.dart';
 import 'package:h_c_1/hc_tr/infrastructure/repositories/hc_repository_impl.dart';
 import 'package:h_c_1/shared/infrastructure/errors/custom_error.dart';
@@ -61,6 +62,58 @@ class HcNotifier extends StateNotifier<HCState> {
       return exists;
     } on CustomError catch (e) {
       print('🔴 Error al verificar existencia: ${e.message}');
+      state = state.copyWith(errorMessage: e.message);
+      return false;
+    }
+  }
+
+  Future<void> createHcPsNino(CreateHcPsNino hc) async {
+    print('🟢 Creando historia clínica de niño');
+    state = state.copyWith(loading: true);
+    try {
+      await _hcRepository.createHcPsNino(hc);
+    } on CustomError catch (e) {
+      print('🔴 Error al crear historia clínica de niño:  [31m${e.message}');
+      state = state.copyWith(errorMessage: e.message);
+    } finally {
+      state = state.copyWith(loading: false);
+    }
+  }
+
+  Future<void> updateHcPsNino(CreateHcPsNino hc) async {
+    print('🟢 Actualizando historia clínica de niño');
+    state = state.copyWith(loading: true);
+    try {
+      await _hcRepository.updateHcPsNino(hc);
+    } on CustomError catch (e) {
+      print('🔴 Error al actualizar historia clínica de niño:  [31m${e.message}');
+      state = state.copyWith(errorMessage: e.message);
+    } finally {
+      state = state.copyWith(loading: false);
+    }
+  }
+
+  Future<CreateHcPsNino?> getHcPsNino(String cedula) async {
+    print('🟢 Obteniendo historia clínica de niño');
+    state = state.copyWith(loading: true);
+    try {
+      final hc = await _hcRepository.getHcPsNino(cedula);
+      state = state.copyWith(errorMessage: '');
+      return hc;
+    } on CustomError catch (e) {
+      print('🔴 Error al obtener historia clínica de niño:  [31m${e.message}');
+      state = state.copyWith(errorMessage: e.message);
+    } finally {
+      state = state.copyWith(loading: false);
+    }
+  }
+
+  Future<bool> existHcPsNino(String cedula) async {
+    try {
+      final exists = await _hcRepository.existHcPsNino(cedula);
+      return exists;
+    } on CustomError catch (e) {
+      print('🔴 Error al verificar existencia de historia clínica de niño:  [31m${e.message}');
       state = state.copyWith(errorMessage: e.message);
       return false;
     }

@@ -6,6 +6,7 @@ on:
   pull_request:
     branches:
       - main
+
 jobs:
   build_apk_production:
     name: Generar y Subir APK a producción
@@ -24,10 +25,12 @@ jobs:
           TEST_RESULT="Prueba con SonarCloud aprobada ✅"
           echo "::add-mask::$TEST_RESULT"
           echo "$TEST_RESULT" > /dev/null
+
       - name: Configurar usuario de GitHub Actions
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
       - name: Instalar Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -54,28 +57,34 @@ jobs:
             }
           }
           EOF
+
       - name: Generar APK en modo release
         run: |
           flutter build apk --release --no-tree-shake-icons
-      - name: Preparar archivos para commit
+
+      - name: Crear carpeta APK y mover el APK generado
         run: |
-          mv build/app/outputs/flutter-apk/app-release.apk app-release.apk
-          git add app-release.apk
-          git commit -m "Generado APK de producción"
-      - name: Verificar en qué rama estás y hacer commit de cambios locales
+          mkdir -p APK
+          mv build/app/outputs/flutter-apk/app-release.apk APK/app-release.apk
+
+      - name: Cambiar a la rama Publish
         run: |
-          git status # Muestra el estado de los archivos
-          git add . # Confirma todos los cambios no confirmados
-          git commit -m "Cambios locales antes de pull" || echo "No hay cambios para confirmar"
-      - name: Hacer git pull y actualizar la rama Publish
-        run: |
+          git fetch origin
           git checkout Publish || git checkout -b Publish
-          git pull origin Publish --rebase
-      - name: Subir cambios a la rama Publish
+
+      - name: Hacer pull de la rama Publish
+        run: git pull origin Publish --rebase
+
+      - name: Agregar y commitear el APK
         run: |
-          git push origin Publish
+          git add APK/app-release.apk
+          git commit -m "Subir APK generado automáticamente [skip ci]" || echo "No hay cambios para commitear"
+
+      - name: Subir cambios a la rama Publish
+        run: git push origin Publish
+
       - name: Subir APK como artefacto en GitHub Actions
         uses: actions/upload-artifact@v4
         with:
           name: APK de Producción
-          path: app-release.apk
+          path: APK/app-release.apk

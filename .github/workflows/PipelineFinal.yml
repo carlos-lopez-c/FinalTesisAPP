@@ -62,10 +62,11 @@ jobs:
         run: |
           flutter build apk --release --no-tree-shake-icons
 
-      - name: Crear carpeta APK y mover el APK generado
+      # Guardar el APK en un lugar temporal
+      - name: Guardar APK en temporal
         run: |
-          mkdir -p APK
-          mv build/app/outputs/flutter-apk/app-release.apk APK/app-release.apk
+          mkdir -p /tmp/apk
+          cp build/app/outputs/flutter-apk/app-release.apk /tmp/apk/app-release.apk
 
       - name: Agregar y commitear todos los cambios
         run: |
@@ -80,6 +81,12 @@ jobs:
       - name: Hacer pull de la rama Publish
         run: git pull origin Publish --rebase
 
+      # Recuperar el APK desde el temporal y ponerlo en la carpeta APK/
+      - name: Copiar APK a carpeta APK en Publish
+        run: |
+          mkdir -p APK
+          cp /tmp/apk/app-release.apk APK/app-release.apk
+
       - name: Agregar y commitear el APK (por si hay cambios nuevos)
         run: |
           git add APK/app-release.apk
@@ -92,4 +99,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: APK de Producción
-          path: APK/app-release.apk 
+          path: APK/app-release.apk

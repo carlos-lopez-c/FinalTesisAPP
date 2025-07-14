@@ -1,0 +1,29 @@
+name: SonarQube Scan
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+
+jobs:
+  sonarqube:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Crear configuración de Sonar
+        run: |
+          echo "sonar.projectKey=FinalTesisAPP" >> sonar-project.properties
+          echo "sonar.organization=carlos-lopez-c" >> sonar-project.properties
+          echo "sonar.host.url=https://sonarcloud.io" >> sonar-project.properties
+          echo "sonar.coverage.exclusions=**/*" >> sonar-project.properties
+          echo "sonar.exclusions=**/*.dart,**/test/**,**/lib/generated/**" >> sonar-project.properties
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

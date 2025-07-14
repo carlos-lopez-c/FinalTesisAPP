@@ -5,14 +5,16 @@ import 'package:h_c_1/shared/infrastructure/inputs/email_input.dart';
 import 'package:h_c_1/shared/infrastructure/inputs/inputs.dart';
 
 final formularioProvider =
-    StateNotifierProvider.autoDispose<FormularioNotifier, FormularioState>((ref) {
+    StateNotifierProvider.autoDispose<FormularioNotifier, FormularioState>(
+        (ref) {
   final loginUserCallback = ref.watch(authProvider.notifier).loginUser;
   return FormularioNotifier(loginUserCallback: loginUserCallback);
 });
 
 class FormularioNotifier extends StateNotifier<FormularioState> {
   final Function(String, String) loginUserCallback;
-  FormularioNotifier({required this.loginUserCallback}) : super(const FormularioState());
+  FormularioNotifier({required this.loginUserCallback})
+      : super(const FormularioState());
 
   void onEmailChanged(String value) {
     final newEmail = Email.dirty(value);

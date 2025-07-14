@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:h_c_1/auth/infrastructure/errors/auth_errors.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_adult/eficiencia.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_adult/hc_adult_entity.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_adult/independencia_autonomia.dart';
@@ -11,14 +10,18 @@ import 'package:h_c_1/hc_tr/presentation/providers/hc_provider.dart';
 import 'package:h_c_1/hc_tr/presentation/providers/state/hc_adult_state.dart';
 import 'package:h_c_1/patient/domain/repositories/patient_repository.dart';
 import 'package:h_c_1/patient/infrastructure/repositories/patient_repository_impl.dart';
+import 'package:h_c_1/shared/infrastructure/errors/custom_error.dart';
+import 'package:intl/intl.dart';
+import 'package:h_c_1/hc_tr/presentation/widgets/hc_adult/Template.dart';
 
 final initialAdult = HcAdultState(
     errorMessage: '',
     successMessage: '',
+    status: 'Nuevo',
     createHcAdult: CreateHcAdultEntity(
       patientId: '',
       nombreCompleto: '',
-      fechaEvalucion: '',
+      fechaEvalucion: DateFormat('yyyy-MM-dd').format(DateTime.now()),
       lateralidad: '',
       independenciaAutonomia: IndependenciaAutonomia(
           quePrepara: '',
@@ -55,11 +58,13 @@ final hcAdultFormProvider =
     final createAdultHc = ref.read(hcProvider.notifier).createHcAdult;
     final updateHcAdult = ref.read(hcProvider.notifier).updateHcAdult;
     final getHcAdult = ref.read(hcProvider.notifier).getHcAdult;
+    final existHcAdult = ref.read(hcProvider.notifier).existHcAdult;
     return HcAdultFormNotifier(
         updateHcAdult: updateHcAdult,
         patientRepository: patientRepo,
         createAdultHc: createAdultHc,
-        getHcAdult: getHcAdult);
+        getHcAdult: getHcAdult,
+        existHcAdult: existHcAdult);
   },
 );
 
@@ -68,11 +73,13 @@ class HcAdultFormNotifier extends StateNotifier<HcAdultState> {
   final Function(CreateHcAdultEntity) createAdultHc;
   final Function(String) getHcAdult;
   final Function(CreateHcAdultEntity) updateHcAdult;
+  final Function(String) existHcAdult;
   HcAdultFormNotifier({
     required this.updateHcAdult,
     required this.getHcAdult,
     required this.createAdultHc,
     required this.patientRepository,
+    required this.existHcAdult,
   }) : super(initialAdult);
 
   void onCedulaChanged(String value) {
@@ -83,6 +90,25 @@ class HcAdultFormNotifier extends StateNotifier<HcAdultState> {
 
   void getPacienteByDni(String dni) async {
     try {
+      print('🔹 Buscando paciente por DNI: $dni');
+      if (dni.isEmpty) {
+        state = state.copyWith(
+          errorMessage: 'Error, debe ingresar un número de cédula',
+        );
+        return;
+      }
+
+      // 🔹 VALIDACIÓN: Verificar si ya existe una historia clínica para este paciente
+      final existHc = await existHcAdult(dni);
+      if (existHc) {
+        print('🔹 Historia clínica de adultos ya existe para este paciente');
+        state = state.copyWith(
+          errorMessage:
+              'Historia clínica de adultos ya existe para este paciente',
+        );
+        return;
+      }
+
       print('🔹 Buscando paciente por DNI: $dni');
       state = state.copyWith(loading: true);
       final paciente = await patientRepository.getPatientByDni(dni);
@@ -97,16 +123,22 @@ class HcAdultFormNotifier extends StateNotifier<HcAdultState> {
       // Actualizar controladores con los nuevos valores
       state = state.copyWith();
     } on CustomError catch (e) {
-      state = state.copyWith(
-          loading: false,
-          errorMessage: e.message ?? 'Error al obtener paciente');
+      state = state.copyWith(loading: false, errorMessage: e.message);
     }
   }
 
   void onTipoChanged(String value) {
-    state = state.copyWith(
-      tipo: value,
-    );
+    if (value != state.tipo) {
+      print('🔹 Cambiando tipo de historia clínica a: $value');
+      state = state.copyWith(
+          tipo: value,
+          createHcAdult: initialAdult.createHcAdult,
+          cedula: '',
+          status: value == 'Nuevo' ? 'Nuevo' : 'Editado',
+          successMessage: '',
+          errorMessage: '',
+          loading: false);
+    }
   }
 
   Future<void> onSearchHcAdult(String cedula) async {
@@ -114,17 +146,25 @@ class HcAdultFormNotifier extends StateNotifier<HcAdultState> {
       print('🟢 Obteniendo historia clínica....');
       state = state.copyWith(loading: true);
       final hcGeneral = await getHcAdult(cedula);
-      print("Aqui tambien llega ${hcGeneral?.toJson()}");
       state = state.copyWith(
         createHcAdult: hcGeneral,
+        status: 'Editado',
       );
     } on CustomError catch (e) {
       state = state.copyWith(
-        errorMessage: e.message ?? 'Error al obtener historia clínica',
+        errorMessage: e.message,
       );
     } finally {
       state = state.copyWith(loading: false);
     }
+  }
+
+  void clearErrorMessage() {
+    state = state.copyWith(errorMessage: '');
+  }
+
+  void clearSuccessMessage() {
+    state = state.copyWith(successMessage: '');
   }
 
   Future<void> onCreateHcGeneral(BuildContext context) async {
@@ -146,29 +186,20 @@ class HcAdultFormNotifier extends StateNotifier<HcAdultState> {
       );
 
       await createAdultHc(state.createHcAdult);
-
+      final datos = state.createHcAdult.toJson();
+      print('🔹 Datos: ${datos['procesoDeAlimentacion']}');
+      await HistoriaClinicaPdfTemplate.guardarYMostrarPdf(
+          datos, context, state.cedula);
       // Limpiar campos
       state = state.copyWith(
         cedula: '',
         tipo: 'Nuevo',
         createHcAdult: initialAdult.createHcAdult,
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Historia clínica actualizada con éxito'),
-          backgroundColor: Colors.green,
-        ),
+        successMessage: 'Historia clínica creada con éxito',
       );
     } on CustomError catch (e) {
       state = state.copyWith(
-        errorMessage: e.message ?? 'Error al crear historia clínica',
-        successMessage: '',
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error al crear historia clínica'),
-          backgroundColor: Colors.red,
-        ),
+        errorMessage: e.message,
       );
     } finally {
       state = state.copyWith(loading: false);
@@ -180,31 +211,23 @@ class HcAdultFormNotifier extends StateNotifier<HcAdultState> {
       state = state.copyWith(loading: true);
       // Asegúrate de que 'fechaEntrevista' esté en el formato correcto
       await updateHcAdult(state.createHcAdult);
-
+      final datos = state.createHcAdult.toJson();
+      print('🔹 Datos: ${datos['procesoDeAlimentacion']}');
+      await HistoriaClinicaPdfTemplate.guardarYMostrarPdf(
+          datos, context, state.cedula);
       // Limpiar campos
 
       state = state.copyWith(
         cedula: '',
         createHcAdult: initialAdult.createHcAdult,
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Historia clínica actualizada con éxito'),
-          backgroundColor: Colors.green,
-        ),
+        tipo: 'Nuevo',
+        status: 'Editado',
+        successMessage: 'Historia clínica actualizada con éxito',
       );
     } on CustomError catch (e) {
       state = state.copyWith(
-        errorMessage: e.toString() ?? 'Error al actualizar historia clínica',
-        successMessage: '',
+        errorMessage: e.message,
       );
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error al actualizar historia clínica'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      print('🔴 Error al actualizar historia clínica: ${e.message}');
     } finally {
       state = state.copyWith(loading: false);
     }

@@ -1,0 +1,2 @@
+C:/Users/reybe/Documents/FinalTesisAPP/android/app/.cxx/Debug/3e1c611r/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/reybe/Documents/FinalTesisAPP/android/app/.cxx/Debug/3e1c611r/armeabi-v7a/CMakeFiles/rebuild_cache.dir

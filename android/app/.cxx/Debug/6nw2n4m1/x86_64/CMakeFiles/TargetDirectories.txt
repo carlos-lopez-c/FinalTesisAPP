@@ -1,0 +1,2 @@
+/home/alexdev/FinalTesisAPP/android/app/.cxx/Debug/6nw2n4m1/x86_64/CMakeFiles/edit_cache.dir
+/home/alexdev/FinalTesisAPP/android/app/.cxx/Debug/6nw2n4m1/x86_64/CMakeFiles/rebuild_cache.dir

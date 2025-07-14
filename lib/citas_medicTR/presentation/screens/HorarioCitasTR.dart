@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:h_c_1/citas_medicTR/domain/entities/cita.entity.dart';
-import 'package:h_c_1/citas_medicTR/presentation/providers/appointments_form_provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:h_c_1/citas_medicTR/presentation/providers/appointments_provider.dart';
 import 'package:h_c_1/citas_medicTR/presentation/screens/GenerarCitasTR.dart';
-import 'package:h_c_1/citas_medicTR/presentation/widgets/NavigationButtonCT_TR.dart';
-import 'package:h_c_1/citas_medicTR/presentation/widgets/headerCT_TR.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
+import 'package:h_c_1/citas_medicTR/presentation/screens/DetalleCitaTR.dart';
 
 class HorarioCitasTr extends ConsumerStatefulWidget {
   @override
@@ -15,6 +13,8 @@ class HorarioCitasTr extends ConsumerStatefulWidget {
 }
 
 class _HorarioCitasTrState extends ConsumerState<HorarioCitasTr> {
+  bool _hasShownMessage = false;
+
   @override
   void initState() {
     super.initState();
@@ -23,87 +23,11 @@ class _HorarioCitasTrState extends ConsumerState<HorarioCitasTr> {
       ref
           .read(appointmentProvider.notifier)
           .getAppointmentsByStatusAndMedicID("Agendado");
+      // Cargar las citas del día actual al iniciar la pantalla
+      ref
+          .read(appointmentProvider.notifier)
+          .getAppointmentsByDate(DateTime.now());
     });
-  }
-
-  void _editarCita(
-      BuildContext context, Appointments cita, AppointmentNotifier notifier) {
-    TextEditingController horaController =
-        TextEditingController(text: cita.appointmentTime);
-    TextEditingController fechaController =
-        TextEditingController(text: cita.date);
-
-    // Analizar la fecha de la cita usando el formato correcto
-    DateTime? selectedDate;
-    try {
-      selectedDate = DateFormat('yyyy-MM-dd').parse(cita.date);
-    } catch (e) {
-      print("Error al analizar la fecha: $e");
-      selectedDate = DateTime.now(); // Usar la fecha actual como fallback
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Editar Cita'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: horaController,
-                decoration: InputDecoration(labelText: 'Hora'),
-              ),
-              TextField(
-                controller: fechaController,
-                decoration: InputDecoration(labelText: 'Fecha'),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  DateTime? pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: selectedDate ?? DateTime.now(),
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime(2030),
-                  );
-                  if (pickedDate != null) {
-                    selectedDate = pickedDate;
-                    fechaController.text =
-                        DateFormat('yyyy-MM-dd').format(pickedDate);
-                  }
-                },
-                child: Text('Seleccionar Fecha'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () async {
-                // Actualizar la cita con los nuevos valores
-                final updatedCita = cita.copyWith(
-                  appointmentTime: horaController.text,
-                  date: fechaController.text,
-                );
-
-                // Llamar al método para actualizar la cita
-                final notifierForm = ref.read(appointmentFormProvider.notifier);
-                await notifierForm.updateAppointment(updatedCita, context);
-
-                // Cerrar el diálogo
-                Navigator.pop(context);
-              },
-              child: Text('Guardar'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -111,167 +35,364 @@ class _HorarioCitasTrState extends ConsumerState<HorarioCitasTr> {
     final appointmentState = ref.watch(appointmentProvider);
     final notifier = ref.read(appointmentProvider.notifier);
 
+    // Agregar listener para mensajes de éxito y error
+    ref.listen<AppointmentState>(appointmentProvider, (previous, next) {
+      if (!_hasShownMessage) {
+        if (next.successMessage.isNotEmpty) {
+          _hasShownMessage = true;
+          _showSnackBar(context, next.successMessage, true);
+          Future.delayed(const Duration(seconds: 2), () {
+            ref.read(appointmentProvider.notifier).clearSuccess();
+            _hasShownMessage = false;
+          });
+        } else if (next.errorMessage.isNotEmpty) {
+          _hasShownMessage = true;
+          _showSnackBar(context, next.errorMessage, false);
+          Future.delayed(const Duration(seconds: 2), () {
+            ref.read(appointmentProvider.notifier).clearError();
+            _hasShownMessage = false;
+          });
+        }
+      }
+    });
+
     final selectedDate = appointmentState.calendarioCitaSeleccionada;
 
     return Scaffold(
+      backgroundColor: Color(0xFFF5F8FA),
       appBar: AppBar(
-        title: Text('Horario de Citas'),
+        backgroundColor: Color(0xFF1976D2),
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          'Horario de Citas',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        iconTheme: IconThemeData(color: Colors.white),
       ),
-      body: Column(
-        children: [
-          HeaderctTrWidget(
-            textoDinamico: '  HORARIO DE CITAS MÉDICAS',
-            textoCitasMedicas: '                    HORARIO',
-          ),
-          const SizedBox(height: 20),
-          SizedBox(height: 15),
-          NavigationTrButton(
-            navigationRoute: (context) => GenerarCitasTr(),
-            buttonText: 'AGENDAR UNA CITA',
-          ),
-          SizedBox(height: 20),
-          Divider(),
-          TableCalendar(
-            availableGestures: AvailableGestures.all,
-            locale: "es_EC",
-            firstDay: DateTime.utc(2025, 1, 1),
-            lastDay: DateTime.utc(2025, 12, 31),
-            focusedDay: selectedDate,
-            selectedDayPredicate: (day) => isSameDay(day, selectedDate),
-            onDaySelected: (selectedDay, focusedDay) {
-              notifier.onDateSelected(selectedDay);
-            },
-            eventLoader: (day) {
-              // Verificar si hay citas agendadas para este día
-              return appointmentState.citasAgendadas.where((cita) {
-                try {
-                  // Convertir la fecha de la cita a DateTime
-                  final citaDate =
-                      DateFormat('MMMM d, y', 'en_US').parse(cita.date);
-                  return isSameDay(day, citaDate);
-                } catch (_) {
-                  return false;
-                }
-              }).toList();
-            },
-            calendarStyle: CalendarStyle(
-              todayDecoration: BoxDecoration(
-                color: Colors.blue,
-                shape: BoxShape.circle,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Color(0xFF1976D2),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
+                ),
               ),
-              selectedDecoration: BoxDecoration(
-                color: Colors.orange,
-                shape: BoxShape.circle,
-              ),
-              // Estilo para los días con eventos (citas agendadas)
-              markerDecoration: BoxDecoration(
-                color: Colors.green,
-                shape: BoxShape.circle,
-              ),
-            ),
-            calendarBuilders: CalendarBuilders(
-              defaultBuilder: (context, day, focusedDay) {
-                // Verificar si hay citas agendadas para este día
-                final citas = appointmentState.citasAgendadas.where((cita) {
-                  try {
-                    final citaDate = DateFormat('yyyy-MM-dd').parse(cita.date);
-
-                    return isSameDay(day, citaDate);
-                  } catch (e) {
-                    print("Error al comparar fechas: $e");
-                    return false;
-                  }
-                }).toList();
-                // Pintar de verde si hay citas agendadas para este día
-
-                Color? backgroundColor;
-                if (citas.isNotEmpty) {
-                  backgroundColor = Colors.green; // Días con citas agendadas
-                }
-                return Container(
-                  margin: const EdgeInsets.all(4),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: backgroundColor ?? Colors.transparent,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    '${day.day}',
+              child: Column(
+                children: [
+                  Text(
+                    'HORARIO DE CITAS MÉDICAS',
                     style: TextStyle(
-                      color: backgroundColor != null
-                          ? Colors.white
-                          : Colors.black87,
+                      color: Colors.white,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                );
-              },
+                  SizedBox(height: 8),
+                  Text(
+                    'GESTIÓN DE CITAS',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Divider(),
-          Expanded(
-            child: appointmentState.loading
-                ? Center(
-                    child: CircularProgressIndicator()) // 🔄 Indicador de carga
-                : Column(
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
                     children: [
-                      Text(
-                        "Citas para el día seleccionado",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      Container(
+                        width: double.infinity,
+                        margin: EdgeInsets.only(bottom: 16),
+                        child: ElevatedButton.icon(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => GenerarCitasTr()),
+                          ),
+                          icon: Icon(Icons.add_circle, color: Colors.white),
+                          label: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12.0),
+                            child: Text(
+                              'AGENDAR UNA CITA',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF1976D2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 2,
+                          ),
                         ),
                       ),
-                      if (appointmentState.citasDelDia.isNotEmpty)
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: appointmentState.citasDelDia.length,
-                            itemBuilder: (context, index) {
-                              final cita = appointmentState.citasDelDia[index];
-                              return GestureDetector(
-                                onTap: () {
-                                  _editarCita(context, cita, notifier);
-                                },
-                                child: Card(
-                                  margin: EdgeInsets.all(10),
-                                  elevation: 5,
-                                  child: Padding(
-                                    padding: EdgeInsets.all(10),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Especialidad: ${cita.specialtyTherapy}",
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                        Text("Fecha: ${cita.date}"),
-                                        Text("Hora: ${cita.appointmentTime}"),
-                                      ],
-                                    ),
+
+
+
+                       Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    child: ElevatedButton.icon(
+                      onPressed: () => context.push('/historial-citas'),
+                      icon: const Icon(Icons.history, color: Colors.white),
+                      label: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12.0),
+                        child: Text(
+                          'HISTORIAL DE CITAS',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1976D2),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 2,
+                      ),
+                    ),
+                  ),
+
+
+
+
+
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: TableCalendar(
+                          availableGestures: AvailableGestures.all,
+                          locale: "es_EC",
+                          firstDay: DateTime.utc(2025, 1, 1),
+                          lastDay: DateTime.utc(2025, 12, 31),
+                          focusedDay: selectedDate,
+                          selectedDayPredicate: (day) =>
+                              isSameDay(day, selectedDate),
+                          onDaySelected: (selectedDay, focusedDay) {
+                            notifier.onDateSelected(selectedDay);
+                          },
+                          eventLoader: (day) {
+                            return appointmentState.citasAgendadas
+                                .where((cita) {
+                              try {
+                                final citaDate =
+                                    DateFormat('yyyy-MM-dd').parse(cita.date);
+                                return isSameDay(day, citaDate);
+                              } catch (_) {
+                                return false;
+                              }
+                            }).toList();
+                          },
+                          calendarStyle: CalendarStyle(
+                            todayDecoration: BoxDecoration(
+                              color: Color(0xFF1976D2),
+                              shape: BoxShape.circle,
+                            ),
+                            selectedDecoration: BoxDecoration(
+                              color: Color(0xFF1976D2).withOpacity(0.8),
+                              shape: BoxShape.circle,
+                            ),
+                            markerDecoration: BoxDecoration(
+                              color: Colors.green,
+                              shape: BoxShape.circle,
+                            ),
+                            outsideDaysVisible: false,
+                            weekendTextStyle: TextStyle(color: Colors.red),
+                          ),
+                          headerStyle: HeaderStyle(
+                            formatButtonVisible: false,
+                            titleCentered: true,
+                            titleTextStyle: TextStyle(
+                              color: Color(0xFF1976D2),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            leftChevronIcon: Icon(Icons.chevron_left,
+                                color: Color(0xFF1976D2)),
+                            rightChevronIcon: Icon(Icons.chevron_right,
+                                color: Color(0xFF1976D2)),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.all(16),
+                              child: Text(
+                                "Citas para el día seleccionado",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF1976D2),
+                                ),
+                              ),
+                            ),
+                            if (appointmentState.loading)
+                              Container(
+                                height: 200,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xFF1976D2),
                                   ),
                                 ),
-                              );
-                            },
-                          ),
+                              )
+                            else if (appointmentState.citasDelDia.isNotEmpty)
+                              Container(
+                                height: 200,
+                                child: ListView.builder(
+                                  padding: EdgeInsets.all(16),
+                                  itemCount:
+                                      appointmentState.citasDelDia.length,
+                                  itemBuilder: (context, index) {
+                                    final cita =
+                                        appointmentState.citasDelDia[index];
+                                    return GestureDetector(
+                                      onTap: () {
+                                        ref
+                                            .read(appointmentProvider.notifier)
+                                            .seleccionarCita(cita);
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (_) => DetalleCitaTr()),
+                                        );
+                                      },
+                                      child: Container(
+                                        margin: EdgeInsets.only(bottom: 12),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.black.withOpacity(0.1),
+                                              blurRadius: 10,
+                                              offset: Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        child: ListTile(
+                                          leading: Icon(Icons.medical_services,
+                                              color: Color(0xFF1976D2)),
+                                          title: Text(
+                                            cita.specialtyTherapy,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFF1976D2),
+                                            ),
+                                          ),
+                                          subtitle: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text("Fecha: ${cita.date}"),
+                                              Text(
+                                                  "Hora: ${cita.appointmentTime}"),
+                                            ],
+                                          ),
+                                          trailing: Icon(Icons.edit,
+                                              color: Color(0xFF1976D2)),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              )
+                            else
+                              Container(
+                                height: 200,
+                                child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.event_busy,
+                                        size: 64,
+                                        color: Colors.grey[400],
+                                      ),
+                                      SizedBox(height: 16),
+                                      Text(
+                                        "No hay citas para este día",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.grey[600],
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
-                      if (appointmentState.citasDelDia.isEmpty)
-                        Padding(
-                          padding: EdgeInsets.all(20),
-                          child: Text(
-                            "No hay citas para este día.",
-                            style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey,
-                                fontStyle: FontStyle.italic),
-                          ),
-                        ),
+                      ),
                     ],
                   ),
-          ),
-        ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSnackBar(BuildContext context, String message, bool isSuccess) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor:
+            isSuccess ? Colors.green.shade300 : Colors.red.shade300,
+        behavior: SnackBarBehavior.fixed,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 2),
       ),
     );
   }

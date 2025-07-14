@@ -5,6 +5,7 @@ import 'package:h_c_1/hc_tr/domain/entities/hc_general/hc_general_entity.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_voice/create_hc_voice_entity.dart';
 import 'package:h_c_1/hc_tr/domain/repositories/hc_repository.dart';
 import 'package:h_c_1/hc_tr/infrastructure/datasources/hc_datasource_impl.dart';
+import 'package:h_c_1/hc_ps/domain/entities/hc_ps_nino/create_hc_nino.dart';
 
 class HcRepositoryImpl implements HcRepository {
   final HcDatasource datasource;
@@ -69,5 +70,45 @@ class HcRepositoryImpl implements HcRepository {
   @override
   Future<void> updateHcVoice(CreateHcVoice hc) {
     return datasource.updateHcVoice(hc);
+  }
+
+  @override
+  Future<bool> existHcGeneral(String cedula) {
+    return datasource.existHcGeneral(cedula);
+  }
+
+  @override
+  Future<bool> existHcAdult(String cedula) {
+    return datasource.existHcAdult(cedula);
+  }
+
+  @override
+  Future<bool> existHcVoice(String cedula) {
+    return datasource.existHcVoice(cedula);
+  }
+
+  @override
+  Future<bool> existHcPsAdult(String cedula) {
+    return datasource.existHcPsAdult(cedula);
+  }
+
+  @override
+  Future<CreateHcPsNino> getHcPsNino(String cedula) {
+    return datasource.getHcPsNino(cedula);
+  }
+
+  @override
+  Future<void> createHcPsNino(CreateHcPsNino hc) {
+    return datasource.createHcPsNino(hc);
+  }
+
+  @override
+  Future<void> updateHcPsNino(CreateHcPsNino hc) {
+    return datasource.updateHcPsNino(hc);
+  }
+
+  @override
+  Future<bool> existHcPsNino(String cedula) {
+    return datasource.existHcPsNino(cedula);
   }
 }

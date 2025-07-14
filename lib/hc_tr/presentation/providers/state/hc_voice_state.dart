@@ -7,12 +7,14 @@ class HcVoiceState {
   final CreateHcVoice createHcVoice;
   final String cedula;
   final String tipo;
+  final String status;
 
   HcVoiceState({
     this.loading = false,
     this.successMessage = '',
     this.errorMessage = '',
     this.tipo = '',
+    this.status = 'Nuevo',
     required this.createHcVoice,
     this.cedula = '',
   });
@@ -21,6 +23,7 @@ class HcVoiceState {
     bool? loading,
     String? tipo,
     String? successMessage,
+    String? status,
     String? errorMessage,
     CreateHcVoice? createHcVoice,
     String? cedula,
@@ -28,6 +31,7 @@ class HcVoiceState {
     return HcVoiceState(
       loading: loading ?? this.loading,
       tipo: tipo ?? this.tipo,
+      status: status ?? this.status,
       successMessage: successMessage ?? this.successMessage,
       errorMessage: errorMessage ?? this.errorMessage,
       createHcVoice: createHcVoice ?? this.createHcVoice,

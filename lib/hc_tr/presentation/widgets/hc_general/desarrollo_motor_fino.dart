@@ -25,12 +25,14 @@ class DesarrolloMotorFino extends ConsumerWidget {
 
         _buildRadioButtonGroupBool(
           options: ["SI", "NO"],
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Pinza digital",
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
               .antecedentesPostnatales.desarrolloMotorFino.pinzaDigital,
           onChanged: hcNotifier.onPinzaDigitalChanged,
         ),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["SI", "NO"],
           title: "Garabateo",
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -38,6 +40,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
           onChanged: hcNotifier.onGarabateoChanged,
         ),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["SI", "NO"],
           title: "Sostener objetos",
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -62,6 +65,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
         SizedBox(height: 10),
 
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Problemas alimenticios",
           options: ["SI", "NO"],
           selectedValue: hcState
@@ -73,6 +77,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
           onChanged: hcNotifier.onProblemasAlimenticiosChanged,
         ),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["SI", "NO"],
           title: "Garabato",
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -80,6 +85,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
           onChanged: hcNotifier.onGarabatoChanged,
         ),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["SI", "NO"],
           title: "Tics motores",
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -87,6 +93,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
           onChanged: hcNotifier.onTicsMotoresChanged,
         ),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["SI", "NO"],
           title: "Tics vocales",
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -94,6 +101,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
           onChanged: hcNotifier.onTicsVocalesChanged,
         ),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["SI", "NO"],
           title: "Conductas problemáticas",
           selectedValue: hcState
@@ -105,6 +113,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
           onChanged: hcNotifier.onConductasProblematicasChanged,
         ),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["SI", "NO"],
           title: "Sonrisa social",
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -112,6 +121,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
           onChanged: hcNotifier.onSonrisaSocialChanged,
         ),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["SI", "NO"],
           title: "Movimientos estereotipados",
           selectedValue: hcState
@@ -123,6 +133,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
           onChanged: hcNotifier.onMovimientosEstereotipadosChanged,
         ),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["SI", "NO"],
           title: "Manipula permanentemente un objeto",
           selectedValue: hcState
@@ -134,6 +145,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
           onChanged: hcNotifier.onManipulaPermanentementeUnObjetoChanged,
         ),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["SI", "NO"],
           title: "Balanceos",
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -141,6 +153,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
           onChanged: hcNotifier.onBalanceosChanged,
         ),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["SI", "NO"],
           title: "Juego repetitivo",
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -148,6 +161,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
           onChanged: hcNotifier.onJuegoRepetitivoChanged,
         ),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["SI", "NO"],
           title: "Tendencia a rutinas",
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -155,6 +169,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
           onChanged: hcNotifier.onTendenciaARutinasChanged,
         ),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["SI", "NO"],
           title: "Camina sin sentido",
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -162,6 +177,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
           onChanged: hcNotifier.onCaminaSinSentidoChanged,
         ),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["SI", "NO"],
           title: "Problemas de sueño",
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -169,6 +185,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
           onChanged: hcNotifier.onProblemaDeSuenoChanged,
         ),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["SI", "NO"],
           title: "Reitera temas favoritos",
           selectedValue: hcState
@@ -180,6 +197,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
           onChanged: hcNotifier.onReiteraTemasFavoritosChanged,
         ),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["SI", "NO"],
           title: "Camina en puntitas",
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -187,6 +205,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
           onChanged: hcNotifier.onCaminaEnPuntitasChanged,
         ),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["SI", "NO"],
           title: "Irritabilidad",
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -194,6 +213,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
           onChanged: hcNotifier.onIrritabilidadChanged,
         ),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Manipula permanentemente algo:",
           options: ["SI", "NO"],
           selectedValue: hcState
@@ -206,6 +226,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Inicia y mantiene conversación:",
           options: ["SI", "NO"],
           selectedValue: hcState
@@ -218,6 +239,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Ecolalia:",
           options: ["SI", "NO"],
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -226,6 +248,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Conocimiento de algún tema:",
           options: ["SI", "NO"],
           selectedValue: hcState
@@ -238,6 +261,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Lenguaje literal:",
           options: ["SI", "NO"],
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -246,6 +270,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Mira a los ojos:",
           options: ["SI", "NO"],
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -254,6 +279,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Otros sistemas de comunicación:",
           options: ["SI", "NO"],
           selectedValue: hcState
@@ -266,6 +292,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Selectivo en la comida:",
           options: ["SI", "NO"],
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -274,6 +301,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Intención comunicativa:",
           options: ["SI", "NO"],
           selectedValue: hcState
@@ -286,6 +314,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Interés restringido:",
           options: ["SI", "NO"],
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -294,6 +323,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Angustia sin causa:",
           options: ["SI", "NO"],
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -302,6 +332,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Preferencia por algún alimento:",
           options: ["SI", "NO"],
           selectedValue: hcState
@@ -314,6 +345,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Sonidos extraños:",
           options: ["SI", "NO"],
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -322,6 +354,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Habla como adulto:",
           options: ["SI", "NO"],
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -330,6 +363,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Frío para hablar:",
           options: ["SI", "NO"],
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -338,6 +372,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Pensamiento obsesivo:",
           options: ["SI", "NO"],
           selectedValue: hcState
@@ -350,6 +385,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Cambio de carácter extremo:",
           options: ["SI", "NO"],
           selectedValue: hcState
@@ -362,6 +398,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Ingenuo:",
           options: ["SI", "NO"],
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -370,6 +407,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Torpeza motriz:",
           options: ["SI", "NO"],
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -378,6 +416,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
         ),
 
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["SI", "NO"],
           title: "Frío emocional",
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -385,6 +424,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
           onChanged: hcNotifier.onFrioEmocionalChanged,
         ),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["SI", "NO"],
           title: "Pocos amigos",
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -392,6 +432,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
           onChanged: hcNotifier.onPocosAmigosChanged,
         ),
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["SI", "NO"],
           title: "Juego imaginativo",
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -408,6 +449,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
         ),
 
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Palmar - Plantar",
           options: ["SI", "NO"],
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -415,24 +457,28 @@ class DesarrolloMotorFino extends ConsumerWidget {
           onChanged: hcNotifier.onPalmarChanged,
         ),
         _buildRadioButtonGroupBool(
+            disabled: hcState.status == 'Editado' ? true : false,
             title: "Moro",
             options: ["SI", "NO"],
             selectedValue: hcState.createHcGeneral.antecedentesPerinatales
                 .antecedentesPostnatales.reflejosPrimitivos.moro,
             onChanged: (value) => hcNotifier.onMoroChanged(value)),
         _buildRadioButtonGroupBool(
+            disabled: hcState.status == 'Editado' ? true : false,
             title: "Presión",
             options: ["SI", "NO"],
             selectedValue: hcState.createHcGeneral.antecedentesPerinatales
                 .antecedentesPostnatales.reflejosPrimitivos.presion,
             onChanged: hcNotifier.onPresionChanged),
         _buildRadioButtonGroupBool(
+            disabled: hcState.status == 'Editado' ? true : false,
             title: "De búsqueda",
             options: ["SI", "NO"],
             selectedValue: hcState.createHcGeneral.antecedentesPerinatales
                 .antecedentesPostnatales.reflejosPrimitivos.deBusqueda,
             onChanged: (value) => hcNotifier.onDeBusquedaChanged(value)),
         _buildRadioButtonGroupBool(
+            disabled: hcState.status == 'Editado' ? true : false,
             title: "Banbiski",
             options: ["SI", "NO"],
             selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -453,42 +499,6 @@ class DesarrolloMotorFino extends ConsumerWidget {
     );
   }
 
-  // 🔹 Grupo de checkbox en línea
-  Widget _buildInlineCheckboxGroup({
-    required String title,
-    required List<String> options,
-    required List<bool> selectedValues,
-    required List<Function(bool)> onChangedList,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title,
-            style:
-                const TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0)),
-        Wrap(
-          spacing: 10.0,
-          children: List.generate(options.length, (index) {
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Checkbox(
-                  value: selectedValues[index],
-                  onChanged: (value) {
-                    if (value != null) {
-                      onChangedList[index](value);
-                    }
-                  },
-                ),
-                Text(options[index]),
-              ],
-            );
-          }),
-        ),
-      ],
-    );
-  }
-
   // 🔹 Grupo de botones de radio
 
   Widget _buildRadioButtonGroupBool({
@@ -496,6 +506,7 @@ class DesarrolloMotorFino extends ConsumerWidget {
     required List<String> options,
     required bool? selectedValue,
     required Function(bool) onChanged,
+    bool disabled = false,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -515,10 +526,14 @@ class DesarrolloMotorFino extends ConsumerWidget {
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Radio(
-                  value: option == "SI",
+                Radio<bool?>(
+                  value: option == "SI" ? true : false,
                   groupValue: selectedValue,
-                  onChanged: (value) => onChanged(value as bool),
+                  onChanged: disabled
+                      ? null
+                      : (value) {
+                          onChanged(value!);
+                        },
                 ),
                 Text(option),
               ],

@@ -1,5 +1,5 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:h_c_1/auth/infrastructure/errors/auth_errors.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_general/al_nacer_necesito.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_general/al_nacer_presento.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_general/alimentacion.dart';
@@ -16,10 +16,13 @@ import 'package:h_c_1/hc_tr/domain/entities/hc_general/habitos_personale.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_general/hc_general_entity.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_general/integracion_sensorial.dart';
 import 'package:h_c_1/hc_tr/domain/entities/hc_general/reflejos_primitivos.dart';
+import 'package:h_c_1/hc_tr/infrastructure/repositories/hc_repository_impl.dart';
 import 'package:h_c_1/hc_tr/presentation/providers/hc_provider.dart';
 import 'package:h_c_1/hc_tr/presentation/providers/state/hc_general_state.dart';
+import 'package:h_c_1/hc_tr/presentation/utils/HistoriaClinicaPdfTemplate.dart';
 import 'package:h_c_1/patient/domain/repositories/patient_repository.dart';
 import 'package:h_c_1/patient/infrastructure/repositories/patient_repository_impl.dart';
+import 'package:h_c_1/shared/infrastructure/errors/custom_error.dart';
 import 'package:intl/intl.dart';
 // 🔹 Provider del formulario de historia clínica general
 
@@ -27,11 +30,12 @@ final initialHcGeneral = HcGeneralFormState(
   edad: 0,
   tipo: 'Nuevo',
   cedula: '',
+  status: 'Nuevo',
   successMessage: '',
   errorMessage: '',
   createHcGeneral: CreateHcGeneral(
     patientId: '',
-    fechaEntrevista: '',
+    fechaEntrevista: DateFormat('yyyy-MM-dd').format(DateTime.now()),
     nombreCompleto: '',
     fechaNacimiento: '',
     sexo: '',
@@ -223,11 +227,16 @@ final hcGeneralProvider =
     AutoDisposeStateNotifierProvider<HcGeneralFormNotifier, HcGeneralFormState>(
   (ref) {
     final getHcGeneral = ref.read(hcProvider.notifier).getHcGeneral;
+    final hcRepository = HcRepositoryImpl();
+    final exitsHcGeneral = hcRepository.existHcGeneral;
     PatientRepository patientRepository = PatientRepositoryImpl();
     final createHcGeneral = ref.read(hcProvider.notifier).createHcGeneral;
+    final updateHcGeneral = ref.read(hcProvider.notifier).updateHcGeneral;
     return HcGeneralFormNotifier(
         patientRepository: patientRepository,
         createHcGeneral: createHcGeneral,
+        updateHcGeneral: updateHcGeneral,
+        exitsHcGeneral: exitsHcGeneral,
         getHcGeneral: getHcGeneral);
   },
 );
@@ -235,11 +244,15 @@ final hcGeneralProvider =
 class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
   final PatientRepository patientRepository;
   final Function(CreateHcGeneral) createHcGeneral;
+  final Function(CreateHcGeneral) updateHcGeneral;
+  final Function(String) exitsHcGeneral;
   final Function(String) getHcGeneral;
   HcGeneralFormNotifier({
     required this.getHcGeneral,
     required this.createHcGeneral,
     required this.patientRepository,
+    required this.updateHcGeneral,
+    required this.exitsHcGeneral,
   }) : super(
           initialHcGeneral,
         );
@@ -267,9 +280,22 @@ class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
 
   Future<void> getPacienteByDni(String dni) async {
     try {
+      if (dni.isEmpty) {
+        state = state.copyWith(
+          errorMessage: 'Error, debe ingresar un número de cédula',
+        );
+        return;
+      }
+      final existHcGeneral = await exitsHcGeneral(dni);
+      if (existHcGeneral) {
+        state = state.copyWith(
+          errorMessage: 'Historia clínica ya existe para este paciente',
+        );
+        return;
+      }
       state = state.copyWith(loading: true);
+      print('DNI: $dni');
       final paciente = await patientRepository.getPatientByDni(dni);
-      print("Aqui llega ${paciente.toJson()}");
       // Formatear la fecha de nacimiento a 'yyyy-MM-dd'
       final fechaNacimiento =
           DateFormat('yyyy-MM-dd').format(paciente.birthdate);
@@ -287,6 +313,7 @@ class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
 
       // Actualizar el estado con la información del paciente
       state = state.copyWith(
+        successMessage: 'Paciente encontrado',
         loading: false,
         edad: edad,
         createHcGeneral: state.createHcGeneral.copyWith(
@@ -298,14 +325,22 @@ class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
         ),
       );
     } on CustomError catch (e) {
+      print('Error CustomError capturado: ${e.message}, código: ${e.message}');
       state = state.copyWith(
         loading: false,
-        errorMessage: e.message ?? 'Error al obtener paciente',
+        errorMessage: e.message,
+      );
+    } catch (e) {
+      // Añade este bloque para capturar cualquier otro tipo de error
+      print('Error genérico capturado en provider: $e');
+      state = state.copyWith(
+        loading: false,
+        errorMessage: e.toString(),
       );
     }
   }
 
-  Future<void> onCreateHcGeneral() async {
+  Future<void> onCreateHcGeneral(BuildContext context) async {
     try {
       state = state.copyWith(loading: true);
 
@@ -341,23 +376,38 @@ class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
 
       // Crear la historia clínica general
       await createHcGeneral(state.createHcGeneral);
-
+      await HistoriaClinicaPdfTemplate.guardarYMostrarPdf(
+          state.createHcGeneral.toJson(), context, state.cedula);
       // Limpiar campos
       state = initialHcGeneral;
       state =
           state.copyWith(successMessage: 'Historia clínica creada con éxito');
     } on CustomError catch (e) {
       state = state.copyWith(
-        errorMessage: e.message ?? 'Error al crear historia clínica',
-        successMessage: '',
+        errorMessage: e.message,
       );
-      print('🔴 Error al crear historia clínica: $e');
     } catch (e) {
       state = state.copyWith(
         errorMessage: 'Error inesperado al crear historia clínica',
-        successMessage: '',
       );
-      print('🔴 Error inesperado: $e');
+    } finally {
+      state = state.copyWith(loading: false);
+    }
+  }
+
+  Future<void> onUpdateHcGeneral(BuildContext context) async {
+    try {
+      state = state.copyWith(loading: true);
+      await updateHcGeneral(state.createHcGeneral);
+      state = state.copyWith(
+        successMessage: 'Historia clínica actualizada con éxito',
+      );
+      await HistoriaClinicaPdfTemplate.guardarYMostrarPdf(
+          state.createHcGeneral.toJson(), context, state.cedula);
+    } on CustomError catch (e) {
+      state = state.copyWith(
+        errorMessage: e.message,
+      );
     } finally {
       state = state.copyWith(loading: false);
     }
@@ -367,13 +417,15 @@ class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
     try {
       state = state.copyWith(loading: true);
       final hcGeneral = await getHcGeneral(cedula);
-      print("Aqui tambien llega ${hcGeneral?.toJson()}");
+      print(hcGeneral.fechaNacimiento);
       state = state.copyWith(
+        status: 'Editado',
         createHcGeneral: hcGeneral,
+        edad: calcularEdad(hcGeneral.fechaNacimiento),
       );
     } on CustomError catch (e) {
       state = state.copyWith(
-        errorMessage: e.message ?? 'Error al obtener historia clínica',
+        errorMessage: e.message,
       );
     } finally {
       state = state.copyWith(loading: false);
@@ -381,9 +433,206 @@ class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
   }
 
   void onTipoChanged(String value) {
-    state = state.copyWith(
-      tipo: value,
-    );
+    if (value != state.tipo) {
+      // Mantener el tipo seleccionado pero reiniciar el resto del estado
+      state = state.copyWith(
+        tipo: value,
+        edad: 0,
+        cedula: '',
+        status: 'Nuevo',
+        successMessage: '',
+        errorMessage: '',
+        createHcGeneral: CreateHcGeneral(
+          patientId: '',
+          fechaEntrevista: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+          nombreCompleto: '',
+          fechaNacimiento: '',
+          sexo: '',
+          escolaridad: '',
+          nombreDeInstitucion: '',
+          tipoDeInstitucion: '',
+          domicilio: '',
+          email: '',
+          telefono: '',
+          entrevistadoPor: '',
+          remitidoPor: '',
+          motivoDeConsulta: '',
+          caracterizacionDelProblema: '',
+          historiaEscolar: '',
+          antecedentesPersonales: AntecedentesPersonales(
+            deseado: null,
+            automedicacion: null,
+            depresion: null,
+            estres: null,
+            ansiedad: null,
+            traumatismo: null,
+            radiaciones: null,
+            medicina: null,
+            riesgoDeAborto: null,
+            maltratoFisico: null,
+            consumoDeDrogas: null,
+            consumoDeAlcohol: null,
+            consumoDeTabaco: null,
+            hipertension: null,
+            dietaBalanceada: null,
+          ),
+          antecedentesPerinatales: AntecedentesPerinatales(
+            duracionDeLaGestacion: '',
+            lugarDeAtencion: '',
+            tipoDeParto: '',
+            duracionDelParto: '',
+            presentacion: '',
+            lloroAlNacer: null,
+            sufrimientoFetal: null,
+            alNacerNecesito: AlNacerNecesito(
+              incubadora: null,
+              oxigeno: null,
+              tiempo: '',
+            ),
+            alNacerPresento: AlNacerPresento(
+              cianosis: null,
+              ictericia: null,
+              malformaciones: null,
+              circulacionDelCordonEnElCuello: null,
+              sufrimientoFetal: null,
+              peso: '',
+              talla: '',
+              perimetroCefalico: '',
+              apgar: '',
+            ),
+            observaciones: '',
+            antecedentesPostnatales: AntecedentesPostnatales(
+              alimentacion: Alimentacion(
+                materna: null,
+                artificial: null,
+                maticacion: null,
+              ),
+              desarrolloMotorGrueso: DesarrolloMotorGrueso(
+                controlCefalico: null,
+                gateo: null,
+                marcha: null,
+                sedestacion: null,
+                sincinesias: null,
+                subeBajaGradas: null,
+                rotacionPies: null,
+              ),
+              reflejosPrimitivos: ReflejosPrimitivos(
+                palmar: null,
+                moro: null,
+                presion: null,
+                deBusqueda: null,
+                banbiski: null,
+              ),
+              desarrolloMotorFino: DesarrolloMotorFino(
+                pinzaDigital: null,
+                garabateo: null,
+                sostenerObjetos: null,
+                angustiaSinCausa: null,
+                balanceos: null,
+                cambioDeCaracterExtremo: null,
+                caminaEnPuntitas: null,
+                caminaSinSentido: null,
+                conductasProblematicas: null,
+                conocimientoDeAlgunTema: null,
+                ecolalia: null,
+                frioEmocional: null,
+                frioParaHablar: null,
+                garabato: null,
+                hablaComoAdulto: null,
+                ingenuo: null,
+                iniciaYMantieneConversaciones: false,
+                intencionComunicativa: false,
+                interesRestringido: false,
+                irritabilidad: false,
+                juegoImaginativo: false,
+                juegoRepetitivo: false,
+                lenguajeLiteral: false,
+                manipulaPermanentementeAlgo: false,
+                manipulaPermanentementeUnObjeto: false,
+                miraALosOjos: false,
+                movimientosEstereotipados: false,
+                otrosSistemasDeComunicacion: false,
+                pensamientosObsesivos: false,
+                pocosAmigos: false,
+                preferenciaPorAlgunAlimento: false,
+                problemaDeSueno: false,
+                problemasAlimenticios: false,
+                reiteraTemasFavoritos: false,
+                selectivoEnLaComida: false,
+                sonidosExtranos: false,
+                sonrisaSocial: false,
+                tendenciaARutinas: false,
+                ticsMotores: false,
+                ticsVocales: false,
+                torpezaMotriz: false,
+              ),
+              especificaciones: Especificaciones(
+                intensionComunicativaHospitalizaciones: '',
+                traumatismo: '',
+                infecciones: '',
+                reaccionesPeculiaresVacunas: '',
+                desnutricionOObesidad: '',
+                cirugias: '',
+                convulsiones: '',
+                medicacion: '',
+                sindromes: '',
+                observaciones: '',
+                diagnosticStudies: '',
+              ),
+              habitosPersonales: HabitosPersonales(
+                berrinches: false,
+                insulta: false,
+                llora: false,
+                grita: false,
+                agrede: false,
+                seEncierra: false,
+                pideAyuda: false,
+                pegaALosPadres: false,
+                aptitudesEInteresesEscolares: '',
+                rendimientoGeneralEscolaridad: '',
+                comportamientoGeneral: ComportamientoGeneral(
+                  agresivo: false,
+                  pasivo: false,
+                  destructor: false,
+                  sociable: false,
+                  hipercinetico: false,
+                  empatia: false,
+                  interesesPeculiares: false,
+                  interesPorInteraccion: false,
+                ),
+                aspectosSocializacion: AspectosSocializacion(
+                  asociaObjetos: false,
+                  lograConcentrarse5Min: false,
+                  mayores: false,
+                  menores: false,
+                  reaccionConPersonasExtranas: false,
+                  reconoceASusFamiliares: false,
+                  reconoceColoresBasicos: false,
+                  reconocePartesDelCuerpo: false,
+                  socializacionConFamilia: false,
+                  todos: false,
+                ),
+                datosFamiliares: DatosFamiliares(
+                  disfuncional: false,
+                  extensa: false,
+                  funcional: false,
+                  monoParental: false,
+                  nuclear: false,
+                  reconstituida: false,
+                ),
+                quienViveEnCasa: '',
+                integracionSensorial: IntegracionSensorial(
+                  tacto: false,
+                  gustoYolfato: false,
+                  oido: false,
+                  vista: false,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
   }
 
   void onNombreCompletoChanged(String value) {
@@ -2959,6 +3208,14 @@ class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
         ),
       ),
     );
+  }
+
+  void clearErrorMessage() {
+    state = state.copyWith(errorMessage: '');
+  }
+
+  void clearSuccessMessage() {
+    state = state.copyWith(successMessage: '');
   }
 
   int calcularEdad(String fechaNacimiento) {

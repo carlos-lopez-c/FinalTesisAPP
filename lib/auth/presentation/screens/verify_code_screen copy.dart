@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../Widgets/CustomCard.dart';
+import '../widgets/CustomCard.dart';
 import '/../shared/header.dart';
 
 class VerifyCodeScreen extends ConsumerWidget {
-  const VerifyCodeScreen({Key? key}) : super(key: key);
+  const VerifyCodeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {    
+  Widget build(BuildContext context, WidgetRef ref) {
     return CustomCard(
       child: Column(
         children: [
@@ -15,11 +15,10 @@ class VerifyCodeScreen extends ConsumerWidget {
             imagePath: 'assets/imagenes/san-miguel.png',
             title: 'Fundación de niños especiales',
             subtitle: '"SAN MIGUEL" FUNESAMI',
-            item: 'Verifique su correo electrónico para completar el proceso desde allí.',
-          ),          
-          const SizedBox(height: 16),       
-   
-
+            item:
+                'Verifique su correo electrónico para completar el proceso desde allí.',
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );

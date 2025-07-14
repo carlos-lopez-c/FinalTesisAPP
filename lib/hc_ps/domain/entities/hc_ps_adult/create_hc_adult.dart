@@ -20,6 +20,7 @@ class CreateHcPsAdult {
   String remision;
   String responsable;
   String telefono;
+  String? edad;
 
   CreateHcPsAdult({
     this.id,
@@ -43,6 +44,7 @@ class CreateHcPsAdult {
     required this.remision,
     required this.responsable,
     required this.telefono,
+    this.edad = '',
   });
 
   CreateHcPsAdult copyWith({
@@ -67,6 +69,7 @@ class CreateHcPsAdult {
     String? remision,
     String? responsable,
     String? telefono,
+    String? edad,
   }) {
     return CreateHcPsAdult(
       id: id ?? this.id,
@@ -92,6 +95,7 @@ class CreateHcPsAdult {
       remision: remision ?? this.remision,
       responsable: responsable ?? this.responsable,
       telefono: telefono ?? this.telefono,
+      edad: edad ?? this.edad,
     );
   }
 
@@ -118,6 +122,7 @@ class CreateHcPsAdult {
       'remision': remision,
       'responsable': responsable,
       'telefono': telefono,
+      'edad': edad,
     };
   }
 
@@ -169,6 +174,7 @@ class CreateHcPsAdult {
         remision: json['remision'],
         responsable: json['responsable'],
         telefono: json['telefono'],
+        edad: json['edad'] ?? '',
       );
     } catch (e) {
       print('Error al convertir JSON a CreateHcPsicologica: $e');

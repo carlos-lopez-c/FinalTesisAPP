@@ -3,11 +3,12 @@ import 'package:h_c_1/hc_tr/domain/entities/hc_general/hc_general_entity.dart';
 class HcGeneralFormState {
   final bool loading;
   final String errorMessage;
-  final successMessage;
+  final String successMessage;
   final CreateHcGeneral createHcGeneral;
   final String tipo;
   final String cedula;
   final int edad;
+  final String status;
 
   HcGeneralFormState({
     this.loading = false,
@@ -17,6 +18,7 @@ class HcGeneralFormState {
     required this.createHcGeneral,
     this.cedula = '',
     this.edad = 0,
+    this.status = 'Nuevo',
   });
 
   HcGeneralFormState copyWith({
@@ -27,6 +29,7 @@ class HcGeneralFormState {
     CreateHcGeneral? createHcGeneral,
     String? cedula,
     int? edad,
+    String? status,
   }) {
     return HcGeneralFormState(
       loading: loading ?? this.loading,
@@ -36,6 +39,7 @@ class HcGeneralFormState {
       cedula: cedula ?? this.cedula,
       tipo: tipo ?? this.tipo,
       edad: edad ?? this.edad,
+      status: status ?? this.status,
     );
   }
 }

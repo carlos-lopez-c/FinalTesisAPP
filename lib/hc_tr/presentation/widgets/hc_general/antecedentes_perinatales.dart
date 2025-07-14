@@ -64,213 +64,293 @@ class _AntecedentesPerinatalesWidgetState
     observacionesAdicionalesController.text =
         hcState.createHcGeneral.antecedentesPerinatales.observaciones;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSection('4.2. ANTECEDENTES PERINATALES'),
-        _buildRadioButtonGroup(
-          title: "Duración de la gestación:",
-          options: ["Pre terminó", "A terminó", "Pos terminó"],
-          selectedValue: hcState
-              .createHcGeneral.antecedentesPerinatales.duracionDeLaGestacion,
-          onChanged: hcNotifier.onDuracionDeLaGestacionChanged,
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '4.2. ANTECEDENTES PERINATALES',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1976D2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildRadioButtonGroup(
+              disabled: hcState.status == 'Editado' ? true : false,
+              title: "Duración de la gestación:",
+              options: ["Pre terminó", "A terminó", "Pos terminó"],
+              selectedValue: hcState.createHcGeneral.antecedentesPerinatales
+                  .duracionDeLaGestacion,
+              onChanged: hcNotifier.onDuracionDeLaGestacionChanged,
+            ),
+            const SizedBox(height: 12),
+            _buildFormField(
+              label: 'Lugar de atención',
+              disabled: hcState.status == 'Editado' ? true : false,
+              controller: lugarDeAtencionController,
+              onChanged: hcNotifier.onLugarDeAtencionChanged,
+            ),
+            const SizedBox(height: 12),
+            _buildRadioButtonGroup(
+              title: "Tipo de parto:",
+              disabled: hcState.status == 'Editado' ? true : false,
+              options: ["Normal", "Fórceps", "Cesárea"],
+              selectedValue:
+                  hcState.createHcGeneral.antecedentesPerinatales.tipoDeParto,
+              onChanged: hcNotifier.onTipoDePartoChanged,
+            ),
+            const SizedBox(height: 12),
+            _buildRadioButtonGroup(
+              disabled: hcState.status == 'Editado' ? true : false,
+              title: "Duración del parto:",
+              options: ["Breve", "Normal", "Prolongado"],
+              selectedValue: hcState
+                  .createHcGeneral.antecedentesPerinatales.duracionDelParto,
+              onChanged: hcNotifier.onDuracionDelPartoChanged,
+            ),
+            const SizedBox(height: 12),
+            _buildRadioButtonGroup(
+              disabled: hcState.status == 'Editado' ? true : false,
+              title: "Presentación:",
+              options: ["Cefálico", "Podálico", "Transverso"],
+              selectedValue:
+                  hcState.createHcGeneral.antecedentesPerinatales.presentacion,
+              onChanged: hcNotifier.onPresentacionChanged,
+            ),
+            const SizedBox(height: 12),
+            _buildRadioButtonGroupBool(
+              disabled: hcState.status == 'Editado' ? true : false,
+              title: 'Lloro al nacer',
+              options: ['SI', 'NO'],
+              selectedValue:
+                  hcState.createHcGeneral.antecedentesPerinatales.lloroAlNacer,
+              onChanged: hcNotifier.onLloroAlNacerChanged,
+            ),
+            const SizedBox(height: 12),
+            _buildRadioButtonGroupBool(
+              disabled: hcState.status == 'Editado' ? true : false,
+              title: 'Sufrimiento fetal',
+              options: ['SI', 'NO'],
+              selectedValue: hcState
+                  .createHcGeneral.antecedentesPerinatales.sufrimientoFetal,
+              onChanged: hcNotifier.onSufrimientoFetalChanged,
+            ),
+            const SizedBox(height: 12),
+            _buildMultipleCheckboxGroup(
+              disabled: hcState.status == 'Editado' ? true : false,
+              title: "Al nacer necesito:",
+              options: {
+                "Oxígeno": hcState.createHcGeneral.antecedentesPerinatales
+                        .alNacerNecesito.oxigeno ??
+                    false,
+                "Incubadora": hcState.createHcGeneral.antecedentesPerinatales
+                        .alNacerNecesito.incubadora ??
+                    false,
+              },
+              onChanged: {
+                "Oxígeno": hcNotifier.onAlNacerNecesitoOxigenoChanged,
+                "Incubadora": hcNotifier.onAlNacerNecesitoIncubadoraChanged,
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildFormField(
+              disabled: hcState.status == 'Editado' ? true : false,
+              label: 'Tiempo en incubadora u oxígeno',
+              controller: tiempoController,
+              onChanged: hcNotifier.onAlNacerNecesitoTiempoChanged,
+            ),
+            const SizedBox(height: 12),
+            _buildMultipleCheckboxGroup(
+              disabled: hcState.status == 'Editado' ? true : false,
+              title: "Al nacer presentó:",
+              options: {
+                "Cianosis": hcState.createHcGeneral.antecedentesPerinatales
+                        .alNacerPresento.cianosis ??
+                    false,
+                "Ictericia": hcState.createHcGeneral.antecedentesPerinatales
+                        .alNacerPresento.ictericia ??
+                    false,
+                "Malformaciones": hcState
+                        .createHcGeneral
+                        .antecedentesPerinatales
+                        .alNacerPresento
+                        .malformaciones ??
+                    false,
+                "Circulación del cordón en el cuello": hcState
+                        .createHcGeneral
+                        .antecedentesPerinatales
+                        .alNacerPresento
+                        .circulacionDelCordonEnElCuello ??
+                    false,
+                "Sufrimiento fetal": hcState
+                        .createHcGeneral
+                        .antecedentesPerinatales
+                        .alNacerPresento
+                        .sufrimientoFetal ??
+                    false,
+              },
+              onChanged: {
+                "Cianosis": hcNotifier.onAlNacerPresentoCianosisChanged,
+                "Ictericia": hcNotifier.onAlNacerPresentoIctericiaChanged,
+                "Malformaciones":
+                    hcNotifier.onAlNacerPresentoMalformacionesChanged,
+                "Circulación del cordón en el cuello": hcNotifier
+                    .onAlNacerPresentoCirculacionDelCordonEnElCuelloChanged,
+                "Sufrimiento fetal":
+                    hcNotifier.onAlNacerPresentoSufrimientoFetalChanged,
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildFormField(
+              disabled: hcState.status == 'Editado' ? true : false,
+              label: 'Peso al nacer',
+              controller: pesoController,
+              onChanged: hcNotifier.onAlNacerPresentoPesoChanged,
+            ),
+            const SizedBox(height: 12),
+            _buildFormField(
+              disabled: hcState.status == 'Editado' ? true : false,
+              label: 'Talla al nacer',
+              controller: tallaController,
+              onChanged: hcNotifier.onAlNacerPresentoTallaChanged,
+            ),
+            const SizedBox(height: 12),
+            _buildFormField(
+              disabled: hcState.status == 'Editado' ? true : false,
+              label: 'Perímetro cefálico',
+              controller: perimetroCefalicoController,
+              onChanged: hcNotifier.onAlNacerPresentoPerimetroCefalicoChanged,
+            ),
+            const SizedBox(height: 12),
+            _buildFormField(
+              disabled: hcState.status == 'Editado' ? true : false,
+              label: 'Apgar',
+              controller: apgarController,
+              onChanged: hcNotifier.onAlNacerPresentoApgarChanged,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Observaciones',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1976D2),
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildMultilineFormField(
+                label: 'Observaciones adicionales',
+                controller: observacionesAdicionalesController,
+                onChanged: hcNotifier.onObservacionesChanged),
+          ],
         ),
-        _buildFormField(
-          label: 'Lugar de atención',
-          controller: lugarDeAtencionController,
-          onChanged: hcNotifier.onLugarDeAtencionChanged,
-        ),
-        _buildRadioButtonGroup(
-          title: "Tipo de parto:",
-          options: ["Normal", "Fórceps", "Cesárea"],
-          selectedValue:
-              hcState.createHcGeneral.antecedentesPerinatales.tipoDeParto,
-          onChanged: hcNotifier.onTipoDePartoChanged,
-        ),
-        const Divider(),
-        _buildRadioButtonGroup(
-          title: "Duración del parto:",
-          options: ["Breve", "Normal", "Prolongado"],
-          selectedValue:
-              hcState.createHcGeneral.antecedentesPerinatales.duracionDelParto,
-          onChanged: hcNotifier.onDuracionDelPartoChanged,
-        ),
-        const Divider(),
-        _buildRadioButtonGroup(
-          title: "Presentación:",
-          options: ["Cefálico", "Podálico", "Transverso"],
-          selectedValue:
-              hcState.createHcGeneral.antecedentesPerinatales.presentacion,
-          onChanged: hcNotifier.onPresentacionChanged,
-        ),
-        const Divider(),
-        _buildRadioButtonGroupBool(
-          title: 'Lloro al nacer',
-          options: ['SI', 'NO'],
-          selectedValue:
-              hcState.createHcGeneral.antecedentesPerinatales.lloroAlNacer,
-          onChanged: hcNotifier.onLloroAlNacerChanged,
-        ),
-        const Divider(),
-        _buildRadioButtonGroupBool(
-          title: 'Sufrimiento fetal',
-          options: ['SI', 'NO'],
-          selectedValue:
-              hcState.createHcGeneral.antecedentesPerinatales.sufrimientoFetal,
-          onChanged: hcNotifier.onSufrimientoFetalChanged,
-        ),
-        const Divider(),
-        _buildMultipleCheckboxGroup(
-          title: "Al nacer necesito:",
-          options: {
-            "Oxígeno": hcState.createHcGeneral.antecedentesPerinatales
-                    .alNacerNecesito.oxigeno ??
-                false,
-            "Incubadora": hcState.createHcGeneral.antecedentesPerinatales
-                    .alNacerNecesito.incubadora ??
-                false,
-          },
-          onChanged: {
-            "Oxígeno": hcNotifier.onAlNacerNecesitoOxigenoChanged,
-            "Incubadora": hcNotifier.onAlNacerNecesitoIncubadoraChanged,
-          },
-        ),
-        _buildFormField(
-          label: 'Tiempo en incubadora u oxígeno',
-          controller: tiempoController,
-          onChanged: hcNotifier.onAlNacerNecesitoTiempoChanged,
-        ),
-        const Divider(),
-        _buildMultipleCheckboxGroup(
-          title: "Al nacer presentó:",
-          options: {
-            "Cianosis": hcState.createHcGeneral.antecedentesPerinatales
-                    .alNacerPresento.cianosis ??
-                false,
-            "Ictericia": hcState.createHcGeneral.antecedentesPerinatales
-                    .alNacerPresento.ictericia ??
-                false,
-            "Malformaciones": hcState.createHcGeneral.antecedentesPerinatales
-                    .alNacerPresento.malformaciones ??
-                false,
-            "Circulación del cordón en el cuello": hcState
-                    .createHcGeneral
-                    .antecedentesPerinatales
-                    .alNacerPresento
-                    .circulacionDelCordonEnElCuello ??
-                false,
-            "Sufrimiento fetal": hcState.createHcGeneral.antecedentesPerinatales
-                    .alNacerPresento.sufrimientoFetal ??
-                false,
-          },
-          onChanged: {
-            "Cianosis": hcNotifier.onAlNacerPresentoCianosisChanged,
-            "Ictericia": hcNotifier.onAlNacerPresentoIctericiaChanged,
-            "Malformaciones": hcNotifier.onAlNacerPresentoMalformacionesChanged,
-            "Circulación del cordón en el cuello": hcNotifier
-                .onAlNacerPresentoCirculacionDelCordonEnElCuelloChanged,
-            "Sufrimiento fetal":
-                hcNotifier.onAlNacerPresentoSufrimientoFetalChanged,
-          },
-        ),
-        _buildFormField(
-          label: 'Peso al nacer',
-          controller: pesoController,
-          onChanged: hcNotifier.onAlNacerPresentoPesoChanged,
-        ),
-        _buildFormField(
-          label: 'Talla al nacer',
-          controller: tallaController,
-          onChanged: hcNotifier.onAlNacerPresentoTallaChanged,
-        ),
-        _buildFormField(
-          label: 'Perímetro cefálico',
-          controller: perimetroCefalicoController,
-          onChanged: hcNotifier.onAlNacerPresentoPerimetroCefalicoChanged,
-        ),
-        _buildFormField(
-          label: 'Apgar',
-          controller: apgarController,
-          onChanged: hcNotifier.onAlNacerPresentoApgarChanged,
-        ),
-        const Divider(),
-        _buildSection('Observaciones'),
-        _buildMultilineFormField(
-            label: 'Observaciones adicionales',
-            controller: observacionesAdicionalesController,
-            onChanged: hcNotifier.onObservacionesChanged),
-      ],
-    );
-  }
-
-  // 🔹 Sección con título estilizado
-  Widget _buildSection(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
-      child: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.bold),
       ),
     );
   }
 
-  // 🔹 Campo de texto conectado al estado
   Widget _buildFormField({
     required String label,
     required TextEditingController controller,
     bool? disabled = false,
     Function(String)? onChanged,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        enabled: !disabled!,
-        controller: controller,
-        onChanged: onChanged,
-        decoration: InputDecoration(
-          labelText: label,
-          filled: true,
-          fillColor: Colors.grey[200],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          errorStyle: const TextStyle(color: Colors.red),
+    return TextFormField(
+      enabled: !disabled!,
+      controller: controller,
+      onChanged: disabled ? null : onChanged,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Color(0xFF1976D2)),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF1976D2)),
         ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF1976D2)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 2),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+      style: const TextStyle(
+        fontSize: 16,
+        color: Colors.black87,
       ),
     );
   }
 
-  // 🔹 Campo de texto multilínea conectado al estado
   Widget _buildMultilineFormField({
     required String label,
     required TextEditingController controller,
     required Function(String) onChanged,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        controller: controller,
-        onChanged: onChanged,
-        maxLines: 5, // Permite múltiples líneas para respuestas detalladas
-        decoration: InputDecoration(
-          labelText: label,
-          filled: true,
-          fillColor: Colors.grey[200],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          errorStyle: const TextStyle(color: Colors.red),
+    return TextFormField(
+      controller: controller,
+      onChanged: onChanged,
+      maxLines: 5,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Color(0xFF1976D2)),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF1976D2)),
         ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF1976D2)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 2),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+      style: const TextStyle(
+        fontSize: 16,
+        color: Colors.black87,
       ),
     );
   }
 
-  // 🔹 Grupo de opciones de radio conectado al estado
   Widget _buildRadioButtonGroup({
     required String title,
+    bool disabled = false,
     required List<String> options,
-    required String selectedValue, // ✅ Se cambia a String
-    required Function(String) onChanged, // ✅ Se cambia a String
+    required String selectedValue,
+    required Function(String) onChanged,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,7 +359,11 @@ class _AntecedentesPerinatalesWidgetState
           padding: const EdgeInsets.only(bottom: 8.0),
           child: Text(
             title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16.0,
+              color: Color(0xFF1976D2),
+            ),
           ),
         ),
         Wrap(
@@ -291,15 +375,24 @@ class _AntecedentesPerinatalesWidgetState
               mainAxisSize: MainAxisSize.min,
               children: [
                 Radio<String>(
-                  value: option, // ✅ Ahora usa String
-                  groupValue: selectedValue, // ✅ Compara con el valor actual
-                  onChanged: (value) {
-                    if (value != null) {
-                      onChanged(value); // ✅ Devuelve el nuevo valor String
-                    }
-                  },
+                  value: option,
+                  groupValue: selectedValue,
+                  onChanged: disabled
+                      ? null
+                      : (String? value) {
+                          if (value != null) {
+                            onChanged(value);
+                          }
+                        },
+                  activeColor: const Color(0xFF1976D2),
                 ),
-                Text(option),
+                Text(
+                  option,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ),
+                ),
               ],
             );
           }).toList(),
@@ -310,9 +403,10 @@ class _AntecedentesPerinatalesWidgetState
 
   Widget _buildRadioButtonGroupBool({
     required String title,
+    bool disabled = false,
     required List<String> options,
-    required bool? selectedValue, // Cambiar a bool?
-    required Function(bool?) onChanged, // Cambiar a bool?
+    required bool? selectedValue,
+    required Function(bool?) onChanged,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,7 +415,11 @@ class _AntecedentesPerinatalesWidgetState
           padding: const EdgeInsets.only(bottom: 8.0),
           child: Text(
             title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16.0,
+              color: Color(0xFF1976D2),
+            ),
           ),
         ),
         Wrap(
@@ -333,14 +431,22 @@ class _AntecedentesPerinatalesWidgetState
               mainAxisSize: MainAxisSize.min,
               children: [
                 Radio<bool?>(
-                  value: option == "SI" ? true : false, // Convertir a bool
-                  groupValue: selectedValue, // Puede ser null
-                  onChanged: (bool? value) {
-                    onChanged(
-                        value); // Pasar el valor seleccionado (puede ser null)
-                  },
+                  value: option == "SI" ? true : false,
+                  groupValue: selectedValue,
+                  onChanged: disabled
+                      ? null
+                      : (bool? value) {
+                          onChanged(value);
+                        },
+                  activeColor: const Color(0xFF1976D2),
                 ),
-                Text(option),
+                Text(
+                  option,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ),
+                ),
               ],
             );
           }).toList(),
@@ -349,29 +455,43 @@ class _AntecedentesPerinatalesWidgetState
     );
   }
 
-  // 🔹 Grupo de selección en línea
   Widget _buildMultipleCheckboxGroup({
     required String title,
-    required Map<String, bool> options, // ✅ Cada opción tiene su propio valor
-    required Map<String, Function(bool)>
-        onChanged, // ✅ Cada opción tiene su propio onChanged
+    bool disabled = false,
+    required Map<String, bool> options,
+    required Map<String, Function(bool)> onChanged,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title,
-            style:
-                const TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0)),
+        Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16.0,
+            color: Color(0xFF1976D2),
+          ),
+        ),
         Column(
           children: options.entries.map((entry) {
             return CheckboxListTile(
-              title: Text(entry.key),
+              enabled: !disabled,
+              title: Text(
+                entry.key,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
+              ),
               value: entry.value,
               onChanged: (bool? newValue) {
                 if (newValue != null) {
                   onChanged[entry.key]!(newValue);
                 }
               },
+              activeColor: const Color(0xFF1976D2),
+              checkColor: Colors.white,
+              contentPadding: EdgeInsets.zero,
             );
           }).toList(),
         ),

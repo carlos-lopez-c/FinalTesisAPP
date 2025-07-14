@@ -30,4 +30,26 @@ class TypeTherapyDatasourceImpl implements TypeTherapyDatasource {
       throw Exception('Error al obtener las especialidades de terapia');
     }
   }
+
+  @override
+  Future<TypeTherapyEntity> getTypeTherapiesByNameUnique(String name) async {
+    try {
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('specialtyTherapy')
+          .where('name', isEqualTo: name)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        throw Exception('No se encontró la especialidad de terapia');
+      }
+
+      Map<String, dynamic> data =
+          querySnapshot.docs.first.data() as Map<String, dynamic>;
+      data['id'] = querySnapshot.docs.first.id;
+      return TypeTherapyEntity.fromJson(data);
+    } catch (e) {
+      print('Error al obtener la especialidad de terapia: $e');
+      throw Exception('Error al obtener la especialidad de terapia');
+    }
+  }
 }

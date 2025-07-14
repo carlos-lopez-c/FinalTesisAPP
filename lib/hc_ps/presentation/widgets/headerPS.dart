@@ -16,8 +16,8 @@ class headerPSWidget extends StatelessWidget {
         children: [
           Image.asset(
             'assets/imagenes/san-miguel.png',
-            width: 117,
-            height: 125,
+            width: 100,
+            height: 115,
           ),
           const SizedBox(width: 10),
           Column(
@@ -27,20 +27,20 @@ class headerPSWidget extends StatelessWidget {
               const Text(
                 'FUNDACIÓN DE NIÑOS ESPECIALES',
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 13,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const Text(
                 '“SAN MIGUEL” FUNESAMI',
                 style: TextStyle(
-                  fontSize: 19,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const Text(
                 'Acuerdo Ministerial 078-08',
-                style: TextStyle(fontSize: 20),
+                style: TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 10),
               const Text(
@@ -53,7 +53,7 @@ class headerPSWidget extends StatelessWidget {
               Text(
                 textoDinamico,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   color: Color.fromARGB(255, 255, 0, 0),
                   fontWeight: FontWeight.bold,
                 ),

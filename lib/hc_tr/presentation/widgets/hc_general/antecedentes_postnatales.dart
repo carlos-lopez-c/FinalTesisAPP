@@ -18,6 +18,7 @@ class AntecedentesPostnatalesWidget extends ConsumerWidget {
         // ✅ Alimentación
         _buildInlineCheckboxGroup(
           title: "Alimentación:",
+          disabled: hcState.status == 'Editado' ? true : false,
           options: ["Materna", "Artificial", "Maticación"],
           selectedValues: [
             hcState.createHcGeneral.antecedentesPerinatales
@@ -40,6 +41,7 @@ class AntecedentesPostnatalesWidget extends ConsumerWidget {
 
         // ✅ Desarrollo Motor Grueso
         _buildInlineCheckboxGroup(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Desarrollo motor grueso:",
           options: [
             "Control céfalico",
@@ -114,6 +116,7 @@ class AntecedentesPostnatalesWidget extends ConsumerWidget {
         ),
 
         _buildRadioButtonGroupBool(
+          disabled: hcState.status == 'Editado' ? true : false,
           title: "Palmar - Plantar",
           options: ["SI", "NO"],
           selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -121,24 +124,28 @@ class AntecedentesPostnatalesWidget extends ConsumerWidget {
           onChanged: hcNotifier.onPalmarChanged,
         ),
         _buildRadioButtonGroupBool(
+            disabled: hcState.status == 'Editado' ? true : false,
             title: "Moro",
             options: ["SI", "NO"],
             selectedValue: hcState.createHcGeneral.antecedentesPerinatales
                 .antecedentesPostnatales.reflejosPrimitivos.moro,
             onChanged: (value) => hcNotifier.onMoroChanged(value)),
         _buildRadioButtonGroupBool(
+            disabled: hcState.status == 'Editado' ? true : false,
             title: "Presión",
             options: ["SI", "NO"],
             selectedValue: hcState.createHcGeneral.antecedentesPerinatales
                 .antecedentesPostnatales.reflejosPrimitivos.presion,
             onChanged: hcNotifier.onPresionChanged),
         _buildRadioButtonGroupBool(
+            disabled: hcState.status == 'Editado' ? true : false,
             title: "De búsqueda",
             options: ["SI", "NO"],
             selectedValue: hcState.createHcGeneral.antecedentesPerinatales
                 .antecedentesPostnatales.reflejosPrimitivos.deBusqueda,
             onChanged: (value) => hcNotifier.onDeBusquedaChanged(value)),
         _buildRadioButtonGroupBool(
+            disabled: hcState.status == 'Editado' ? true : false,
             title: "Banbiski",
             options: ["SI", "NO"],
             selectedValue: hcState.createHcGeneral.antecedentesPerinatales
@@ -161,6 +168,7 @@ class AntecedentesPostnatalesWidget extends ConsumerWidget {
 
   // 🔹 Grupo de checkbox en línea
   Widget _buildInlineCheckboxGroup({
+    bool disabled = false,
     required String title,
     required List<String> options,
     required List<bool> selectedValues,
@@ -180,11 +188,11 @@ class AntecedentesPostnatalesWidget extends ConsumerWidget {
               children: [
                 Checkbox(
                   value: selectedValues[index],
-                  onChanged: (value) {
-                    if (value != null) {
-                      onChangedList[index](value);
-                    }
-                  },
+                  onChanged: disabled
+                      ? null
+                      : (value) {
+                          onChangedList[index](value!);
+                        },
                 ),
                 Text(options[index]),
               ],
@@ -200,6 +208,7 @@ class AntecedentesPostnatalesWidget extends ConsumerWidget {
   Widget _buildRadioButtonGroupBool({
     required String title,
     required List<String> options,
+    bool disabled = false,
     required bool? selectedValue, // Cambiar a bool?
     required Function(bool?) onChanged, // Cambiar a bool?
   }) {
@@ -224,10 +233,11 @@ class AntecedentesPostnatalesWidget extends ConsumerWidget {
                 Radio<bool?>(
                   value: option == "SI" ? true : false, // Convertir a bool
                   groupValue: selectedValue, // Puede ser null
-                  onChanged: (bool? value) {
-                    onChanged(
-                        value); // Pasar el valor seleccionado (puede ser null)
-                  },
+                  onChanged: disabled
+                      ? null
+                      : (value) {
+                          onChanged(value);
+                        }, // Cambiar a bool?
                 ),
                 Text(option),
               ],

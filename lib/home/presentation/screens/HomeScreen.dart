@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:h_c_1/auth/presentation/providers/auth_provider.dart';
 import 'package:h_c_1/citas_medicTR/presentation/screens/ListaCitasTR.dart';
 import 'package:h_c_1/hc_ps/presentation/screens/PsicologiaTab.dart';
@@ -21,12 +22,15 @@ class HomeScreen extends ConsumerWidget {
     }
 
     final role = authState.user!.role;
-
+    final nameComplete = authState.user!.userInformation!.firstName +
+        ' ' +
+        authState.user!.userInformation!.lastName;
+    print(nameComplete);
     // Verificar el rol del usuario y asignar tabs dinámicamente
     List<Tab> tabs = [];
     List<Widget> tabViews = [];
 
-    if (role == ('TERAPIA')) {
+    if (role == ('Therapy')) {
       tabs = [
         const Tab(icon: Icon(Icons.home), text: "Inicio"),
         const Tab(icon: Icon(Icons.folder), text: "Historias Clínicas"),
@@ -34,11 +38,11 @@ class HomeScreen extends ConsumerWidget {
       ];
 
       tabViews = [
-        HomeContent(),
+        HomeContent(name: nameComplete),
         Terapiatab(),
         ListaCitasTR(),
       ];
-    } else if (role == ('PSICOLOGIA')) {
+    } else if (role == ('Psicology')) {
       tabs = [
         const Tab(icon: Icon(Icons.home), text: "Inicio"),
         const Tab(icon: Icon(Icons.folder), text: "Historias Clínicas"),
@@ -46,7 +50,7 @@ class HomeScreen extends ConsumerWidget {
       ];
 
       tabViews = [
-        HomeContent(),
+        HomeContent(name: nameComplete),
         PsicologiaTab(),
         ListaCitasTR(),
       ];
@@ -61,17 +65,31 @@ class HomeScreen extends ConsumerWidget {
     return DefaultTabController(
       length: tabs.length,
       child: Scaffold(
+        backgroundColor: const Color(0xFFF5F8FA),
         appBar: AppBar(
+          backgroundColor: const Color(0xFF1976D2),
+          elevation: 0,
           centerTitle: true,
+          title: const Text(
+            'FUNESAMI',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.logout),
+              icon: const Icon(Icons.logout, color: Colors.white),
               onPressed: () {
                 ref.read(authProvider.notifier).logout();
               },
             ),
           ],
           bottom: TabBar(
+            indicatorColor: Colors.white,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white70,
             tabs: tabs,
           ),
         ),
@@ -85,87 +103,162 @@ class HomeScreen extends ConsumerWidget {
 
 // Pantalla de contenido principal (Home)
 class HomeContent extends StatelessWidget {
+  final String name;
+  const HomeContent({Key? key, this.name = ''}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(30.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(height: 110),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: const [
-              Text(
-                'Fundación de niños especiales',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 20),
+            // Encabezado con logo y título
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Image.asset(
+                    'assets/imagenes/san-miguel.png',
+                    width: 200,
+                    height: 200,
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Fundación de niños especiales',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1976D2),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'SAN MIGUEL - FUNESAMI',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Color(0xFF1976D2),
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 30),
+            // Mensaje de bienvenida
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    'Bienvenido/a $name',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      color: Color(0xFF1976D2),
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Sistema de gestión de citas e historias clínicas',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 25),
+            // Botón de cambio de contraseña
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: ElevatedButton.icon(
+                onPressed: () => context.push('/change-password'),
+                icon: const Icon(Icons.lock_reset, color: Colors.white),
+                label: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12.0),
+                  child: Text(
+                    'Cambiar Contraseña',
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  ),
                 ),
-                textAlign: TextAlign.center,
-              ),
-              Text(
-                'SAN MIGUEL - FUNESAMI',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Bienvenido/a ',
-                style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.blueAccent,
-                    fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(width: 10),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'al sistema de gestión de citas e historias clínicas',
-                style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.blueAccent,
-                    fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(width: 10),
-            ],
-          ),
-          Image.asset(
-            'assets/imagenes/san-miguel.png', // Ruta de la imagen
-            width: 250,
-            height: 450,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Text(
-                '© Desarrollado por ',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.normal,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1976D2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 2,
                 ),
               ),
-              Text(
-                'Carlos Eduardo López Candelejo',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Colors.blueAccent,
-                  fontWeight: FontWeight.bold,
-                ),
+            ),
+            const SizedBox(height: 25),
+            // Footer
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Text(
+                    '© Desarrollado por ',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  Text(
+                    'Carlos Eduardo López Candelejo',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF1976D2),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -7,7 +7,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_core/firebase_core.dart'; // Import Firebase
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Ensure proper initialization
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -22,8 +22,11 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appRouter = ref.watch(goRouterProvider);
     return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
       locale: const Locale('es', 'EC'),
       routerConfig: appRouter,
     );
   }
 }
+
+//hola

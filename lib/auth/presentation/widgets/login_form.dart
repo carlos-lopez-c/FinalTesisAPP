@@ -9,146 +9,175 @@ class LoginForm extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final loginForm = ref.watch(formularioProvider);
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Campo de correo electrónico
-            TextFormField(
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Campo de correo electrónico
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20.0),
+            child: TextFormField(
               onChanged: ref.read(formularioProvider.notifier).onEmailChanged,
               keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
-                errorBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.red),
+                filled: true,
+                fillColor: Colors.white,
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.red),
                 ),
-                focusedErrorBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.red),
+                focusedErrorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.red, width: 2),
                 ),
-                errorStyle: const TextStyle(color: Colors.red),
+                errorStyle: const TextStyle(
+                  color: Colors.red,
+                  fontSize: 14,
+                  height: 1.5,
+                  overflow: TextOverflow.visible,
+                ),
+                errorMaxLines: 3,
                 errorText: loginForm.isFormPosted
                     ? loginForm.email.errorMessage
                     : null,
                 labelText: 'Correo Electrónico',
-                labelStyle: const TextStyle(color: Colors.lightBlue),
-                hintText: 'ejemplo@gmail.com o ejemplo@outlook.com',
-                prefixIcon: const Icon(Icons.email, color: Colors.lightBlue),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.lightBlue),
+                labelStyle: const TextStyle(color: Color(0xFF1976D2)),
+                hintText: 'ejemplo@gmail.com',
+                prefixIcon: const Icon(Icons.email, color: Color(0xFF1976D2)),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFF1976D2)),
                 ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.lightBlue, width: 2.0),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide:
+                      const BorderSide(color: Color(0xFF1976D2), width: 2),
                 ),
               ),
-              style: const TextStyle(color: Colors.black),
+              style: const TextStyle(color: Colors.black87),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Por favor, ingrese su correo electrónico.';
                 }
-
                 final RegExp regex = RegExp(r'^[a-zA-Z0-9._%+-]+@');
                 if (!regex.hasMatch(value)) {
-                  return 'El correo no cumple con el formato correcto';
+                  return 'El correo no cumple con el formato correcto.';
                 }
                 return null;
               },
             ),
-            const SizedBox(height: 16),
+          ),
 
-            // Campo de contraseña
-            TextFormField(
-              onChanged: ref.read(formularioProvider.notifier).onPasswordChanged,
+          // Campo de contraseña
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20.0),
+            child: TextFormField(
+              onChanged:
+                  ref.read(formularioProvider.notifier).onPasswordChanged,
+              obscureText: true,
               decoration: InputDecoration(
-                errorBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.red),
+                filled: true,
+                fillColor: Colors.white,
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.red),
                 ),
-                focusedErrorBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.red),
+                focusedErrorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.red, width: 2),
                 ),
+                errorStyle: const TextStyle(
+                  color: Colors.red,
+                  fontSize: 14,
+                  height: 1.5,
+                  overflow: TextOverflow.visible,
+                ),
+                errorMaxLines: 3,
                 errorText: loginForm.isFormPosted
                     ? loginForm.password.errorMessage
                     : null,
                 labelText: 'Contraseña',
-                labelStyle: const TextStyle(color: Colors.lightBlue),
-                prefixIcon: const Icon(Icons.lock, color: Colors.lightBlue),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.lightBlue),
+                labelStyle: const TextStyle(color: Color(0xFF1976D2)),
+                prefixIcon: const Icon(Icons.lock, color: Color(0xFF1976D2)),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFF1976D2)),
                 ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.lightBlue, width: 2.0),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide:
+                      const BorderSide(color: Color(0xFF1976D2), width: 2),
                 ),
               ),
-              style: const TextStyle(color: Colors.black),
+              style: const TextStyle(color: Colors.black87),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Por favor, ingrese su contraseña.';
-                } else if (value.length < 10) {
-                  return 'La contraseña debe tener al menos 10 caracteres.';
+                } else if (value.length < 12) {
+                  return 'La contraseña debe tener al menos 12 caracteres.';
+                } else if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                  return 'La contraseña debe contener al menos una letra mayúscula.';
+                } else if (!RegExp(r'[a-z]').hasMatch(value)) {
+                  return 'La contraseña debe contener al menos una letra minúscula.';
+                } else if (!RegExp(r'\d').hasMatch(value)) {
+                  return 'La contraseña debe contener al menos un número.';
+                } else if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>]')
+                    .hasMatch(value)) {
+                  return 'La contraseña debe contener al menos un carácter especial.';
                 }
                 return null;
               },
-              obscureText: true,
             ),
-            const SizedBox(height: 16),
+          ),
 
-            // Botón de iniciar sesión
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Material(
-                  elevation: 2,
-                  borderRadius: BorderRadius.circular(30),
-                  child: OutlinedButton(
-                    onPressed: () {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        ref.read(formularioProvider.notifier).onFormSubmit();
+          const SizedBox(height: 20),
 
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: Text('Éxito'),
-                              content: Text('Inicio de sesión exitoso.'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: Text('Aceptar'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Por favor, corrija los errores.'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    },
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(
-                          color: const Color.fromARGB(255, 141, 183, 203),
-                          width: 1.5),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      foregroundColor: const Color.fromARGB(255, 4, 71, 103),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 15),
-                    ),
-                    child: const Text('Iniciar Sesión'),
+          // Botón de iniciar sesión
+          ElevatedButton(
+            onPressed: () async {
+              if (_formKey.currentState?.validate() ?? false) {
+                try {
+                  await ref.read(formularioProvider.notifier).onFormSubmit();
+                } catch (e) {
+                  print("Error: $e");
+                }
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Por favor, corrija los errores.'),
+                    backgroundColor: Colors.red,
                   ),
-                ),
-              ],
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1976D2),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 4,
             ),
-          ],
-        ),
+            child: loginForm.isPosting
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Text(
+                    'Iniciar Sesión',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+          ),
+        ],
       ),
     );
   }

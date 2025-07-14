@@ -1,0 +1,2 @@
+C:/Users/CARLOS/Desktop/FN/NUEVO PDF/FinalTesisAPP/android/app/.cxx/RelWithDebInfo/1e4p441j/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/CARLOS/Desktop/FN/NUEVO PDF/FinalTesisAPP/android/app/.cxx/RelWithDebInfo/1e4p441j/armeabi-v7a/CMakeFiles/rebuild_cache.dir

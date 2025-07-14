@@ -67,6 +67,11 @@ jobs:
           mkdir -p APK
           mv build/app/outputs/flutter-apk/app-release.apk APK/app-release.apk
 
+      - name: Agregar y commitear todos los cambios
+        run: |
+          git add .
+          git commit -m "Preparar cambios antes de pull para Publish [skip ci]" || echo "No hay cambios para commitear"
+
       - name: Cambiar a la rama Publish
         run: |
           git fetch origin
@@ -75,7 +80,7 @@ jobs:
       - name: Hacer pull de la rama Publish
         run: git pull origin Publish --rebase
 
-      - name: Agregar y commitear el APK
+      - name: Agregar y commitear el APK (por si hay cambios nuevos)
         run: |
           git add APK/app-release.apk
           git commit -m "Subir APK generado automáticamente [skip ci]" || echo "No hay cambios para commitear"
@@ -87,4 +92,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: APK de Producción
-          path: APK/app-release.apk
+          path: APK/app-release.apk 

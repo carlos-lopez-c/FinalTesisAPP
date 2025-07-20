@@ -223,22 +223,46 @@ class HcPsAdultFormNotifier extends StateNotifier<HcFormAdultState> {
 
   Future<void> onSearchHcPsAdult(String cedula) async {
     try {
-      state = state.copyWith(loading: true);
+      state = state.copyWith(loading: true, errorMessage: '');
+
+      if (cedula.isEmpty) {
+        state = state.copyWith(
+          errorMessage: 'Debe ingresar un número de cédula',
+          loading: false,
+        );
+        return;
+      }
+
       final hcGeneral = await onCallbackSearchHcPsAdult(cedula);
       print("Aqui tambien llega ${hcGeneral?.toJson()}");
+
+      // Verificar si realmente se encontró una historia clínica válida
+      if (hcGeneral == null || hcGeneral.nombreCompleto.isEmpty) {
+        state = state.copyWith(
+          createHcPsAdult: initialPsAdult,
+          status: 'Nuevo',
+          errorMessage:
+              'No se encontró historia clínica asociada al DNI $cedula',
+          successMessage: '',
+          loading: false,
+        );
+        return;
+      }
+
       state = state.copyWith(
         createHcPsAdult: hcGeneral,
         status: 'Editado',
         errorMessage: '',
         successMessage: 'Historia clínica encontrada',
+        loading: false,
       );
     } catch (e) {
+      print('🔴 Error al buscar historia clínica: $e');
       state = state.copyWith(
-        errorMessage: e.toString() ?? 'Error al obtener historia clínica',
+        errorMessage: 'No se encontró historia clínica asociada al DNI $cedula',
         successMessage: '',
+        loading: false,
       );
-    } finally {
-      state = state.copyWith(loading: false);
     }
   }
 

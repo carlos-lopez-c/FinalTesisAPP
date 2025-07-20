@@ -325,12 +325,22 @@ class HcPsNinoFormNotifier extends StateNotifier<HcFormNinoState> {
       state = state.copyWith(
           loading: true, busquedaRealizada: false, errorMessage: '');
 
+      if (cedula.isEmpty) {
+        state = state.copyWith(
+          errorMessage: 'Debe ingresar un número de cédula',
+          loading: false,
+          busquedaRealizada: true,
+        );
+        return;
+      }
+
       // Verificar si existe la historia clínica
       final exists = await onCallbackExistHcPsNino(cedula);
       if (!exists) {
         state = state.copyWith(
           createHcPsNino: initialPsNino,
-          errorMessage: 'No se encontró una historia clínica para esta cédula',
+          errorMessage:
+              'No se encontró historia clínica asociada al DNI $cedula',
           successMessage: '',
           busquedaRealizada: true,
         );
@@ -339,6 +349,21 @@ class HcPsNinoFormNotifier extends StateNotifier<HcFormNinoState> {
 
       // Buscar la historia clínica
       final hcNino = await onCallbackSearchHcPsNino(cedula);
+
+      // Verificar si realmente se encontró una historia clínica válida
+      if (hcNino == null || hcNino.nombreCompleto.isEmpty) {
+        state = state.copyWith(
+          createHcPsNino: initialPsNino,
+          status: 'Nuevo',
+          errorMessage:
+              'No se encontró historia clínica asociada al DNI $cedula',
+          successMessage: '',
+          busquedaRealizada: true,
+          historiaExiste: false,
+        );
+        return;
+      }
+
       state = state.copyWith(
         createHcPsNino: hcNino,
         status: 'Editado',
@@ -348,9 +373,10 @@ class HcPsNinoFormNotifier extends StateNotifier<HcFormNinoState> {
         historiaExiste: true,
       );
     } catch (e) {
+      print('🔴 Error al buscar historia clínica: $e');
       state = state.copyWith(
         createHcPsNino: initialPsNino,
-        errorMessage: e.toString() ?? 'Error al buscar historia clínica',
+        errorMessage: 'No se encontró historia clínica asociada al DNI $cedula',
         successMessage: '',
         busquedaRealizada: true,
       );

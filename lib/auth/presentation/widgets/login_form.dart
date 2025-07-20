@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_c_1/auth/presentation/providers/login_provider.dart';
 
-class LoginForm extends ConsumerWidget {
+class LoginForm extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<LoginForm> createState() => _LoginFormState();
+}
+
+class _LoginFormState extends ConsumerState<LoginForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _passwordVisible = false;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final loginForm = ref.watch(formularioProvider);
 
     return Form(
@@ -75,7 +81,7 @@ class LoginForm extends ConsumerWidget {
             child: TextFormField(
               onChanged:
                   ref.read(formularioProvider.notifier).onPasswordChanged,
-              obscureText: true,
+              obscureText: !_passwordVisible,
               decoration: InputDecoration(
                 filled: true,
                 fillColor: Colors.white,
@@ -100,6 +106,17 @@ class LoginForm extends ConsumerWidget {
                 labelText: 'Contraseña',
                 labelStyle: const TextStyle(color: Color(0xFF1976D2)),
                 prefixIcon: const Icon(Icons.lock, color: Color(0xFF1976D2)),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _passwordVisible ? Icons.visibility : Icons.visibility_off,
+                    color: const Color(0xFF1976D2),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _passwordVisible = !_passwordVisible;
+                    });
+                  },
+                ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(color: Color(0xFF1976D2)),

@@ -12,6 +12,32 @@ class _GenerarCitasTrState extends ConsumerState<GenerarCitasTr> {
   final TextEditingController _nombreController = TextEditingController();
 
   @override
+  void dispose() {
+    _nombreController.dispose();
+    super.dispose();
+  }
+
+  String _getAreaName(AppointmentFormState state) {
+    if (state.areas.isEmpty) return 'Terapia';
+
+    if (state.specialtyTherapyId == null) {
+      return state.areas.first.name;
+    }
+
+    try {
+      final area = state.areas.firstWhere(
+        (area) => area.id == state.specialtyTherapyId,
+        orElse: () => state.areas.first,
+      );
+      print('🔹 Módulo TR: Área seleccionada: ${area.name}');
+      return area.name;
+    } catch (e) {
+      print('🔹 Módulo TR: Error al obtener área, usando Terapia por defecto');
+      return state.areas.isNotEmpty ? state.areas.first.name : 'Terapia';
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final appointmentFormState = ref.watch(appointmentFormProvider);
     final notifier = ref.read(appointmentFormProvider.notifier);
@@ -41,6 +67,14 @@ class _GenerarCitasTrState extends ConsumerState<GenerarCitasTr> {
           ),
         ),
         iconTheme: IconThemeData(color: Colors.white),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            // Limpiar el estado antes de navegar de vuelta
+            notifier.clearState();
+            Navigator.of(context).pop();
+          },
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -142,6 +176,55 @@ class _GenerarCitasTrState extends ConsumerState<GenerarCitasTr> {
                             ),
                           ],
                         ),
+                        SizedBox(height: 10),
+                        if (appointmentFormState.searchMessage != null)
+                          Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: appointmentFormState.searchMessage ==
+                                      'Paciente encontrado'
+                                  ? Colors.green.withOpacity(0.1)
+                                  : Colors.red.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: appointmentFormState.searchMessage ==
+                                        'Paciente encontrado'
+                                    ? Colors.green
+                                    : Colors.red,
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  appointmentFormState.searchMessage ==
+                                          'Paciente encontrado'
+                                      ? Icons.check_circle
+                                      : Icons.error,
+                                  color: appointmentFormState.searchMessage ==
+                                          'Paciente encontrado'
+                                      ? Colors.green
+                                      : Colors.red,
+                                  size: 20,
+                                ),
+                                SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    appointmentFormState.searchMessage!,
+                                    style: TextStyle(
+                                      color:
+                                          appointmentFormState.searchMessage ==
+                                                  'Paciente encontrado'
+                                              ? Colors.green
+                                              : Colors.red,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -228,23 +311,21 @@ class _GenerarCitasTrState extends ConsumerState<GenerarCitasTr> {
                           ),
                         ),
                         SizedBox(height: 16),
-                        DropdownButtonFormField<String>(
-                          value: appointmentFormState.specialtyTherapyId,
-                          hint: Text('Seleccione un Área'),
+                        TextFormField(
+                          enabled: false,
                           decoration: InputDecoration(
+                            labelText: 'Área',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                             prefixIcon:
                                 Icon(Icons.category, color: Color(0xFF1976D2)),
+                            filled: true,
+                            fillColor: Colors.grey[200],
                           ),
-                          items: appointmentFormState.areas.map((area) {
-                            return DropdownMenuItem(
-                              value: area.id,
-                              child: Text(area.name),
-                            );
-                          }).toList(),
-                          onChanged: (value) => notifier.onAreaChanged(value!),
+                          controller: TextEditingController(
+                            text: _getAreaName(appointmentFormState),
+                          ),
                         ),
                         SizedBox(height: 16),
                         Row(

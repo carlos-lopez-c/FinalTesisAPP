@@ -3,11 +3,39 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:h_c_1/auth/presentation/providers/auth_provider.dart';
 import 'package:h_c_1/home/presentation/providers/change_password_provier.dart';
 
-class Changepasswordscreen extends ConsumerWidget {
+class Changepasswordscreen extends ConsumerStatefulWidget {
   const Changepasswordscreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<Changepasswordscreen> createState() =>
+      _ChangepasswordscreenState();
+}
+
+class _ChangepasswordscreenState extends ConsumerState<Changepasswordscreen> {
+  final TextEditingController _oldPasswordController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
+  @override
+  void dispose() {
+    _oldPasswordController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  // 🔹 Verificar si todos los requisitos están cumplidos
+  bool _areAllRequirementsMet(FormChangePasswordState state) {
+    return state.hasMinLength &&
+        state.hasUppercase &&
+        state.hasLowercase &&
+        state.hasNumber &&
+        state.hasSpecialChar;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final formChangePassword = ref.watch(formChangePasswordProvider);
     final auth = ref.watch(authProvider);
     ref.listen<AuthState?>(authProvider, (previous, next) {
@@ -23,6 +51,12 @@ class Changepasswordscreen extends ConsumerWidget {
             duration: const Duration(seconds: 2),
           ),
         );
+        // Limpiar el formulario después de una actualización exitosa
+        ref.read(formChangePasswordProvider.notifier).clearForm();
+        // Limpiar los controladores de texto
+        _oldPasswordController.clear();
+        _newPasswordController.clear();
+        _confirmPasswordController.clear();
         Future.delayed(const Duration(seconds: 2), () {
           ref.read(authProvider.notifier).clearSuccess();
         });
@@ -100,6 +134,7 @@ class Changepasswordscreen extends ConsumerWidget {
                 const SizedBox(height: 32),
                 // Antigua contraseña
                 _PasswordField(
+                  controller: _oldPasswordController,
                   label: 'Antigua Contraseña',
                   onChanged: ref
                       .read(formChangePasswordProvider.notifier)
@@ -115,6 +150,7 @@ class Changepasswordscreen extends ConsumerWidget {
                 const SizedBox(height: 20),
                 // Nueva contraseña
                 _PasswordField(
+                  controller: _newPasswordController,
                   label: 'Nueva Contraseña',
                   onChanged: ref
                       .read(formChangePasswordProvider.notifier)
@@ -130,6 +166,7 @@ class Changepasswordscreen extends ConsumerWidget {
                 const SizedBox(height: 20),
                 // Confirmar contraseña
                 _PasswordField(
+                  controller: _confirmPasswordController,
                   label: 'Confirmar Contraseña',
                   onChanged: ref
                       .read(formChangePasswordProvider.notifier)
@@ -143,8 +180,62 @@ class Changepasswordscreen extends ConsumerWidget {
                       .read(formChangePasswordProvider.notifier)
                       .onConfirmPasswordVisibilityChanged,
                 ),
+                // Mensaje visual de coincidencia de contraseñas
+                if (_newPasswordController.text.isNotEmpty &&
+                    _confirmPasswordController.text.isNotEmpty)
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(top: 4, bottom: 8),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: (_newPasswordController.text ==
+                              _confirmPasswordController.text)
+                          ? Colors.green.shade50
+                          : Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: (_newPasswordController.text ==
+                                _confirmPasswordController.text)
+                            ? Colors.green
+                            : Colors.red,
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          (_newPasswordController.text ==
+                                  _confirmPasswordController.text)
+                              ? Icons.check_circle
+                              : Icons.cancel,
+                          color: (_newPasswordController.text ==
+                                  _confirmPasswordController.text)
+                              ? Colors.green
+                              : Colors.red,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            (_newPasswordController.text ==
+                                    _confirmPasswordController.text)
+                                ? '¡Las contraseñas coinciden!'
+                                : 'Las contraseñas no coinciden',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: (_newPasswordController.text ==
+                                      _confirmPasswordController.text)
+                                  ? Colors.green
+                                  : Colors.red,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 const SizedBox(height: 8),
-                // Ayuda sobre requisitos de contraseña
+                // Validaciones de contraseña en tiempo real
                 Container(
                   width: double.infinity,
                   margin: const EdgeInsets.only(bottom: 16),
@@ -153,17 +244,93 @@ class Changepasswordscreen extends ConsumerWidget {
                     color: Colors.blue.shade50,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Text(
-                    'La nueva contraseña debe tener al menos 12 caracteres, incluir mayúsculas, minúsculas, números y un carácter especial.',
-                    style: TextStyle(fontSize: 14, color: Color(0xFF1976D2)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Requisitos de la contraseña:',
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1976D2)),
+                      ),
+                      const SizedBox(height: 8),
+                      _PasswordRequirement(
+                        text: 'Mínimo 12 caracteres',
+                        isMet: formChangePassword.hasMinLength,
+                      ),
+                      _PasswordRequirement(
+                        text: 'Al menos una mayúscula',
+                        isMet: formChangePassword.hasUppercase,
+                      ),
+                      _PasswordRequirement(
+                        text: 'Al menos una minúscula',
+                        isMet: formChangePassword.hasLowercase,
+                      ),
+                      _PasswordRequirement(
+                        text: 'Al menos un número',
+                        isMet: formChangePassword.hasNumber,
+                      ),
+                      _PasswordRequirement(
+                        text: 'Al menos un carácter especial',
+                        isMet: formChangePassword.hasSpecialChar,
+                      ),
+                    ],
                   ),
                 ),
+                const SizedBox(height: 8),
+                // Mensaje de validación completa
+                if (formChangePassword.newPassword.value.isNotEmpty)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: _areAllRequirementsMet(formChangePassword)
+                          ? Colors.green.shade50
+                          : Colors.orange.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: _areAllRequirementsMet(formChangePassword)
+                            ? Colors.green
+                            : Colors.orange,
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _areAllRequirementsMet(formChangePassword)
+                              ? Icons.check_circle
+                              : Icons.info,
+                          color: _areAllRequirementsMet(formChangePassword)
+                              ? Colors.green
+                              : Colors.orange,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _areAllRequirementsMet(formChangePassword)
+                                ? '¡Todos los requisitos cumplidos!'
+                                : 'Completa todos los requisitos para continuar',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: _areAllRequirementsMet(formChangePassword)
+                                  ? Colors.green
+                                  : Colors.orange,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 const SizedBox(height: 12),
                 // Botón de cambiar contraseña
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: auth.isLoading
+                    onPressed: (auth.isLoading || !formChangePassword.isValid)
                         ? null
                         : () {
                             ref
@@ -208,6 +375,7 @@ class Changepasswordscreen extends ConsumerWidget {
 // Widget reutilizable para campos de contraseña
 class _PasswordField extends StatelessWidget {
   final String label;
+  final TextEditingController? controller;
   final void Function(String) onChanged;
   final String? errorText;
   final bool isVisible;
@@ -215,6 +383,7 @@ class _PasswordField extends StatelessWidget {
 
   const _PasswordField({
     required this.label,
+    this.controller,
     required this.onChanged,
     required this.errorText,
     required this.isVisible,
@@ -225,6 +394,7 @@ class _PasswordField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      controller: controller,
       onChanged: onChanged,
       obscureText: !isVisible,
       decoration: InputDecoration(
@@ -259,6 +429,42 @@ class _PasswordField extends StatelessWidget {
         ),
       ),
       style: const TextStyle(color: Colors.black87, fontSize: 16),
+    );
+  }
+}
+
+// Widget para mostrar requisitos de contraseña
+class _PasswordRequirement extends StatelessWidget {
+  final String text;
+  final bool isMet;
+
+  const _PasswordRequirement({
+    required this.text,
+    required this.isMet,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          Icon(
+            isMet ? Icons.check_circle : Icons.circle_outlined,
+            size: 16,
+            color: isMet ? Colors.green : Colors.grey,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              color: isMet ? Colors.green : Colors.grey[600],
+              fontWeight: isMet ? FontWeight.w500 : FontWeight.normal,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

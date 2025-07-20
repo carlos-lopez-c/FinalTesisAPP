@@ -85,7 +85,12 @@ class PasswordResetNotifier extends StateNotifier<PasswordResetState> {
       // Regresar a la pantalla anterior después de mostrar el mensaje
       ref.read(goRouterProvider).pop();
     } on CustomError catch (e) {
-      state = state.copyWith(isSubmitting: false, errorMessage: e.message);
+      // Si el mensaje es de historia clínica o user-not-found, mostrar el mensaje correcto
+      final msg = (e.message.contains('historia clínica asociada al DNI') ||
+              e.message.contains('user-not-found'))
+          ? 'No existe una cuenta asociada a este correo electrónico.'
+          : e.message;
+      state = state.copyWith(isSubmitting: false, errorMessage: msg);
     } catch (e) {
       state = state.copyWith(
           isSubmitting: false,

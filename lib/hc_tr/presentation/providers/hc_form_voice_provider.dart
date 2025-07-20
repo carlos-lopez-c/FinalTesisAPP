@@ -32,7 +32,7 @@ final initialVoice = HcVoiceState(
       razonDeDerivacion: '',
       diagnosticoORL: '',
       telefonoDeContacto: '',
-      fechaDeEvaluacion: '',
+      fechaDeEvaluacion: DateTime.now().toIso8601String().substring(0, 10),
       historiaClinica: HistoriaClinica(
         motivoDeConsulta: '',
         esLaPrimeraVezQueTieneEstaDificultad: '',
@@ -140,7 +140,7 @@ class HcVoiceFormNotifier extends StateNotifier<HcVoiceState> {
           razonDeDerivacion: '',
           diagnosticoORL: '',
           telefonoDeContacto: '',
-          fechaDeEvaluacion: '',
+          fechaDeEvaluacion: DateTime.now().toIso8601String().substring(0, 10),
           historiaClinica: HistoriaClinica(
             motivoDeConsulta: '',
             esLaPrimeraVezQueTieneEstaDificultad: '',
@@ -187,16 +187,50 @@ class HcVoiceFormNotifier extends StateNotifier<HcVoiceState> {
 
   Future<void> onSearchHcVoice(String cedula) async {
     try {
-      print('🟢 Obteniendo historia clínica....');
-      state = state.copyWith(loading: true);
-      final hcGeneral = await getHcVoice(cedula);
-      state = state.copyWith(createHcVoice: hcGeneral, status: 'Editado');
-    } on CustomError catch (e) {
+      state = state.copyWith(loading: true, errorMessage: '');
+
+      if (cedula.isEmpty) {
+        state = state.copyWith(
+          errorMessage: 'Debe ingresar un número de cédula',
+          loading: false,
+        );
+        return;
+      }
+
+      print('🟢 Obteniendo historia clínica de voz....');
+      final hcVoice = await getHcVoice(cedula);
+
+      // Verificar si realmente se encontró una historia clínica válida
+      if (hcVoice == null || hcVoice.nombreCompleto.isEmpty) {
+        state = state.copyWith(
+          status: 'Nuevo',
+          errorMessage:
+              'No se encontró historia clínica asociada al DNI $cedula',
+          loading: false,
+        );
+        return;
+      }
+
+      print('Historia clínica de voz encontrada: ${hcVoice.nombreCompleto}');
       state = state.copyWith(
-        errorMessage: e.message,
+        createHcVoice: hcVoice,
+        status: 'Editado',
+        errorMessage: '',
+        successMessage: 'Historia clínica encontrada',
+        loading: false,
       );
-    } finally {
-      state = state.copyWith(loading: false);
+    } on CustomError catch (e) {
+      final msg = (e.message != null &&
+              e.message!.contains('Correo no registrado'))
+          ? 'No se encontró historia clínica asociada al DNI ${state.cedula.isNotEmpty ? state.cedula : 'desconocido'}'
+          : e.message;
+      state = state.copyWith(loading: false, errorMessage: msg);
+    } catch (e) {
+      print('🔴 Error inesperado al buscar historia clínica de voz: $e');
+      state = state.copyWith(
+        errorMessage: 'No se encontró historia clínica asociada al DNI $cedula',
+        loading: false,
+      );
     }
   }
 
@@ -226,8 +260,12 @@ class HcVoiceFormNotifier extends StateNotifier<HcVoiceState> {
           successMessage: 'Historia clínica creada con éxito',
           errorMessage: '');
     } on CustomError catch (e) {
+      final msg = (e.message != null &&
+              e.message!.contains('Correo no registrado'))
+          ? 'No se encontró historia clínica asociada al DNI ${state.cedula.isNotEmpty ? state.cedula : 'desconocido'}'
+          : e.message;
       state = state.copyWith(
-        errorMessage: e.message,
+        errorMessage: msg,
         successMessage: '',
       );
       print('🔴 Error al crear historia clínica: $e');
@@ -254,8 +292,12 @@ class HcVoiceFormNotifier extends StateNotifier<HcVoiceState> {
           successMessage: 'Historia clínica actualizada con éxito',
           errorMessage: '');
     } on CustomError catch (e) {
+      final msg = (e.message != null &&
+              e.message!.contains('Correo no registrado'))
+          ? 'No se encontró historia clínica asociada al DNI ${state.cedula.isNotEmpty ? state.cedula : 'desconocido'}'
+          : e.message;
       state = state.copyWith(
-        errorMessage: e.message,
+        errorMessage: msg,
         successMessage: '',
       );
       print('🔴 Error al actualizar historia clínica: $e');
@@ -295,7 +337,11 @@ class HcVoiceFormNotifier extends StateNotifier<HcVoiceState> {
         ),
       );
     } on CustomError catch (e) {
-      state = state.copyWith(loading: false, errorMessage: e.message);
+      final msg = (e.message != null &&
+              e.message!.contains('Correo no registrado'))
+          ? 'No se encontró historia clínica asociada al DNI ${state.cedula.isNotEmpty ? state.cedula : 'desconocido'}'
+          : e.message;
+      state = state.copyWith(loading: false, errorMessage: msg);
     }
   }
 

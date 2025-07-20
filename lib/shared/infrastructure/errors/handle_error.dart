@@ -56,7 +56,7 @@ class FirebaseErrorHandler {
             code: e.code);
       default:
         return CustomError(
-            'Ha ocurrido un error. Por favor, intenta nuevamente.',
+            'Error en la autenticación. Por favor, verifica tus datos e intenta nuevamente.',
             code: e.code);
     }
   }
@@ -109,8 +109,7 @@ class FirebaseErrorHandler {
         return CustomError('Se requiere verificación de dos factores.',
             code: e.code);
       default:
-        return CustomError(
-            'Ha ocurrido un error. Por favor, intenta nuevamente.',
+        return CustomError('No se encontró historia clínica asociada al DNI',
             code: e.code);
     }
   }

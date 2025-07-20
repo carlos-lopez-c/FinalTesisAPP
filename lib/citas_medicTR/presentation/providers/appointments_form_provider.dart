@@ -25,6 +25,7 @@ final appointmentFormProvider =
         ref.read(appointmentProvider.notifier).crearCita;
 
     return AppointmentFormNotifier(
+        ref: ref,
         onCallbackAppointment: onCallbackAppointment,
         appointmentRepository: appointmentRepo,
         patientRepository: patientRepo,
@@ -40,9 +41,11 @@ class AppointmentFormNotifier extends StateNotifier<AppointmentFormState> {
   final PatientRepository patientRepository;
   final TypeTherapyRepository typeTherapyRepository;
   final String medicID;
+  final Ref ref;
 
   AppointmentFormNotifier(
-      {required this.appointmentRepository,
+      {required this.ref,
+      required this.appointmentRepository,
       required this.onCallbackAppointment,
       required this.patientRepository,
       required this.typeTherapyRepository,
@@ -57,15 +60,58 @@ class AppointmentFormNotifier extends StateNotifier<AppointmentFormState> {
   }
 
   void onCedulaChanged(String value) {
-    state = state.copyWith(cedula: value);
+    // Limpiar mensaje de búsqueda cuando se cambia la cédula
+    if (value.isEmpty) {
+      state = state.copyWith(cedula: value, searchMessage: null);
+    } else {
+      state = state.copyWith(cedula: value);
+    }
   }
 
   Future<void> getTypeTherapics() async {
     try {
       print('🔹 Cargando áreas terapéuticas...');
       final areas = await typeTherapyRepository.getTypeTherapies();
-      state = state.copyWith(areas: areas);
+
+      // Obtener el rol del usuario desde el authProvider
+      final authState = ref.read(authProvider);
+      final userRole = authState.user?.role ?? '';
+      print('🔹 Rol del usuario: $userRole');
+
+      // Buscar el área según el rol del usuario
+      print('🔹 Buscando área para rol: $userRole');
+      final defaultArea = areas.isNotEmpty
+          ? areas.firstWhere(
+              (area) {
+                print('🔹 Evaluando área: ${area.name}');
+                if (userRole == 'Psicology') {
+                  final isPsicologia =
+                      area.name.toLowerCase().contains('psicología') ||
+                          area.name.toLowerCase().contains('psicologia');
+                  print('🔹 Es psicología: $isPsicologia');
+                  return isPsicologia;
+                } else {
+                  final isTerapia = area.name.toLowerCase().contains('terapia');
+                  print('🔹 Es terapia: $isTerapia');
+                  return isTerapia;
+                }
+              },
+              orElse: () => areas.first,
+            )
+          : null;
+
+      state = state.copyWith(
+        areas: areas,
+        specialtyTherapyId: defaultArea?.id,
+      );
       print('🔹 Áreas terapéuticas cargadas: ${areas.length}');
+      if (defaultArea != null) {
+        print(
+            '🔹 Área por defecto establecida: ${defaultArea.name} (Rol: $userRole)');
+      } else {
+        print(
+            '🔹 No se encontró área específica, usando primera área disponible');
+      }
     } catch (e) {
       state = state.copyWith(
           loading: false, errorMessage: 'Error al obtener áreas terapéuticas');
@@ -74,19 +120,28 @@ class AppointmentFormNotifier extends StateNotifier<AppointmentFormState> {
 
   // 🔹 Buscar paciente por DNI
   Future<void> getPacienteByDni(String dni) async {
+    if (dni.trim().isEmpty) {
+      state = state.copyWith(searchMessage: null);
+      return;
+    }
+
     try {
       print('🔹 Buscando paciente por DNI: $dni');
-      state = state.copyWith(loading: true);
+      state = state.copyWith(loading: true, searchMessage: null);
       final paciente = await patientRepository.getPatientByDni(dni);
       state = state.copyWith(
         loading: false,
         patientId: paciente.id,
         patientEntity: paciente,
+        searchMessage: 'Paciente encontrado',
       );
       print('🔹 Paciente: ${state.patientEntity?.firstname} ');
     } catch (e) {
       state = state.copyWith(
-          loading: false, errorMessage: 'Error al obtener paciente');
+        loading: false,
+        errorMessage: 'Error al obtener paciente',
+        searchMessage: 'No se encontró paciente con el DNI asociado',
+      );
     }
   }
 
@@ -108,6 +163,17 @@ class AppointmentFormNotifier extends StateNotifier<AppointmentFormState> {
   // 🔹 Seleccionar Hora
   void onTimeChanged(String value) {
     state = state.copyWith(selectedTime: value);
+  }
+
+  // 🔹 Limpiar estado completo
+  void clearState() {
+    state = AppointmentFormState();
+    getTypeTherapics(); // Recargar áreas terapéuticas y establecer área por defecto
+  }
+
+  // 🔹 Limpiar solo el mensaje de búsqueda
+  void clearSearchMessage() {
+    state = state.copyWith(searchMessage: null);
   }
 
   // 🔹 Guardar Cita
@@ -203,6 +269,7 @@ class AppointmentFormState {
   final String? selectedTime;
   final bool loading;
   final String errorMessage;
+  final String? searchMessage;
 
   const AppointmentFormState({
     this.cedula = '',
@@ -215,6 +282,7 @@ class AppointmentFormState {
     this.selectedTime,
     this.loading = false,
     this.errorMessage = '',
+    this.searchMessage,
   });
 
   AppointmentFormState copyWith({
@@ -228,6 +296,7 @@ class AppointmentFormState {
     String? selectedTime,
     bool? loading,
     String? errorMessage,
+    String? searchMessage,
   }) {
     return AppointmentFormState(
       cedula: cedula ?? this.cedula,
@@ -240,6 +309,7 @@ class AppointmentFormState {
       selectedTime: selectedTime ?? this.selectedTime,
       loading: loading ?? this.loading,
       errorMessage: errorMessage ?? this.errorMessage,
+      searchMessage: searchMessage ?? this.searchMessage,
     );
   }
 }

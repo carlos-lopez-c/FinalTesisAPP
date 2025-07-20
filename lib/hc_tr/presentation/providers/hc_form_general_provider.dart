@@ -325,17 +325,18 @@ class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
         ),
       );
     } on CustomError catch (e) {
-      print('Error CustomError capturado: ${e.message}, código: ${e.message}');
+      print(
+          'Error CustomError capturado: [31m${e.message}, código: ${e.message}[0m');
       state = state.copyWith(
         loading: false,
-        errorMessage: e.message,
+        errorMessage: 'No se encontró historia clínica asociada al DNI $dni',
       );
     } catch (e) {
       // Añade este bloque para capturar cualquier otro tipo de error
       print('Error genérico capturado en provider: $e');
       state = state.copyWith(
         loading: false,
-        errorMessage: e.toString(),
+        errorMessage: 'No se encontró historia clínica asociada al DNI $dni',
       );
     }
   }
@@ -415,20 +416,50 @@ class HcGeneralFormNotifier extends StateNotifier<HcGeneralFormState> {
 
   Future<void> onSearchHcGeneral(String cedula) async {
     try {
-      state = state.copyWith(loading: true);
+      state = state.copyWith(loading: true, errorMessage: '');
+
+      if (cedula.isEmpty) {
+        state = state.copyWith(
+          errorMessage: 'Debe ingresar un número de cédula',
+          loading: false,
+        );
+        return;
+      }
+
       final hcGeneral = await getHcGeneral(cedula);
-      print(hcGeneral.fechaNacimiento);
+
+      // Verificar si realmente se encontró una historia clínica válida
+      if (hcGeneral == null || hcGeneral.nombreCompleto.isEmpty) {
+        state = state.copyWith(
+          status: 'Nuevo',
+          errorMessage:
+              'No se encontró historia clínica asociada al DNI $cedula',
+          loading: false,
+        );
+        return;
+      }
+
+      print('Historia clínica encontrada: ${hcGeneral.fechaNacimiento}');
       state = state.copyWith(
         status: 'Editado',
         createHcGeneral: hcGeneral,
         edad: calcularEdad(hcGeneral.fechaNacimiento),
+        errorMessage: '',
+        successMessage: 'Historia clínica encontrada',
+        loading: false,
       );
     } on CustomError catch (e) {
+      print('🔴 Error al buscar historia clínica: ${e.message}');
       state = state.copyWith(
-        errorMessage: e.message,
+        errorMessage: 'No se encontró historia clínica asociada al DNI $cedula',
+        loading: false,
       );
-    } finally {
-      state = state.copyWith(loading: false);
+    } catch (e) {
+      print('🔴 Error inesperado al buscar historia clínica: $e');
+      state = state.copyWith(
+        errorMessage: 'No se encontró historia clínica asociada al DNI $cedula',
+        loading: false,
+      );
     }
   }
 

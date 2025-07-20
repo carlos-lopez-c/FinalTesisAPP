@@ -29,21 +29,50 @@ class FormChangePasswordNotifier
 
   void onNewPasswordChanged(String value) {
     final newNewPassword = Password.dirty(value);
+    final passwordValidations = _validatePassword(value);
+    final allRequirementsMet = _areAllRequirementsMet(passwordValidations);
+
     state = state.copyWith(
       newPassword: newNewPassword,
       isValid: Formz.validate(
               [state.oldPassword, newNewPassword, state.confirmPassword]) &&
-          newNewPassword.value == state.confirmPassword.value,
+          newNewPassword.value == state.confirmPassword.value &&
+          allRequirementsMet,
+      hasMinLength: passwordValidations['hasMinLength'] ?? false,
+      hasUppercase: passwordValidations['hasUppercase'] ?? false,
+      hasLowercase: passwordValidations['hasLowercase'] ?? false,
+      hasNumber: passwordValidations['hasNumber'] ?? false,
+      hasSpecialChar: passwordValidations['hasSpecialChar'] ?? false,
     );
+  }
+
+  // 🔹 Validar requisitos de contraseña
+  Map<String, bool> _validatePassword(String password) {
+    return {
+      'hasMinLength': password.length >= 12,
+      'hasUppercase': password.contains(RegExp(r'[A-Z]')),
+      'hasLowercase': password.contains(RegExp(r'[a-z]')),
+      'hasNumber': password.contains(RegExp(r'[0-9]')),
+      'hasSpecialChar': password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]')),
+    };
+  }
+
+  // 🔹 Verificar si todos los requisitos están cumplidos
+  bool _areAllRequirementsMet(Map<String, bool> validations) {
+    return validations.values.every((isValid) => isValid);
   }
 
   void onConfirmPasswordChanged(String value) {
     final newConfirmPassword = Password.dirty(value);
+    final passwordValidations = _validatePassword(state.newPassword.value);
+    final allRequirementsMet = _areAllRequirementsMet(passwordValidations);
+
     state = state.copyWith(
       confirmPassword: newConfirmPassword,
       isValid: Formz.validate(
               [state.oldPassword, state.newPassword, newConfirmPassword]) &&
-          state.newPassword.value == newConfirmPassword.value,
+          state.newPassword.value == newConfirmPassword.value &&
+          allRequirementsMet,
     );
   }
 
@@ -70,13 +99,26 @@ class FormChangePasswordNotifier
   Future<void> onFormSubmit() async {
     _touchEveryField();
 
-    if (!state.isValid) return;
+    if (!state.isValid) {
+      // Verificar si el problema es que no se cumplen todos los requisitos
+      final passwordValidations = _validatePassword(state.newPassword.value);
+      final allRequirementsMet = _areAllRequirementsMet(passwordValidations);
 
-    if (state.newPassword.value != state.confirmPassword.value) {
-      print('Passwords do not match');
-      state = state.copyWith(
-        errorMessage: 'Las contraseñas no coinciden',
-      );
+      if (!allRequirementsMet) {
+        state = state.copyWith(
+          errorMessage:
+              'La nueva contraseña debe cumplir con todos los requisitos de seguridad',
+        );
+        return;
+      }
+
+      if (state.newPassword.value != state.confirmPassword.value) {
+        state = state.copyWith(
+          errorMessage: 'Las contraseñas no coinciden',
+        );
+        return;
+      }
+
       return;
     }
 
@@ -117,13 +159,24 @@ class FormChangePasswordNotifier
       return;
     }
 
+    final passwordValidations = _validatePassword(newPassword.value);
+    final allRequirementsMet = _areAllRequirementsMet(passwordValidations);
+
     state = state.copyWith(
       isFormPosted: true,
       oldPassword: oldPassword,
       newPassword: newPassword,
       confirmPassword: confirmPassword,
-      isValid: Formz.validate([oldPassword, newPassword, confirmPassword]),
+      isValid: Formz.validate([oldPassword, newPassword, confirmPassword]) &&
+          newPassword.value == confirmPassword.value &&
+          allRequirementsMet,
     );
+  }
+
+  // 🔹 Limpiar todos los campos del formulario
+  void clearForm() {
+    state = const FormChangePasswordState();
+    print('🔹 Formulario de cambio de contraseña limpiado');
   }
 }
 
@@ -139,6 +192,13 @@ class FormChangePasswordState {
   final bool isFormPosted;
   final bool isValid;
 
+  // Validaciones de contraseña
+  final bool hasMinLength;
+  final bool hasUppercase;
+  final bool hasLowercase;
+  final bool hasNumber;
+  final bool hasSpecialChar;
+
   const FormChangePasswordState({
     this.oldPassword = const Password.pure(),
     this.newPassword = const Password.pure(),
@@ -150,6 +210,11 @@ class FormChangePasswordState {
     this.errorMessage,
     this.isFormPosted = false,
     this.isValid = false,
+    this.hasMinLength = false,
+    this.hasUppercase = false,
+    this.hasLowercase = false,
+    this.hasNumber = false,
+    this.hasSpecialChar = false,
   });
 
   FormChangePasswordState copyWith({
@@ -163,6 +228,11 @@ class FormChangePasswordState {
     String? errorMessage,
     bool? isFormPosted,
     bool? isValid,
+    bool? hasMinLength,
+    bool? hasUppercase,
+    bool? hasLowercase,
+    bool? hasNumber,
+    bool? hasSpecialChar,
   }) {
     return FormChangePasswordState(
       oldPassword: oldPassword ?? this.oldPassword,
@@ -176,6 +246,11 @@ class FormChangePasswordState {
       errorMessage: errorMessage ?? this.errorMessage,
       isFormPosted: isFormPosted ?? this.isFormPosted,
       isValid: isValid ?? this.isValid,
+      hasMinLength: hasMinLength ?? this.hasMinLength,
+      hasUppercase: hasUppercase ?? this.hasUppercase,
+      hasLowercase: hasLowercase ?? this.hasLowercase,
+      hasNumber: hasNumber ?? this.hasNumber,
+      hasSpecialChar: hasSpecialChar ?? this.hasSpecialChar,
     );
   }
 }

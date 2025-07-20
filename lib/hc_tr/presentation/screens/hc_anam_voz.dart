@@ -63,7 +63,9 @@ class _HcTrAnamVozState extends ConsumerState<HcTrAnamVoz> {
     razonDeDerivacionController = TextEditingController();
     diagnosticoORLController = TextEditingController();
     telefonoDeContactoController = TextEditingController();
-    fechaDeEvaluacionController = TextEditingController();
+    fechaDeEvaluacionController = TextEditingController(
+      text: DateTime.now().toIso8601String().substring(0, 10),
+    );
     motivoDeConsultaController = TextEditingController();
     esLaPrimeraVezQueTieneEstaDificultadController = TextEditingController();
     desdeCuandoTieneEstaDificultadController = TextEditingController();
@@ -259,117 +261,119 @@ class _HcTrAnamVozState extends ConsumerState<HcTrAnamVoz> {
             headerTRWidget(textoDinamico: 'ANAMNESIS DE VOZ'),
             const SizedBox(height: 20),
             Card(
-  elevation: 2,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(12),
-  ),
-  child: Padding(
-    padding: EdgeInsets.all(16.0),  // Removido const
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,  // Cambiado de Center a start
-      children: [
-        Text(  // Título agregado
-          'Tipo de registro',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1976D2),
-          ),
-        ),
-        SizedBox(height: 12),  // Espaciado ajustado
-        
-        // RadioButtonGroup modificado para alineación horizontal
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Radio<String>(
-                  value: 'Nuevo',
-                  groupValue: hcState.tipo,
-                  onChanged: (value) => hcNotifier.onTipoChanged(value ?? 'Nuevo'),
-                  activeColor: Color(0xFF1976D2),
-                ),
-                SizedBox(width: 4),
-                Text('Nuevo'),
-              ],
-            ),
-            SizedBox(width: 20),
-            Row(
-              children: [
-                Radio<String>(
-                  value: 'Buscar',
-                  groupValue: hcState.tipo,
-                  onChanged: (value) => hcNotifier.onTipoChanged(value ?? 'Buscar'),
-                  activeColor: Color(0xFF1976D2),
-                ),
-                SizedBox(width: 4),
-                Text('Buscar'),
-              ],
-            ),
-          ],
-        ),
-
-        SizedBox(height: 20),
-        
-        // Campo de búsqueda (igual al original)
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: cedulaController,
-                onChanged: hcNotifier.onCedulaChanged,
-                decoration: InputDecoration(
-                  labelText: 'Buscar por cédula',
-                  labelStyle: TextStyle(color: Color(0xFF1976D2)),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Color(0xFF1976D2)),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Color(0xFF1976D2)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: Color(0xFF1976D2),
-                      width: 2
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: EdgeInsets.all(16.0), // Removido const
+                child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start, // Cambiado de Center a start
+                  children: [
+                    Text(
+                      // Título agregado
+                      'Tipo de registro',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1976D2),
+                      ),
                     ),
-                  ),
+                    SizedBox(height: 12), // Espaciado ajustado
+
+                    // RadioButtonGroup modificado para alineación horizontal
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Radio<String>(
+                              value: 'Nuevo',
+                              groupValue: hcState.tipo,
+                              onChanged: (value) =>
+                                  hcNotifier.onTipoChanged(value ?? 'Nuevo'),
+                              activeColor: Color(0xFF1976D2),
+                            ),
+                            SizedBox(width: 4),
+                            Text('Nuevo'),
+                          ],
+                        ),
+                        SizedBox(width: 20),
+                        Row(
+                          children: [
+                            Radio<String>(
+                              value: 'Buscar',
+                              groupValue: hcState.tipo,
+                              onChanged: (value) =>
+                                  hcNotifier.onTipoChanged(value ?? 'Buscar'),
+                              activeColor: Color(0xFF1976D2),
+                            ),
+                            SizedBox(width: 4),
+                            Text('Buscar'),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 20),
+
+                    // Campo de búsqueda (igual al original)
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: cedulaController,
+                            onChanged: hcNotifier.onCedulaChanged,
+                            decoration: InputDecoration(
+                              labelText: 'Buscar por cédula',
+                              labelStyle: TextStyle(color: Color(0xFF1976D2)),
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide:
+                                    BorderSide(color: Color(0xFF1976D2)),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide:
+                                    BorderSide(color: Color(0xFF1976D2)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                    color: Color(0xFF1976D2), width: 2),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        ElevatedButton(
+                          onPressed: () {
+                            if (hcState.tipo == 'Nuevo') {
+                              hcNotifier.getPacienteByDni(hcState.cedula);
+                            } else {
+                              hcNotifier.onSearchHcVoice(hcState.cedula);
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF1976D2),
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text('Buscar'),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
-            SizedBox(width: 10),
-            ElevatedButton(
-              onPressed: () {
-                if (hcState.tipo == 'Nuevo') {
-                  hcNotifier.getPacienteByDni(hcState.cedula);
-                } else {
-                  hcNotifier.onSearchHcVoice(hcState.cedula);
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF1976D2),
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Text('Buscar'),
-            ),
-          ],
-        ),
-      ],
-    ),
-  ),
-),
             const SizedBox(height: 20),
             Card(
               elevation: 2,
@@ -450,7 +454,8 @@ class _HcTrAnamVozState extends ConsumerState<HcTrAnamVoz> {
                     _buildFormField(
                       label: 'Fecha de evaluación',
                       controller: fechaDeEvaluacionController,
-                      onChanged: hcNotifier.setFechaDeEvaluacion,
+                      disabled: true,
+                      onChanged: (value) {},
                     ),
                   ],
                 ),
@@ -1340,6 +1345,13 @@ Widget _buildRadioButtonGroupBool({
 }
 
 void _showSnackBar(BuildContext context, String message, bool isSuccess) {
+  // Si el mensaje contiene '[patient-not-found]:', mostrar solo el mensaje limpio
+  if (message.contains('[patient-not-found]:')) {
+    final parts = message.split(':');
+    if (parts.length > 1) {
+      message = parts.sublist(1).join(':').trim();
+    }
+  }
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Text(message),
